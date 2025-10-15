@@ -8,9 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { 
+  REGIONS_COTE_IVOIRE, 
+  SECTORS, 
+  EDUCATION_LEVELS, 
+  EXPERIENCE_LEVELS,
+  MARITAL_STATUS,
+  RELIGIONS 
+} from "@/constants/regions";
 
 interface Profile {
   id: string;
@@ -19,6 +28,17 @@ interface Profile {
   avatar_url?: string;
   bio?: string;
   location?: string;
+  phone_number?: string;
+  region?: string;
+  profession?: string;
+  sector?: string;
+  position?: string;
+  experience_level?: string;
+  years_of_experience?: number;
+  education_level?: string;
+  marital_status?: string;
+  religion?: string;
+  interests?: string[];
 }
 
 const EditProfile = () => {
@@ -34,6 +54,17 @@ const EditProfile = () => {
     bio: "",
     location: "",
     avatar_url: "",
+    phone_number: "",
+    region: "",
+    profession: "",
+    sector: "",
+    position: "",
+    experience_level: "",
+    years_of_experience: 0,
+    education_level: "",
+    marital_status: "",
+    religion: "",
+    interests: [] as string[],
   });
 
   useEffect(() => {
@@ -59,6 +90,17 @@ const EditProfile = () => {
         bio: data.bio || "",
         location: data.location || "",
         avatar_url: data.avatar_url || "",
+        phone_number: data.phone_number || "",
+        region: data.region || "",
+        profession: data.profession || "",
+        sector: data.sector || "",
+        position: data.position || "",
+        experience_level: data.experience_level || "",
+        years_of_experience: data.years_of_experience || 0,
+        education_level: data.education_level || "",
+        marital_status: data.marital_status || "",
+        religion: data.religion || "",
+        interests: data.interests || [],
       });
     } catch (error: any) {
       toast.error("Erreur lors du chargement du profil");
@@ -117,6 +159,17 @@ const EditProfile = () => {
           bio: formData.bio.trim(),
           location: formData.location.trim(),
           avatar_url: formData.avatar_url.trim() || null,
+          phone_number: formData.phone_number.trim() || null,
+          region: formData.region || null,
+          profession: formData.profession.trim() || null,
+          sector: formData.sector || null,
+          position: formData.position.trim() || null,
+          experience_level: formData.experience_level || null,
+          years_of_experience: formData.years_of_experience || null,
+          education_level: formData.education_level || null,
+          marital_status: formData.marital_status || null,
+          religion: formData.religion || null,
+          interests: formData.interests.length > 0 ? formData.interests : null,
         })
         .eq("id", user.id);
 
@@ -233,6 +286,171 @@ const EditProfile = () => {
                       setFormData({ ...formData, location: e.target.value })
                     }
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone_number">Numéro de téléphone</Label>
+                  <Input
+                    id="phone_number"
+                    type="tel"
+                    placeholder="0759566087"
+                    value={formData.phone_number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone_number: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="region">Région</Label>
+                  <Select 
+                    value={formData.region} 
+                    onValueChange={(value) => setFormData({ ...formData, region: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre région" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REGIONS_COTE_IVOIRE.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {r}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profession">Profession / Activité</Label>
+                  <Input
+                    id="profession"
+                    placeholder="Développeur, Commerçant, etc."
+                    value={formData.profession}
+                    onChange={(e) =>
+                      setFormData({ ...formData, profession: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sector">Secteur d'activité</Label>
+                  <Select 
+                    value={formData.sector} 
+                    onValueChange={(value) => setFormData({ ...formData, sector: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un secteur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SECTORS.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="position">Poste</Label>
+                  <Input
+                    id="position"
+                    placeholder="Directeur, Manager, etc."
+                    value={formData.position}
+                    onChange={(e) =>
+                      setFormData({ ...formData, position: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="experience_level">Niveau d'expérience</Label>
+                  <Select 
+                    value={formData.experience_level} 
+                    onValueChange={(value) => setFormData({ ...formData, experience_level: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre niveau" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPERIENCE_LEVELS.map((e) => (
+                        <SelectItem key={e} value={e}>
+                          {e}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="years_of_experience">Années d'expérience</Label>
+                  <Input
+                    id="years_of_experience"
+                    type="number"
+                    min="0"
+                    placeholder="5"
+                    value={formData.years_of_experience}
+                    onChange={(e) =>
+                      setFormData({ ...formData, years_of_experience: parseInt(e.target.value) || 0 })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="education_level">Niveau d'études</Label>
+                  <Select 
+                    value={formData.education_level} 
+                    onValueChange={(value) => setFormData({ ...formData, education_level: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre diplôme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EDUCATION_LEVELS.map((e) => (
+                        <SelectItem key={e} value={e}>
+                          {e}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="marital_status">Statut matrimonial</Label>
+                  <Select 
+                    value={formData.marital_status} 
+                    onValueChange={(value) => setFormData({ ...formData, marital_status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MARITAL_STATUS.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="religion">Religion</Label>
+                  <Select 
+                    value={formData.religion} 
+                    onValueChange={(value) => setFormData({ ...formData, religion: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre religion" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELIGIONS.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {r}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex gap-2">

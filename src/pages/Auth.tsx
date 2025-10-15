@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import appLogo from "@/assets/app-logo.png";
+import { REGIONS_COTE_IVOIRE } from "@/constants/regions";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,6 +17,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [region, setRegion] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -40,7 +44,7 @@ const Auth = () => {
         toast.success("Connexion réussie !");
         navigate("/feed");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -48,11 +52,25 @@ const Auth = () => {
             data: {
               username,
               full_name: fullName,
+              phone_number: phoneNumber,
+              region,
             },
           },
         });
 
         if (error) throw error;
+        
+        // Update profile with additional fields
+        if (data.user) {
+          await supabase
+            .from("profiles")
+            .update({
+              phone_number: phoneNumber,
+              region: region,
+            })
+            .eq("id", data.user.id);
+        }
+        
         toast.success("Compte créé ! Bienvenue sur IvoireConnect 🇨🇮");
         navigate("/feed");
       }
@@ -91,7 +109,7 @@ const Auth = () => {
             {!isLogin && !isForgotPassword && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nom complet</Label>
+                  <Label htmlFor="fullName">Nom complet *</Label>
                   <Input
                     id="fullName"
                     type="text"
@@ -102,7 +120,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="username">Nom d'utilisateur</Label>
+                  <Label htmlFor="username">Nom d'utilisateur *</Label>
                   <Input
                     id="username"
                     type="text"
@@ -111,6 +129,32 @@ const Auth = () => {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Numéro de téléphone *</Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="0759566087"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="region">Région *</Label>
+                  <Select value={region} onValueChange={setRegion} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre région" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REGIONS_COTE_IVOIRE.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {r}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             )}
