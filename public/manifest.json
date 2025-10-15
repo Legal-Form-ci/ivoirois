@@ -1,0 +1,35 @@
+{
+  "name": "Ivoi'Rois - Ici, on cause royalement !",
+  "short_name": "Ivoi'Rois",
+  "description": "Ivoi'Rois — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF8C00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["social", "communication"],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}
