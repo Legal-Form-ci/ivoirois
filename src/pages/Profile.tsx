@@ -18,6 +18,16 @@ interface Profile {
   avatar_url?: string;
   bio?: string;
   location?: string;
+  region?: string;
+  phone_number?: string;
+  profession?: string;
+  sector?: string;
+  position?: string;
+  experience_level?: string;
+  years_of_experience?: number;
+  education_level?: string;
+  marital_status?: string;
+  religion?: string;
   created_at: string;
 }
 
@@ -288,11 +298,62 @@ const Profile = () => {
                         {profile.location}
                       </div>
                     )}
+                    {profile.region && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {profile.region}
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       Membre depuis {new Date(profile.created_at).toLocaleDateString("fr-FR")}
                     </div>
                   </div>
+
+                  {/* Professional Information */}
+                  {(profile.profession || profile.sector || profile.position) && (
+                    <div className="border-t pt-4 space-y-2">
+                      <h3 className="font-semibold text-sm">Informations professionnelles</h3>
+                      <div className="space-y-1 text-sm">
+                        {profile.profession && (
+                          <p><span className="text-muted-foreground">Profession:</span> {profile.profession}</p>
+                        )}
+                        {profile.sector && (
+                          <p><span className="text-muted-foreground">Secteur:</span> {profile.sector}</p>
+                        )}
+                        {profile.position && (
+                          <p><span className="text-muted-foreground">Poste:</span> {profile.position}</p>
+                        )}
+                        {profile.experience_level && (
+                          <p><span className="text-muted-foreground">Expérience:</span> {profile.experience_level}</p>
+                        )}
+                        {profile.years_of_experience && (
+                          <p><span className="text-muted-foreground">Années d'expérience:</span> {profile.years_of_experience} ans</p>
+                        )}
+                        {profile.education_level && (
+                          <p><span className="text-muted-foreground">Niveau d'études:</span> {profile.education_level}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Personal Information (only visible to profile owner) */}
+                  {user?.id === id && (profile.marital_status || profile.religion || profile.phone_number) && (
+                    <div className="border-t pt-4 space-y-2">
+                      <h3 className="font-semibold text-sm">Informations personnelles</h3>
+                      <div className="space-y-1 text-sm">
+                        {profile.phone_number && (
+                          <p><span className="text-muted-foreground">Téléphone:</span> {profile.phone_number}</p>
+                        )}
+                        {profile.marital_status && (
+                          <p><span className="text-muted-foreground">Statut matrimonial:</span> {profile.marital_status}</p>
+                        )}
+                        {profile.religion && (
+                          <p><span className="text-muted-foreground">Religion:</span> {profile.religion}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {user?.id === id ? (
                     <div className="flex gap-2">

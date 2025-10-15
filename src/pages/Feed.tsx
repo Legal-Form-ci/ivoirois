@@ -4,6 +4,7 @@ import CreatePost from "@/components/CreatePost";
 import PostCard from "@/components/PostCard";
 import Stories from "@/components/Stories";
 import SearchUsers from "@/components/SearchUsers";
+import SuggestedUsers from "@/components/SuggestedUsers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -54,18 +55,43 @@ const Feed = () => {
 
   const fetchPosts = async () => {
     try {
+      // Get current user's profile to filter by region if needed
+      let myRegion = null;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("region")
+          .eq("id", user.id)
+          .single();
+        myRegion = profile?.region;
+      }
+
       const { data, error } = await supabase
         .from("posts")
         .select(`
           *,
-          profiles!posts_user_id_fkey(username, full_name, avatar_url),
+          profiles!posts_user_id_fkey(username, full_name, avatar_url, region),
           likes(count),
           comments(count)
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (error) throw error;
-      setPosts(data || []);
+
+      // Prioritize posts from same region
+      if (myRegion && data) {
+        const sorted = data.sort((a, b) => {
+          const aFromRegion = a.profiles?.region === myRegion;
+          const bFromRegion = b.profiles?.region === myRegion;
+          if (aFromRegion && !bFromRegion) return -1;
+          if (!aFromRegion && bFromRegion) return 1;
+          return 0;
+        });
+        setPosts(sorted);
+      } else {
+        setPosts(data || []);
+      }
     } catch (error: any) {
       toast.error("Erreur lors du chargement des posts");
     } finally {
@@ -96,6 +122,7 @@ const Feed = () => {
       <main className="container py-6">
         <div className="max-w-2xl mx-auto space-y-6">
           <SearchUsers />
+          <SuggestedUsers />
           <Stories />
           <CreatePost onPostCreated={fetchPosts} />
 
