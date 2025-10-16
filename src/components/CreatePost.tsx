@@ -31,9 +31,9 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Le fichier ne doit pas dépasser 10 Mo");
+    // Check file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Le fichier ne doit pas dépasser 50 Mo");
       return;
     }
 
@@ -69,18 +69,17 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
       // Upload file if selected
       if (selectedFile) {
         const fileExt = selectedFile.name.split(".").pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `posts/${fileName}`;
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(filePath, selectedFile);
+          .from("posts")
+          .upload(fileName, selectedFile);
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(filePath);
+          .from("posts")
+          .getPublicUrl(fileName);
 
         imageUrl = publicUrl;
       }

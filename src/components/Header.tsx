@@ -1,8 +1,15 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import appLogo from "@/assets/app-logo.png";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -53,9 +60,71 @@ const Header = () => {
             </nav>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={signOut}>
+              <Button variant="ghost" size="icon" className="hidden md:flex" onClick={signOut}>
                 <LogOut />
               </Button>
+              
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px]">
+                  <SheetHeader>
+                    <SheetTitle className="text-left">Menu</SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col gap-2 mt-6">
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/feed">
+                        <Home className="h-5 w-5" />
+                        <span>Accueil</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to={`/profile/${user.id}`}>
+                        <UserCircle className="h-5 w-5" />
+                        <span>Mon Profil</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/friends">
+                        <Users className="h-5 w-5" />
+                        <span>Amis</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/messages">
+                        <MessageCircle className="h-5 w-5" />
+                        <span>Messages</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/groups">
+                        <UsersRound className="h-5 w-5" />
+                        <span>Groupes</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/notifications">
+                        <Bell className="h-5 w-5" />
+                        <span>Notifications</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/settings">
+                        <Settings className="h-5 w-5" />
+                        <span>Paramètres</span>
+                      </Link>
+                    </Button>
+                    <div className="border-t my-4" />
+                    <Button variant="destructive" className="justify-start gap-3" onClick={signOut}>
+                      <LogOut className="h-5 w-5" />
+                      <span>Déconnexion</span>
+                    </Button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
           </>
         )}

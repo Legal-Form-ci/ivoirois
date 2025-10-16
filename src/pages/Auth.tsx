@@ -71,7 +71,7 @@ const Auth = () => {
             .eq("id", data.user.id);
         }
         
-        toast.success("Compte créé ! Bienvenue sur IvoireConnect 🇨🇮");
+        toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
         navigate("/feed");
       }
     } catch (error: any) {
@@ -91,10 +91,10 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <img src={appLogo} alt="IvoireConnect" className="h-16 w-16 rounded-xl" />
+            <img src={appLogo} alt="Ivoi'Rois" className="h-16 w-16 rounded-xl" />
           </div>
           <CardTitle className="text-3xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            {isForgotPassword ? "Mot de passe oublié" : "IvoireConnect"}
+            {isForgotPassword ? "Mot de passe oublié" : "Ivoi'Rois"}
           </CardTitle>
           <CardDescription>
             {isForgotPassword
