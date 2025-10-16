@@ -44,6 +44,22 @@ const Auth = () => {
         toast.success("Connexion réussie !");
         navigate("/feed");
       } else {
+        // Validation du numéro de téléphone (10 chiffres)
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+          toast.error("Le numéro de téléphone doit contenir 10 chiffres");
+          setLoading(false);
+          return;
+        }
+
+        // Validation du username (alphanumérique et underscore)
+        const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+        if (!usernameRegex.test(username)) {
+          toast.error("Le nom d'utilisateur doit contenir entre 3 et 30 caractères (lettres, chiffres et _)");
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,

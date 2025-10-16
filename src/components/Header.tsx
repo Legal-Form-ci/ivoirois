@@ -1,4 +1,4 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,16 @@ const Header = () => {
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/feed">
                   <Home />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/jobs">
+                  <Briefcase />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/companies">
+                  <Building2 />
                 </Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
@@ -88,6 +98,24 @@ const Header = () => {
                       </Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/jobs">
+                        <Briefcase className="h-5 w-5" />
+                        <span>Emplois</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/companies">
+                        <Building2 className="h-5 w-5" />
+                        <span>Entreprises</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/resume">
+                        <FileText className="h-5 w-5" />
+                        <span>Mon CV</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
                       <Link to="/friends">
                         <Users className="h-5 w-5" />
                         <span>Amis</span>
@@ -115,6 +143,12 @@ const Header = () => {
                       <Link to="/settings">
                         <Settings className="h-5 w-5" />
                         <span>Paramètres</span>
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/admin">
+                        <Shield className="h-5 w-5" />
+                        <span>Admin</span>
                       </Link>
                     </Button>
                     <div className="border-t my-4" />
