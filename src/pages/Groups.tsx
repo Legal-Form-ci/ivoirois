@@ -1,182 +1,179 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Users } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { Plus, Users, Lock, Globe } from 'lucide-react';
 
 interface Group {
   id: string;
   name: string;
   description: string;
-  avatar_url?: string;
+  cover_image_url: string;
+  privacy: string;
   created_at: string;
-  group_members: { count: number }[];
+  member_count: number;
+  is_member: boolean;
 }
 
 const Groups = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[]>([]);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: "", description: "" });
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchGroups();
-    }
+    fetchGroups();
   }, [user]);
 
   const fetchGroups = async () => {
-    const { data: memberData } = await supabase
-      .from("group_members" as any)
-      .select("group_id")
-      .eq("user_id", user!.id);
+    try {
+      const { data: groupsData } = await supabase
+        .from('groups' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (memberData && memberData.length > 0) {
-      const groupIds = (memberData as any[]).map((m: any) => m.group_id);
-      const { data } = await supabase
-        .from("groups" as any)
-        .select("*, group_members(count)")
-        .in("id", groupIds);
+      if (groupsData) {
+        const enrichedGroups = await Promise.all(
+          groupsData.map(async (group: any) => {
+            const { count: memberCount } = await supabase
+              .from('group_members' as any)
+              .select('*', { count: 'exact', head: true })
+              .eq('group_id', group.id);
 
-      setGroups((data || []) as unknown as Group[]);
+            const { data: memberData } = await supabase
+              .from('group_members' as any)
+              .select('id')
+              .eq('group_id', group.id)
+              .eq('user_id', user?.id)
+              .maybeSingle();
+
+            return {
+              ...group,
+              member_count: memberCount || 0,
+              is_member: !!memberData,
+            };
+          })
+        );
+
+        setGroups(enrichedGroups);
+      }
+    } catch (error) {
+      toast.error('Erreur lors du chargement des groupes');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const createGroup = async () => {
-    if (!newGroup.name.trim()) {
-      toast.error("Le nom du groupe est requis");
-      return;
-    }
+  const joinGroup = async (groupId: string) => {
+    if (!user) return;
 
     try {
-      const { data: group, error: groupError } = await supabase
-        .from("groups" as any)
+      await supabase
+        .from('group_members' as any)
         .insert({
-          name: newGroup.name,
-          description: newGroup.description,
-          created_by: user!.id,
-        })
-        .select()
-        .single();
+          group_id: groupId,
+          user_id: user.id,
+          role: 'member'
+        });
 
-      if (groupError) throw groupError;
-
-      await supabase.from("group_members" as any).insert({
-        group_id: (group as any).id,
-        user_id: user!.id,
-        role: "admin",
-      });
-
-      toast.success("Groupe créé !");
-      setShowCreateDialog(false);
-      setNewGroup({ name: "", description: "" });
+      toast.success('Vous avez rejoint le groupe !');
       fetchGroups();
     } catch (error) {
-      toast.error("Erreur lors de la création du groupe");
+      toast.error('Erreur lors de l\'adhésion au groupe');
     }
   };
+
+  const filteredGroups = groups.filter(g =>
+    g.name.toLowerCase().includes(search.toLowerCase()) ||
+    g.description?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">Groupes</h1>
-            <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+            <Button onClick={() => navigate('/groups/create')} className="gap-2">
               <Plus className="h-4 w-4" />
               Créer un groupe
             </Button>
           </div>
 
-          {groups.length === 0 ? (
+          <Input
+            placeholder="Rechercher un groupe..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-md"
+          />
+
+          {loading ? (
+            <p className="text-center py-8">Chargement...</p>
+          ) : filteredGroups.length === 0 ? (
             <Card className="p-8 text-center">
-              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground mb-4">
-                Vous n'avez rejoint aucun groupe pour le moment
-              </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                Créer votre premier groupe
-              </Button>
+              <p className="text-muted-foreground">Aucun groupe trouvé</p>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {groups.map((group) => (
-                <Card
-                  key={group.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate(`/groups/${group.id}`)}
-                >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredGroups.map((group) => (
+                <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  {group.cover_image_url && (
+                    <div className="h-32 overflow-hidden">
+                      <img
+                        src={group.cover_image_url}
+                        alt={group.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage src={group.avatar_url} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {group.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <CardTitle>{group.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {group.group_members[0]?.count || 0} membres
-                        </p>
-                      </div>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{group.name}</CardTitle>
+                      {group.privacy === 'private' ? (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </div>
                   </CardHeader>
-                  {group.description && (
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {group.description}
-                      </p>
-                    </CardContent>
-                  )}
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {group.description}
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      <span>{group.member_count} membre{group.member_count > 1 ? 's' : ''}</span>
+                    </div>
+                    {group.is_member ? (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => navigate(`/groups/${group.id}`)}
+                      >
+                        Voir le groupe
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={() => joinGroup(group.id)}
+                      >
+                        Rejoindre
+                      </Button>
+                    )}
+                  </CardContent>
                 </Card>
               ))}
             </div>
           )}
         </div>
       </main>
-
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Créer un nouveau groupe</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div>
-              <label className="text-sm font-medium">Nom du groupe</label>
-              <Input
-                value={newGroup.name}
-                onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                placeholder="Ex: Famille, Amis, Travail..."
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                value={newGroup.description}
-                onChange={(e) =>
-                  setNewGroup({ ...newGroup, description: e.target.value })
-                }
-                placeholder="Décrivez votre groupe..."
-                rows={3}
-              />
-            </div>
-            <Button onClick={createGroup} className="w-full">
-              Créer le groupe
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

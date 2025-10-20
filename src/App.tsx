@@ -22,6 +22,10 @@ import Companies from "./pages/Companies";
 import CreateCompany from "./pages/CreateCompany";
 import Jobs from "./pages/Jobs";
 import Resume from "./pages/Resume";
+import Groups from "./pages/Groups";
+import CreateGroup from "./pages/CreateGroup";
+import Pages from "./pages/Pages";
+import CreatePage from "./pages/CreatePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

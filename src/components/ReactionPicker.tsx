@@ -1,58 +1,178 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Heart, Smile, Angry, Frown, ThumbsUp } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface ReactionPickerProps {
-  onReact: (reaction: string) => void;
-  currentReaction?: string;
+  postId: string;
+  onReactionChange?: () => void;
 }
 
-const reactions = [
-  { type: "like", icon: ThumbsUp, label: "J'aime", color: "text-primary" },
-  { type: "love", icon: Heart, label: "J'adore", color: "text-red-500" },
-  { type: "haha", icon: Smile, label: "Haha", color: "text-yellow-500" },
-  { type: "wow", icon: Smile, label: "Wow", color: "text-blue-500" },
-  { type: "sad", icon: Frown, label: "Triste", color: "text-yellow-600" },
-  { type: "angry", icon: Angry, label: "Grrr", color: "text-orange-500" },
+const REACTIONS = [
+  { type: 'like', emoji: '👍', label: 'J\'aime' },
+  { type: 'love', emoji: '❤️', label: 'J\'adore' },
+  { type: 'smile', emoji: '😊', label: 'Sourire' },
+  { type: 'wow', emoji: '😮', label: 'Impressionnant' },
+  { type: 'sad', emoji: '😔', label: 'Triste' },
+  { type: 'cry', emoji: '😭', label: 'Pleurer' },
+  { type: 'angry', emoji: '😠', label: 'En colère' },
+  { type: 'dislike', emoji: '👎', label: 'N\'aime pas' },
 ];
 
-const ReactionPicker = ({ onReact, currentReaction }: ReactionPickerProps) => {
+const ReactionPicker = ({ postId, onReactionChange }: ReactionPickerProps) => {
+  const { user } = useAuth();
+  const [currentReaction, setCurrentReaction] = useState<string | null>(null);
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
   const [open, setOpen] = useState(false);
 
-  const handleReact = (type: string) => {
-    onReact(type);
-    setOpen(false);
+  useEffect(() => {
+    if (user) {
+      fetchCurrentReaction();
+      fetchReactionCounts();
+    }
+  }, [postId, user]);
+
+  const fetchCurrentReaction = async () => {
+    if (!user) return;
+
+    try {
+      const { data } = await supabase
+        .from('reactions' as any)
+        .select('reaction_type')
+        .eq('post_id', postId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setCurrentReaction((data as any)?.reaction_type || null);
+    } catch (error) {
+      console.error('Error fetching reaction:', error);
+    }
   };
 
-  const CurrentIcon = reactions.find((r) => r.type === currentReaction)?.icon || ThumbsUp;
-  const currentColor = reactions.find((r) => r.type === currentReaction)?.color || "text-muted-foreground";
+  const fetchReactionCounts = async () => {
+    try {
+      const { data } = await supabase
+        .from('reactions' as any)
+        .select('reaction_type')
+        .eq('post_id', postId);
+
+      const counts: Record<string, number> = {};
+      data?.forEach((r: any) => {
+        counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1;
+      });
+      setReactionCounts(counts);
+    } catch (error) {
+      console.error('Error fetching reaction counts:', error);
+    }
+  };
+
+  const handleReaction = async (reactionType: string) => {
+    if (!user) {
+      toast.error('Vous devez être connecté');
+      return;
+    }
+
+    try {
+      if (currentReaction === reactionType) {
+        await supabase
+          .from('reactions' as any)
+          .delete()
+          .eq('post_id', postId)
+          .eq('user_id', user.id);
+        
+        setCurrentReaction(null);
+        setReactionCounts(prev => ({
+          ...prev,
+          [reactionType]: Math.max(0, (prev[reactionType] || 0) - 1)
+        }));
+      } else {
+        if (currentReaction) {
+          await supabase
+            .from('reactions' as any)
+            .update({ reaction_type: reactionType })
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+          
+          setReactionCounts(prev => ({
+            ...prev,
+            [currentReaction]: Math.max(0, (prev[currentReaction] || 0) - 1),
+            [reactionType]: (prev[reactionType] || 0) + 1
+          }));
+        } else {
+          await supabase
+            .from('reactions' as any)
+            .insert({
+              post_id: postId,
+              user_id: user.id,
+              reaction_type: reactionType
+            });
+          
+          setReactionCounts(prev => ({
+            ...prev,
+            [reactionType]: (prev[reactionType] || 0) + 1
+          }));
+        }
+        
+        setCurrentReaction(reactionType);
+      }
+      
+      setOpen(false);
+      onReactionChange?.();
+    } catch (error: any) {
+      toast.error('Erreur lors de la réaction');
+    }
+  };
+
+  const currentReactionData = REACTIONS.find(r => r.type === currentReaction);
+  const totalReactions = Object.values(reactionCounts).reduce((a, b) => a + b, 0);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <CurrentIcon className={`h-4 w-4 ${currentReaction ? currentColor : ""}`} />
-          <span>{currentReaction ? reactions.find((r) => r.type === currentReaction)?.label : "J'aime"}</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-2">
-        <div className="flex gap-2">
-          {reactions.map((reaction) => (
-            <Button
-              key={reaction.type}
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 hover:scale-125 transition-transform"
-              onClick={() => handleReact(reaction.type)}
-              title={reaction.label}
-            >
-              <reaction.icon className={`h-6 w-6 ${reaction.color}`} />
-            </Button>
-          ))}
+    <div className="flex items-center gap-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-2"
+          >
+            <span className="text-xl">{currentReactionData?.emoji || '👍'}</span>
+            <span className="text-sm">{totalReactions > 0 ? totalReactions : ''}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-2">
+          <div className="flex gap-1">
+            {REACTIONS.map((reaction) => (
+              <Button
+                key={reaction.type}
+                variant="ghost"
+                size="sm"
+                className="text-2xl p-2 h-auto hover:scale-125 transition-transform"
+                onClick={() => handleReaction(reaction.type)}
+                title={reaction.label}
+              >
+                {reaction.emoji}
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+      
+      {Object.entries(reactionCounts).filter(([_, count]) => count > 0).length > 0 && (
+        <div className="flex gap-1 text-xs">
+          {Object.entries(reactionCounts)
+            .filter(([_, count]) => count > 0)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([type, count]) => (
+              <span key={type} className="flex items-center gap-1">
+                {REACTIONS.find(r => r.type === type)?.emoji} {count}
+              </span>
+            ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 };
 
