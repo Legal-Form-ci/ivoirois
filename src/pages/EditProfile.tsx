@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/RichTextEditor";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -265,14 +265,11 @@ const EditProfile = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="bio">Biographie</Label>
-                  <Textarea
-                    id="bio"
-                    rows={4}
+                  <RichTextEditor
+                    content={formData.bio}
+                    onChange={(value) => setFormData({ ...formData, bio: value })}
                     placeholder="Parlez-nous de vous..."
-                    value={formData.bio}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bio: e.target.value })
-                    }
+                    minHeight="160px"
                   />
                 </div>
 

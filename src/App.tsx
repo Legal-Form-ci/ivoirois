@@ -15,7 +15,7 @@ import Friends from "./pages/Friends";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
-import Groups from "./pages/Groups";
+import GroupsPage from "./pages/Groups";
 import GroupChat from "./pages/GroupChat";
 import Admin from "./pages/Admin";
 import Companies from "./pages/Companies";
@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/messages/:conversationId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
+            <Route path="/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
             <Route path="/groups/create" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
             <Route path="/groups/:groupId" element={<ProtectedRoute><GroupChat /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />

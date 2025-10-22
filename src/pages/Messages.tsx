@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import RichTextEditor from "@/components/RichTextEditor";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -276,7 +276,7 @@ const Messages = () => {
                               : "bg-muted"
                           }`}
                         >
-                          <p>{msg.content}</p>
+                          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: msg.content }} />
                           <p className="text-xs opacity-70 mt-1">
                             {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
                               hour: "2-digit",
@@ -289,16 +289,18 @@ const Messages = () => {
                   </div>
                 </ScrollArea>
 
-                <form onSubmit={sendMessage} className="p-4 border-t flex gap-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                <form onSubmit={sendMessage} className="p-4 border-t space-y-2">
+                  <RichTextEditor
+                    content={newMessage}
+                    onChange={setNewMessage}
                     placeholder="Écrivez un message..."
-                    className="flex-1"
+                    minHeight="80px"
                   />
-                  <Button type="submit" size="icon">
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button type="submit" size="icon">
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </form>
               </>
             ) : (

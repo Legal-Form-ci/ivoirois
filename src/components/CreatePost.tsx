@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Image, Smile, Video, Music, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -116,11 +116,11 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
               {user?.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <Textarea
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
             placeholder="Quoi de neuf en Côte d'Ivoire ?"
-            className="min-h-[100px] resize-none border-0 focus-visible:ring-0 bg-muted/50"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            minHeight="140px"
           />
         </div>
 

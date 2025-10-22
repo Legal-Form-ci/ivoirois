@@ -159,13 +159,22 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
       </CardHeader>
       
       <CardContent className="pb-3 space-y-3">
-        <p className="text-foreground leading-relaxed">{content}</p>
+        <div
+          className="prose prose-sm max-w-none text-foreground leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
         {image && (
-          <img 
-            src={image} 
-            alt="Post content" 
-            className="w-full rounded-lg object-cover max-h-96"
-          />
+          image.match(/\.(mp4|webm|ogg)$/i) ? (
+            <video src={image} controls className="w-full rounded-lg max-h-96" />
+          ) : image.match(/\.(mp3|wav|m4a|ogg)$/i) ? (
+            <audio src={image} controls className="w-full" />
+          ) : (
+            <img 
+              src={image} 
+              alt="Post media" 
+              className="w-full rounded-lg object-cover max-h-96"
+            />
+          )
         )}
       </CardContent>
 

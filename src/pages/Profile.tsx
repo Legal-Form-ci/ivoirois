@@ -289,7 +289,12 @@ const Profile = () => {
                     <p className="text-muted-foreground">@{profile.username}</p>
                   </div>
 
-                  {profile.bio && <p className="text-foreground">{profile.bio}</p>}
+                  {profile.bio && (
+                    <div
+                      className="prose prose-sm max-w-none text-foreground"
+                      dangerouslySetInnerHTML={{ __html: profile.bio }}
+                    />
+                  )}
 
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     {profile.location && (
