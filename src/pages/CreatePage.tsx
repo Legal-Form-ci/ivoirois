@@ -18,13 +18,9 @@ const CreatePage = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    username: '',
     description: '',
     category: 'business',
     website: '',
-    phone_number: '',
-    email: '',
-    location: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,13 +33,9 @@ const CreatePage = () => {
         .from('pages' as any)
         .insert({
           name: formData.name,
-          username: formData.username,
           description: formData.description,
           category: formData.category,
           website: formData.website || null,
-          phone_number: formData.phone_number || null,
-          email: formData.email || null,
-          location: formData.location || null,
           created_by: user.id,
         })
         .select()
@@ -51,23 +43,19 @@ const CreatePage = () => {
 
       if (pageError) throw pageError;
 
-      // Add creator as owner
+      // Auto-follow the page
       await supabase
-        .from('page_admins' as any)
+        .from('page_followers' as any)
         .insert({
           page_id: (page as any).id,
           user_id: user.id,
-          role: 'owner',
         });
 
       toast.success('Page créée avec succès !');
-      navigate(`/pages/${(page as any).id}`);
+      navigate('/pages');
     } catch (error: any) {
-      if (error.code === '23505') {
-        toast.error('Ce nom d\'utilisateur est déjà pris');
-      } else {
-        toast.error('Erreur lors de la création de la page');
-      }
+      toast.error('Erreur lors de la création de la page');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -101,17 +89,6 @@ const CreatePage = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ex: Studio Design Abidjan"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="username">Nom d'utilisateur * (@username)</Label>
-                  <Input
-                    id="username"
-                    required
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
-                    placeholder="studiodesignabidjan"
                   />
                 </div>
 
@@ -154,38 +131,6 @@ const CreatePage = () => {
                     value={formData.website}
                     onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                     placeholder="https://exemple.com"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="contact@exemple.com"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone_number">Téléphone</Label>
-                  <Input
-                    id="phone_number"
-                    type="tel"
-                    value={formData.phone_number}
-                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                    placeholder="0759566087"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">Localisation</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Abidjan, Côte d'Ivoire"
                   />
                 </div>
 

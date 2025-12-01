@@ -22,6 +22,7 @@ import Companies from "./pages/Companies";
 import CreateCompany from "./pages/CreateCompany";
 import Jobs from "./pages/Jobs";
 import Resume from "./pages/Resume";
+import CreateResume from "./pages/CreateResume";
 import CreateGroup from "./pages/CreateGroup";
 import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/companies/create" element={<ProtectedRoute><CreateCompany /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
+            <Route path="/resume/create" element={<ProtectedRoute><CreateResume /></ProtectedRoute>} />
             <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
             <Route path="/pages/create" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

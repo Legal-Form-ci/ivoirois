@@ -9,16 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Plus, CheckCircle2 } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 
 interface Page {
   id: string;
   name: string;
-  username: string;
   description: string;
   category: string;
-  avatar_url: string;
-  verified: boolean;
+  profile_image: string | null;
+  cover_image: string | null;
+  website: string | null;
   follower_count: number;
   is_following: boolean;
 }
@@ -39,7 +39,6 @@ const Pages = () => {
       const { data: pagesData } = await supabase
         .from('pages' as any)
         .select('*')
-        .order('verified', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (pagesData) {
@@ -131,8 +130,8 @@ const Pages = () => {
       <Header />
       <main className="container py-6">
         <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Pages</h1>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold">Pages</h1>
             <Button onClick={() => navigate('/pages/create')} className="gap-2">
               <Plus className="h-4 w-4" />
               Créer une page
@@ -155,32 +154,44 @@ const Pages = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPages.map((page) => (
-                <Card key={page.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
+                <Card key={page.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                  {page.cover_image && (
+                    <div className="h-24 overflow-hidden">
+                      <img
+                        src={page.cover_image}
+                        alt={page.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader className="pb-2">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={page.avatar_url} />
-                        <AvatarFallback>{page.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={page.profile_image || undefined} />
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {page.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-lg truncate">{page.name}</CardTitle>
-                          {page.verified && (
-                            <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">@{page.username}</p>
+                        <CardTitle className="text-lg truncate">{page.name}</CardTitle>
+                        {page.category && (
+                          <Badge variant="secondary" className="mt-1">
+                            {getCategoryLabel(page.category)}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Badge variant="secondary">{getCategoryLabel(page.category)}</Badge>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {page.description}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {page.follower_count} abonné{page.follower_count > 1 ? 's' : ''}
-                    </p>
+                    {page.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {page.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      <span>{page.follower_count} abonné{page.follower_count > 1 ? 's' : ''}</span>
+                    </div>
                     {page.is_following ? (
                       <Button
                         variant="outline"
