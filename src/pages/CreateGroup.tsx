@@ -41,13 +41,13 @@ const CreateGroup = () => {
 
       if (groupError) throw groupError;
 
-      // Add creator as owner
+      // Add creator as admin
       await supabase
         .from('group_members' as any)
         .insert({
           group_id: (group as any).id,
           user_id: user.id,
-          role: 'owner',
+          role: 'admin',
         });
 
       toast.success('Groupe créé avec succès !');

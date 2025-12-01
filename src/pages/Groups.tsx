@@ -13,7 +13,7 @@ interface Group {
   id: string;
   name: string;
   description: string;
-  cover_image_url: string;
+  cover_image: string;
   privacy: string;
   created_at: string;
   member_count: number;
@@ -89,6 +89,23 @@ const Groups = () => {
     }
   };
 
+  const leaveGroup = async (groupId: string) => {
+    if (!user) return;
+
+    try {
+      await supabase
+        .from('group_members' as any)
+        .delete()
+        .eq('group_id', groupId)
+        .eq('user_id', user.id);
+
+      toast.success('Vous avez quitté le groupe');
+      fetchGroups();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
   const filteredGroups = groups.filter(g =>
     g.name.toLowerCase().includes(search.toLowerCase()) ||
     g.description?.toLowerCase().includes(search.toLowerCase())
@@ -99,8 +116,8 @@ const Groups = () => {
       <Header />
       <main className="container py-6">
         <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Groupes</h1>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold">Groupes</h1>
             <Button onClick={() => navigate('/groups/create')} className="gap-2">
               <Plus className="h-4 w-4" />
               Créer un groupe
@@ -124,16 +141,16 @@ const Groups = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredGroups.map((group) => (
                 <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  {group.cover_image_url && (
+                  {group.cover_image && (
                     <div className="h-32 overflow-hidden">
                       <img
-                        src={group.cover_image_url}
+                        src={group.cover_image}
                         alt={group.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   )}
-                  <CardHeader>
+                  <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{group.name}</CardTitle>
                       {group.privacy === 'private' ? (
@@ -144,21 +161,31 @@ const Groups = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {group.description}
-                    </p>
+                    {group.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {group.description}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
                       <span>{group.member_count} membre{group.member_count > 1 ? 's' : ''}</span>
                     </div>
                     {group.is_member ? (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => navigate(`/groups/${group.id}`)}
-                      >
-                        Voir le groupe
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="default"
+                          className="flex-1"
+                          onClick={() => navigate(`/groups/${group.id}`)}
+                        >
+                          Voir
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => leaveGroup(group.id)}
+                        >
+                          Quitter
+                        </Button>
+                      </div>
                     ) : (
                       <Button
                         className="w-full"

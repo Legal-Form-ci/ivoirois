@@ -4,8 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Music, Image, Video } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Story {
   id: string;
@@ -68,15 +74,19 @@ const Stories = () => {
     }
   };
 
-  const uploadStory = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadStory = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'audio') => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !user) return;
 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user!.id}/${Date.now()}.${fileExt}`;
-      const mediaType = file.type.startsWith("video") ? "video" : "image";
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      let mediaType = type;
+      if (file.type.startsWith("video")) mediaType = "video";
+      else if (file.type.startsWith("audio")) mediaType = "audio";
+      else if (file.type.startsWith("image")) mediaType = "image";
 
       const { error: uploadError } = await supabase.storage
         .from("stories")
@@ -88,15 +98,19 @@ const Stories = () => {
         .from("stories")
         .getPublicUrl(fileName);
 
-      await supabase.from("stories" as any).insert({
-        user_id: user!.id,
+      const { error: insertError } = await supabase.from("stories" as any).insert({
+        user_id: user.id,
         media_url: publicUrl,
         media_type: mediaType,
       });
 
+      if (insertError) throw insertError;
+
       toast.success("Story publiée !");
-    } catch (error) {
-      toast.error("Erreur lors de la publication");
+      fetchStories();
+    } catch (error: any) {
+      console.error("Error uploading story:", error);
+      toast.error("Erreur lors de la publication: " + error.message);
     } finally {
       setUploading(false);
     }
@@ -105,58 +119,99 @@ const Stories = () => {
   const viewStory = async (story: Story) => {
     setSelectedStory(story);
     
-    await supabase.from("story_views" as any).insert({
-      story_id: story.id,
-      viewer_id: user!.id,
-    });
+    if (user) {
+      await supabase.from("story_views" as any).upsert({
+        story_id: story.id,
+        viewer_id: user.id,
+      }, { onConflict: 'story_id,viewer_id' });
+    }
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 mb-6">
-      <div className="flex flex-col items-center gap-2 min-w-[80px]">
+    <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+      <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
         <div className="relative">
           <Avatar className="h-16 w-16 border-2 border-primary cursor-pointer">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback>Vous</AvatarFallback>
           </Avatar>
-          <label
-            htmlFor="story-upload"
-            className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80"
-          >
-            <Plus className="h-4 w-4" />
-          </label>
-          <input
-            id="story-upload"
-            type="file"
-            accept="image/*,video/*"
-            className="hidden"
-            onChange={uploadStory}
-            disabled={uploading}
-          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50"
+                disabled={uploading}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Image className="h-4 w-4" />
+                  Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => uploadStory(e, 'image')}
+                    disabled={uploading}
+                  />
+                </label>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Video className="h-4 w-4" />
+                  Vidéo
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => uploadStory(e, 'video')}
+                    disabled={uploading}
+                  />
+                </label>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Music className="h-4 w-4" />
+                  Audio
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    onChange={(e) => uploadStory(e, 'audio')}
+                    disabled={uploading}
+                  />
+                </label>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <span className="text-xs text-center">Votre story</span>
+        <span className="text-xs text-center">
+          {uploading ? "Envoi..." : "Votre story"}
+        </span>
       </div>
 
       {stories.map((story) => (
         <div
           key={story.id}
-          className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer"
+          className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0 cursor-pointer"
           onClick={() => viewStory(story)}
         >
           <Avatar className="h-16 w-16 border-2 border-primary ring-2 ring-primary/20">
-            <AvatarImage src={story.profiles.avatar_url} />
-            <AvatarFallback>{story.profiles.full_name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={story.profiles?.avatar_url} />
+            <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
           </Avatar>
           <span className="text-xs text-center truncate max-w-[80px]">
-            {story.profiles.full_name}
+            {story.profiles?.full_name || "Utilisateur"}
           </span>
         </div>
       ))}
 
       <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
-        <DialogContent className="max-w-md p-0 bg-black">
+        <DialogContent className="max-w-md p-0 bg-black overflow-hidden">
           {selectedStory && (
-            <div className="relative">
+            <div className="relative min-h-[400px] flex flex-col">
               <Button
                 variant="ghost"
                 size="icon"
@@ -167,14 +222,14 @@ const Stories = () => {
               </Button>
               <div className="flex items-center gap-3 absolute top-4 left-4 z-10">
                 <Avatar className="h-10 w-10 border-2 border-white">
-                  <AvatarImage src={selectedStory.profiles.avatar_url} />
+                  <AvatarImage src={selectedStory.profiles?.avatar_url} />
                   <AvatarFallback className="bg-white text-black">
-                    {selectedStory.profiles.full_name.charAt(0)}
+                    {selectedStory.profiles?.full_name?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-white font-semibold">
-                    {selectedStory.profiles.full_name}
+                    {selectedStory.profiles?.full_name || "Utilisateur"}
                   </p>
                   <p className="text-white/80 text-xs">
                     {new Date(selectedStory.created_at).toLocaleTimeString("fr-FR", {
@@ -184,20 +239,36 @@ const Stories = () => {
                   </p>
                 </div>
               </div>
-              {selectedStory.media_type === "video" ? (
-                <video
-                  src={selectedStory.media_url}
-                  className="w-full h-auto max-h-[80vh]"
-                  controls
-                  autoPlay
-                />
-              ) : (
-                <img
-                  src={selectedStory.media_url}
-                  alt="Story"
-                  className="w-full h-auto max-h-[80vh] object-contain"
-                />
-              )}
+              
+              <div className="flex-1 flex items-center justify-center pt-16 pb-4">
+                {selectedStory.media_type === "video" ? (
+                  <video
+                    src={selectedStory.media_url}
+                    className="w-full max-h-[70vh] object-contain"
+                    controls
+                    autoPlay
+                  />
+                ) : selectedStory.media_type === "audio" ? (
+                  <div className="flex flex-col items-center gap-4 p-8">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center animate-pulse">
+                      <Music className="h-16 w-16 text-white" />
+                    </div>
+                    <audio
+                      src={selectedStory.media_url}
+                      className="w-full max-w-xs"
+                      controls
+                      autoPlay
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={selectedStory.media_url}
+                    alt="Story"
+                    className="w-full max-h-[70vh] object-contain"
+                  />
+                )}
+              </div>
+              
               {selectedStory.content && (
                 <p className="absolute bottom-4 left-4 right-4 text-white text-center bg-black/50 p-2 rounded">
                   {selectedStory.content}

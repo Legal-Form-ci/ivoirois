@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Share2, Send } from "lucide-react";
+import { MessageCircle, Share2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import ReactionPicker from "./ReactionPicker";
+import ShareButton from "./ShareButton";
 
 interface PostCardProps {
   postId?: string;
@@ -33,61 +35,10 @@ interface Comment {
 
 const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes: initialLikes, comments: initialComments, timeAgo }: PostCardProps) => {
   const { user } = useAuth();
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(initialLikes);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentsCount, setCommentsCount] = useState(initialComments);
-
-  useEffect(() => {
-    if (postId && user) {
-      checkIfLiked();
-    }
-  }, [postId, user]);
-
-  const checkIfLiked = async () => {
-    if (!postId || !user) return;
-    
-    try {
-      const { data } = await supabase
-        .from("likes")
-        .select("id")
-        .eq("post_id", postId)
-        .eq("user_id", user.id)
-        .single();
-
-      setLiked(!!data);
-    } catch (error) {
-      // No like found
-    }
-  };
-
-  const handleLike = async () => {
-    if (!postId || !user) return;
-
-    try {
-      if (liked) {
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("post_id", postId)
-          .eq("user_id", user.id);
-        
-        setLiked(false);
-        setLikesCount(prev => Math.max(0, prev - 1));
-      } else {
-        await supabase
-          .from("likes")
-          .insert({ post_id: postId, user_id: user.id });
-        
-        setLiked(true);
-        setLikesCount(prev => prev + 1);
-      }
-    } catch (error: any) {
-      toast.error("Erreur lors de l'action");
-    }
-  };
 
   const loadComments = async () => {
     if (!postId) return;
@@ -180,15 +131,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
 
       <CardFooter className="flex flex-col gap-3 border-t pt-3 bg-muted/30">
         <div className="flex items-center justify-around w-full">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={`flex items-center gap-2 ${liked ? "text-destructive" : ""}`}
-            onClick={handleLike}
-          >
-            <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
-            <span className="text-sm">{likesCount}</span>
-          </Button>
+          {postId && <ReactionPicker postId={postId} />}
           <Button 
             variant="ghost" 
             size="sm" 
@@ -198,9 +141,12 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
             <MessageCircle className="h-5 w-5" />
             <span className="text-sm">{commentsCount}</span>
           </Button>
-          <Button variant="ghost" size="sm">
-            <Share2 className="h-5 w-5" />
-          </Button>
+          {postId && (
+            <ShareButton 
+              postId={postId}
+              content={content}
+            />
+          )}
         </div>
 
         {showComments && (
