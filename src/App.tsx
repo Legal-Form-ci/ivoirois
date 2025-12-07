@@ -23,9 +23,11 @@ import CreateCompany from "./pages/CreateCompany";
 import Jobs from "./pages/Jobs";
 import Resume from "./pages/Resume";
 import CreateResume from "./pages/CreateResume";
+import ResumeView from "./pages/ResumeView";
 import CreateGroup from "./pages/CreateGroup";
 import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
+import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,8 +60,10 @@ const App = () => (
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
             <Route path="/resume/create" element={<ProtectedRoute><CreateResume /></ProtectedRoute>} />
+            <Route path="/resume/:id" element={<ProtectedRoute><ResumeView /></ProtectedRoute>} />
             <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
             <Route path="/pages/create" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
