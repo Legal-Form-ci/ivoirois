@@ -1,8 +1,10 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Search, FileUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import appLogo from "@/assets/app-logo.png";
+import NotificationBell from "./NotificationBell";
+import GlobalSearch from "./GlobalSearch";
 import {
   Sheet,
   SheetContent,
@@ -26,10 +28,13 @@ const Header = () => {
 
         {user && (
           <>
-            <nav className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex flex-1 max-w-md mx-4">
+              <GlobalSearch />
+            </div>
+            <nav className="hidden md:flex items-center gap-1">
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/feed">
-                  <Home />
+                  <Home className="h-5 w-5" />
                 </Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
@@ -57,11 +62,7 @@ const Header = () => {
                   <UsersRound />
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/notifications">
-                  <Bell />
-                </Link>
-              </Button>
+              <NotificationBell />
               <Button variant="ghost" size="icon" asChild>
                 <Link to={`/profile/${user.id}`}>
                   <User />
