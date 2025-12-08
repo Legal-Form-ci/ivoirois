@@ -27,6 +27,7 @@ import ResumeView from "./pages/ResumeView";
 import CreateGroup from "./pages/CreateGroup";
 import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
+import PageView from "./pages/PageView";
 import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/resume/:id" element={<ProtectedRoute><ResumeView /></ProtectedRoute>} />
             <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
             <Route path="/pages/create" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
+            <Route path="/pages/:pageId" element={<ProtectedRoute><PageView /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
