@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -28,28 +28,32 @@ const TypingIndicator = ({ conversationId, groupId }: TypingIndicatorProps) => {
         },
         async (payload: any) => {
           if (payload.new && payload.new.user_id !== user?.id) {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("full_name")
-              .eq("id", payload.new.user_id)
-              .single();
+            try {
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("full_name")
+                .eq("id", payload.new.user_id)
+                .single();
 
-            if (profile && payload.new.is_typing) {
-              setTypingUsers((prev) =>
-                prev.includes(profile.full_name)
-                  ? prev
-                  : [...prev, profile.full_name]
-              );
+              if (profile && payload.new.is_typing) {
+                setTypingUsers((prev) =>
+                  prev.includes(profile.full_name)
+                    ? prev
+                    : [...prev, profile.full_name]
+                );
 
-              setTimeout(() => {
+                setTimeout(() => {
+                  setTypingUsers((prev) =>
+                    prev.filter((name) => name !== profile.full_name)
+                  );
+                }, 3000);
+              } else if (profile) {
                 setTypingUsers((prev) =>
                   prev.filter((name) => name !== profile.full_name)
                 );
-              }, 3000);
-            } else if (profile) {
-              setTypingUsers((prev) =>
-                prev.filter((name) => name !== profile.full_name)
-              );
+              }
+            } catch (error) {
+              console.error("Error fetching typing user profile:", error);
             }
           }
         }
@@ -64,12 +68,48 @@ const TypingIndicator = ({ conversationId, groupId }: TypingIndicatorProps) => {
   if (typingUsers.length === 0) return null;
 
   return (
-    <div className="text-sm text-muted-foreground italic px-4 py-2">
-      {typingUsers.length === 1
-        ? `${typingUsers[0]} est en train d'écrire...`
-        : `${typingUsers.join(", ")} sont en train d'écrire...`}
+    <div className="text-sm text-muted-foreground italic px-4 py-2 flex items-center gap-2">
+      <div className="flex gap-1">
+        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      </div>
+      <span>
+        {typingUsers.length === 1
+          ? `${typingUsers[0]} est en train d'écrire...`
+          : `${typingUsers.join(", ")} sont en train d'écrire...`}
+      </span>
     </div>
   );
+};
+
+// Hook to send typing indicator
+export const useSendTypingIndicator = (conversationId?: string, groupId?: string) => {
+  const { user } = useAuth();
+
+  const sendTypingIndicator = useCallback(async (isTyping: boolean) => {
+    if (!user?.id || (!conversationId && !groupId)) return;
+
+    try {
+      // Upsert typing indicator
+      await supabase
+        .from("typing_indicators")
+        .upsert({
+          user_id: user.id,
+          conversation_id: conversationId || null,
+          group_id: groupId || null,
+          is_typing: isTyping,
+          updated_at: new Date().toISOString(),
+        } as any, {
+          onConflict: 'user_id,conversation_id',
+        });
+    } catch (error) {
+      // Ignore errors for typing indicators
+      console.debug("Typing indicator error:", error);
+    }
+  }, [user?.id, conversationId, groupId]);
+
+  return { sendTypingIndicator };
 };
 
 export default TypingIndicator;

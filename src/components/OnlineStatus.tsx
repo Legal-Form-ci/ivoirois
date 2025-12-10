@@ -56,26 +56,35 @@ const OnlineStatus = ({ userId, showText = false }: OnlineStatusProps) => {
   }, [user]);
 
   const fetchStatus = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("is_online, last_seen")
-      .eq("id", userId)
-      .single() as any;
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_online, last_seen")
+        .eq("id", userId)
+        .single();
 
-    if (data) {
-      setIsOnline(data.is_online);
-      setLastSeen(data.last_seen);
+      if (data) {
+        setIsOnline((data as any).is_online || false);
+        setLastSeen((data as any).last_seen || null);
+      }
+    } catch (error) {
+      console.error("Error fetching online status:", error);
     }
   };
 
   const updateOnlineStatus = async (online: boolean) => {
-    await supabase
-      .from("profiles")
-      .update({
-        is_online: online,
-        last_seen: new Date().toISOString(),
-      } as any)
-      .eq("id", user!.id);
+    if (!user?.id) return;
+    try {
+      await supabase
+        .from("profiles")
+        .update({
+          is_online: online,
+          last_seen: new Date().toISOString(),
+        } as any)
+        .eq("id", user.id);
+    } catch (error) {
+      console.error("Error updating online status:", error);
+    }
   };
 
   const getLastSeenText = () => {

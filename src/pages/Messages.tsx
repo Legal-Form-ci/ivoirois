@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import RichTextEditor from "@/components/RichTextEditor";
 import VideoCall from "@/components/VideoCall";
 import OnlineStatus from "@/components/OnlineStatus";
-import TypingIndicator from "@/components/TypingIndicator";
+import TypingIndicator, { useSendTypingIndicator } from "@/components/TypingIndicator";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft, Phone, Video, Search, Plus } from "lucide-react";
+import { Send, ArrowLeft, Phone, Video, Search, Plus, Check, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -23,6 +23,8 @@ interface Message {
   sender_id: string;
   created_at: string;
   read: boolean;
+  delivered_at?: string;
+  read_at?: string;
 }
 
 interface Conversation {
@@ -54,6 +56,7 @@ const Messages = () => {
   const [showNewConvo, setShowNewConvo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const { sendTypingIndicator } = useSendTypingIndicator(conversationId);
 
   useEffect(() => {
     if (user) {
@@ -187,12 +190,13 @@ const Messages = () => {
         setOtherUser(profile);
       }
 
-      // Mark messages as read
+      // Mark messages as read with timestamp
       await supabase
         .from("messages")
-        .update({ read: true })
+        .update({ read: true, read_at: new Date().toISOString() } as any)
         .eq("conversation_id", conversationId!)
-        .neq("sender_id", user!.id);
+        .neq("sender_id", user!.id)
+        .is("read_at", null);
 
       await supabase
         .from("conversation_participants")
@@ -205,11 +209,17 @@ const Messages = () => {
   };
 
   const handleTyping = () => {
-    // Typing indicator is handled by the TypingIndicator component
+    sendTypingIndicator(true);
+    
     // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
+    
+    // Stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      sendTypingIndicator(false);
+    }, 2000);
   };
 
   const sendMessage = async (e: React.FormEvent) => {
@@ -470,16 +480,29 @@ const Messages = () => {
                             className="prose prose-sm max-w-none break-words [&_p]:m-0" 
                             dangerouslySetInnerHTML={{ __html: msg.content }} 
                           />
-                          <p className={`text-xs mt-1 ${
+                          <div className={`flex items-center gap-1 text-xs mt-1 ${
                             msg.sender_id === user?.id 
                               ? "text-primary-foreground/70" 
                               : "text-muted-foreground"
                           }`}>
-                            {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
+                            <span>
+                              {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                            {msg.sender_id === user?.id && (
+                              <span className="ml-1">
+                                {msg.read_at ? (
+                                  <CheckCheck className="h-3.5 w-3.5 text-blue-400" />
+                                ) : msg.delivered_at ? (
+                                  <CheckCheck className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Check className="h-3.5 w-3.5" />
+                                )}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
