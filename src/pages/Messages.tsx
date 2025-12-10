@@ -7,6 +7,8 @@ import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import RichTextEditor from "@/components/RichTextEditor";
 import VideoCall from "@/components/VideoCall";
+import OnlineStatus from "@/components/OnlineStatus";
+import TypingIndicator from "@/components/TypingIndicator";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -203,20 +205,7 @@ const Messages = () => {
   };
 
   const handleTyping = () => {
-    if (!conversationId || !user || !otherUser) return;
-
-    // Get user's name
-    supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          sendTypingIndicator(conversationId, data.full_name, user.id);
-        }
-      });
-
+    // Typing indicator is handled by the TypingIndicator component
     // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -395,10 +384,9 @@ const Messages = () => {
                             {conv.other_user.full_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <OnlineStatus 
-                          userId={conv.other_user.id} 
-                          className="absolute -bottom-0.5 -right-0.5"
-                        />
+                        <div className="absolute -bottom-0.5 -right-0.5">
+                          <OnlineStatus userId={conv.other_user.id} />
+                        </div>
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="font-medium truncate">{conv.other_user.full_name}</p>
@@ -440,14 +428,13 @@ const Messages = () => {
                             {otherUser.full_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <OnlineStatus 
-                          userId={otherUser.id}
-                          className="absolute -bottom-0.5 -right-0.5"
-                        />
+                        <div className="absolute -bottom-0.5 -right-0.5">
+                          <OnlineStatus userId={otherUser.id} />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{otherUser.full_name}</p>
-                        <OnlineStatus userId={otherUser.id} showText className="text-xs" />
+                        <OnlineStatus userId={otherUser.id} showText />
                       </div>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => startCall('audio')}>
@@ -501,7 +488,7 @@ const Messages = () => {
                 </ScrollArea>
 
                 {conversationId && (
-                  <TypingIndicator conversationId={conversationId} className="px-4" />
+                  <TypingIndicator conversationId={conversationId} />
                 )}
 
                 <form onSubmit={sendMessage} className="p-3 md:p-4 border-t space-y-2">
@@ -537,10 +524,11 @@ const Messages = () => {
       {/* Video Call Modal */}
       {showVideoCall && otherUser && (
         <VideoCall
-          isOpen={showVideoCall}
+          open={showVideoCall}
           onClose={() => setShowVideoCall(false)}
-          remoteUser={otherUser}
-          isVideoCall={callType === 'video'}
+          recipientName={otherUser.full_name}
+          recipientAvatar={otherUser.avatar_url}
+          isAudioOnly={callType === 'audio'}
         />
       )}
       
