@@ -308,24 +308,30 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          delivered_at: string | null
           id: string
           read: boolean
+          read_at: string | null
           sender_id: string
         }
         Insert: {
           content: string
           conversation_id: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           read?: boolean
+          read_at?: string | null
           sender_id: string
         }
         Update: {
           content?: string
           conversation_id?: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           read?: boolean
+          read_at?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -521,6 +527,8 @@ export type Database = {
           full_name: string
           id: string
           interests: string[] | null
+          is_online: boolean | null
+          last_seen: string | null
           location: string | null
           marital_status: string | null
           phone_number: string | null
@@ -542,6 +550,8 @@ export type Database = {
           full_name: string
           id: string
           interests?: string[] | null
+          is_online?: boolean | null
+          last_seen?: string | null
           location?: string | null
           marital_status?: string | null
           phone_number?: string | null
@@ -563,6 +573,8 @@ export type Database = {
           full_name?: string
           id?: string
           interests?: string[] | null
+          is_online?: boolean | null
+          last_seen?: string | null
           location?: string | null
           marital_status?: string | null
           phone_number?: string | null
@@ -686,6 +698,48 @@ export type Database = {
             columns: ["viewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      typing_indicators: {
+        Row: {
+          conversation_id: string | null
+          group_id: string | null
+          id: string
+          is_typing: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          group_id?: string | null
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string | null
+          group_id?: string | null
+          id?: string
+          is_typing?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "typing_indicators_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "typing_indicators_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
