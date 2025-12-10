@@ -6,9 +6,10 @@ import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import RichTextEditor from "@/components/RichTextEditor";
-import VideoCall from "@/components/VideoCall";
+import WebRTCCall from "@/components/WebRTCCall";
 import OnlineStatus from "@/components/OnlineStatus";
 import TypingIndicator, { useSendTypingIndicator } from "@/components/TypingIndicator";
+import MessageReactions from "@/components/MessageReactions";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -470,7 +471,7 @@ const Messages = () => {
                         }`}
                       >
                         <div
-                          className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-2 ${
+                          className={`group relative max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-2 ${
                             msg.sender_id === user?.id
                               ? "bg-primary text-primary-foreground rounded-br-md"
                               : "bg-muted rounded-bl-md"
@@ -480,7 +481,7 @@ const Messages = () => {
                             className="prose prose-sm max-w-none break-words [&_p]:m-0" 
                             dangerouslySetInnerHTML={{ __html: msg.content }} 
                           />
-                          <div className={`flex items-center gap-1 text-xs mt-1 ${
+                          <div className={`flex items-center justify-between gap-2 text-xs mt-1 ${
                             msg.sender_id === user?.id 
                               ? "text-primary-foreground/70" 
                               : "text-muted-foreground"
@@ -502,6 +503,10 @@ const Messages = () => {
                                 )}
                               </span>
                             )}
+                          </div>
+                          {/* Message Reactions */}
+                          <div className="absolute -bottom-3 left-2">
+                            <MessageReactions messageId={msg.id} />
                           </div>
                         </div>
                       </div>
@@ -545,12 +550,14 @@ const Messages = () => {
       </main>
 
       {/* Video Call Modal */}
-      {showVideoCall && otherUser && (
-        <VideoCall
+      {showVideoCall && otherUser && conversationId && (
+        <WebRTCCall
           open={showVideoCall}
           onClose={() => setShowVideoCall(false)}
-          recipientName={otherUser.full_name}
-          recipientAvatar={otherUser.avatar_url}
+          conversationId={conversationId}
+          remoteUserId={otherUser.id}
+          remoteUserName={otherUser.full_name}
+          remoteUserAvatar={otherUser.avatar_url}
           isAudioOnly={callType === 'audio'}
         />
       )}
