@@ -52,6 +52,47 @@ export type Database = {
           },
         ]
       }
+      certifications: {
+        Row: {
+          badge_type: string
+          company_id: string | null
+          expires_at: string | null
+          id: string
+          issued_at: string
+          issued_by: string
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          badge_type: string
+          company_id?: string | null
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          issued_by: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          badge_type?: string
+          company_id?: string | null
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content: string
@@ -90,6 +131,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      companies: {
+        Row: {
+          address: string | null
+          city: string | null
+          commerce_registry: string | null
+          cover_image: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          email: string | null
+          founded_year: number | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          region: string | null
+          sector: string | null
+          size: string | null
+          updated_at: string
+          verified: boolean | null
+          verified_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          commerce_registry?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          region?: string | null
+          sector?: string | null
+          size?: string | null
+          updated_at?: string
+          verified?: boolean | null
+          verified_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          commerce_registry?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          region?: string | null
+          sector?: string | null
+          size?: string | null
+          updated_at?: string
+          verified?: boolean | null
+          verified_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
       }
       conversation_participants: {
         Row: {
@@ -305,6 +415,124 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          id: string
+          job_id: string
+          resume_url: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          resume_url?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          resume_url?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_posts: {
+        Row: {
+          application_email: string | null
+          application_url: string | null
+          applications_count: number | null
+          benefits: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          deadline: string | null
+          description: string
+          experience_level: string | null
+          id: string
+          job_type: string
+          location: string | null
+          remote_option: string | null
+          requirements: string | null
+          responsibilities: string | null
+          salary_range: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          application_email?: string | null
+          application_url?: string | null
+          applications_count?: number | null
+          benefits?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          deadline?: string | null
+          description: string
+          experience_level?: string | null
+          id?: string
+          job_type?: string
+          location?: string | null
+          remote_option?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          application_email?: string | null
+          application_url?: string | null
+          applications_count?: number | null
+          benefits?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          description?: string
+          experience_level?: string | null
+          id?: string
+          job_type?: string
+          location?: string | null
+          remote_option?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -337,6 +565,44 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          id: string
+          message_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type: string
+          file_url: string
+          id?: string
+          message_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
@@ -724,6 +990,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reports: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       stories: {
         Row: {
