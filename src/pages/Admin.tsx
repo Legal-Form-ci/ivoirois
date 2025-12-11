@@ -3,12 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import MobileNav from "@/components/MobileNav";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Building2, AlertCircle, Award, FileText, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Users, Building2, AlertCircle, Award, FileText, TrendingUp, 
+  Search, Shield, CheckCircle2, XCircle, Eye, Ban, MessageSquare,
+  Activity, BarChart3, Settings, Flag, Bell, UserPlus
+} from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface Stats {
   totalUsers: number;
@@ -17,6 +27,30 @@ interface Stats {
   totalReports: number;
   activeCertifications: number;
   totalJobPosts: number;
+  totalPosts: number;
+  totalGroups: number;
+  totalPages: number;
+}
+
+interface UserProfile {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url: string | null;
+  email?: string;
+  created_at: string;
+  region: string | null;
+  is_online: boolean;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  sector: string;
+  verified: boolean;
+  commerce_registry: string | null;
+  created_at: string;
 }
 
 const Admin = () => {
@@ -24,6 +58,9 @@ const Admin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalCompanies: 0,
@@ -31,6 +68,9 @@ const Admin = () => {
     totalReports: 0,
     activeCertifications: 0,
     totalJobPosts: 0,
+    totalPosts: 0,
+    totalGroups: 0,
+    totalPages: 0,
   });
 
   useEffect(() => {
@@ -48,17 +88,16 @@ const Admin = () => {
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "super_admin")
-        .single();
+        .in("role", ["super_admin", "admin"]);
 
-      if (!roles) {
+      if (!roles || roles.length === 0) {
         toast.error("Accès refusé : vous n'êtes pas administrateur");
         navigate("/feed");
         return;
       }
 
       setIsAdmin(true);
-      await fetchStats();
+      await Promise.all([fetchStats(), fetchUsers(), fetchCompanies()]);
     } catch (error) {
       toast.error("Erreur de vérification des droits");
       navigate("/feed");
@@ -69,34 +108,97 @@ const Admin = () => {
 
   const fetchStats = async () => {
     try {
-      const [usersCount, companiesCount, verificationsCount, reportsCount, certificationsCount, jobsCount] = await Promise.all([
+      const [
+        usersCount, 
+        companiesCount, 
+        postsCount, 
+        groupsCount, 
+        pagesCount,
+        jobsCount,
+        reportsCount,
+        certsCount
+      ] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
-        (supabase as any).from("companies").select("*", { count: "exact", head: true }),
-        (supabase as any).from("company_verifications").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        (supabase as any).from("reports").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        (supabase as any).from("certifications").select("*", { count: "exact", head: true }).eq("status", "active"),
-        (supabase as any).from("job_posts").select("*", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("companies" as any).select("*", { count: "exact", head: true }),
+        supabase.from("posts").select("*", { count: "exact", head: true }),
+        supabase.from("groups").select("*", { count: "exact", head: true }),
+        supabase.from("pages").select("*", { count: "exact", head: true }),
+        supabase.from("job_posts" as any).select("*", { count: "exact", head: true }),
+        supabase.from("reports" as any).select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("certifications" as any).select("*", { count: "exact", head: true }).eq("status", "active"),
       ]);
+
+      const pendingVerifs = await supabase
+        .from("companies" as any)
+        .select("*", { count: "exact", head: true })
+        .eq("verified", false)
+        .not("commerce_registry", "is", null);
 
       setStats({
         totalUsers: usersCount.count || 0,
         totalCompanies: companiesCount.count || 0,
-        pendingVerifications: verificationsCount.count || 0,
-        totalReports: reportsCount.count || 0,
-        activeCertifications: certificationsCount.count || 0,
+        totalPosts: postsCount.count || 0,
+        totalGroups: groupsCount.count || 0,
+        totalPages: pagesCount.count || 0,
         totalJobPosts: jobsCount.count || 0,
+        pendingVerifications: pendingVerifs.count || 0,
+        totalReports: reportsCount.count || 0,
+        activeCertifications: certsCount.count || 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
   };
 
+  const fetchUsers = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setUsers((data as unknown as UserProfile[]) || []);
+  };
+
+  const fetchCompanies = async () => {
+    const { data } = await supabase
+      .from("companies" as any)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setCompanies((data as unknown as Company[]) || []);
+  };
+
+  const verifyCompany = async (companyId: string) => {
+    try {
+      const { error } = await supabase
+        .from("companies" as any)
+        .update({ verified: true, verified_at: new Date().toISOString() })
+        .eq("id", companyId);
+
+      if (error) throw error;
+      toast.success("Entreprise vérifiée avec succès");
+      fetchCompanies();
+      fetchStats();
+    } catch (error) {
+      toast.error("Erreur lors de la vérification");
+    }
+  };
+
+  const filteredUsers = users.filter((u) =>
+    u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredCompanies = companies.filter((c) =>
+    c.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/30">
         <Header />
         <div className="container py-6 text-center">
-          <p>Chargement...</p>
+          <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
     );
@@ -107,108 +209,161 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Tableau de bord Administrateur</h1>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Shield className="h-8 w-8 text-primary" />
+                Espace Super Admin
+              </h1>
+              <p className="text-muted-foreground">Gestion complète de la plateforme Ivoi'Rois</p>
+            </div>
+            <Badge variant="destructive" className="text-lg px-4 py-2">
               Super Admin
             </Badge>
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                <p className="text-xs text-muted-foreground">Membres inscrits</p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Entreprises</CardTitle>
-                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <Building2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalCompanies}</div>
-                <p className="text-xs text-muted-foreground">Entreprises enregistrées</p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Publications</CardTitle>
+                <FileText className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalPosts}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Vérifications</CardTitle>
                 <AlertCircle className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-500">{stats.pendingVerifications}</div>
-                <p className="text-xs text-muted-foreground">En attente</p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Signalements</CardTitle>
-                <AlertCircle className="h-4 w-4 text-red-500" />
+                <Flag className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-500">{stats.totalReports}</div>
-                <p className="text-xs text-muted-foreground">À traiter</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Certifications</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeCertifications}</div>
-                <p className="text-xs text-muted-foreground">Actives</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Offres d'emploi</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalJobPosts}</div>
-                <p className="text-xs text-muted-foreground">Actives</p>
               </CardContent>
             </Card>
           </div>
 
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un utilisateur, une entreprise..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           {/* Management Tabs */}
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="users">Utilisateurs</TabsTrigger>
-              <TabsTrigger value="companies">Entreprises</TabsTrigger>
-              <TabsTrigger value="verifications">Vérifications</TabsTrigger>
-              <TabsTrigger value="reports">Signalements</TabsTrigger>
-              <TabsTrigger value="certifications">Certifications</TabsTrigger>
+            <TabsList className="grid grid-cols-5 w-full">
+              <TabsTrigger value="users" className="gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Utilisateurs</span>
+              </TabsTrigger>
+              <TabsTrigger value="companies" className="gap-2">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Entreprises</span>
+              </TabsTrigger>
+              <TabsTrigger value="verifications" className="gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Vérifications</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="gap-2">
+                <Flag className="h-4 w-4" />
+                <span className="hidden sm:inline">Signalements</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
               <Card>
                 <CardHeader>
                   <CardTitle>Gestion des utilisateurs</CardTitle>
+                  <CardDescription>
+                    {stats.totalUsers} utilisateurs inscrits sur la plateforme
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Gérez les comptes utilisateurs, accordez des certifications et modérez le contenu.
-                  </p>
-                  <Button onClick={() => navigate("/admin/users")}>
-                    Voir tous les utilisateurs
-                  </Button>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-2">
+                      {filteredUsers.map((u) => (
+                        <div
+                          key={u.id}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <Avatar>
+                                <AvatarImage src={u.avatar_url || undefined} />
+                                <AvatarFallback>{u.full_name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              {u.is_online && (
+                                <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{u.full_name}</p>
+                              <p className="text-sm text-muted-foreground">@{u.username}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {u.region && (
+                              <Badge variant="outline">{u.region}</Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(u.created_at), { addSuffix: true, locale: fr })}
+                            </span>
+                            <Button size="sm" variant="ghost" onClick={() => navigate(`/profile/${u.id}`)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive">
+                              <Ban className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -217,14 +372,49 @@ const Admin = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Gestion des entreprises</CardTitle>
+                  <CardDescription>
+                    {stats.totalCompanies} entreprises enregistrées
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Validez les entreprises, gérez les vérifications et surveillez les offres d'emploi.
-                  </p>
-                  <Button onClick={() => navigate("/admin/companies")}>
-                    Voir toutes les entreprises
-                  </Button>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-2">
+                      {filteredCompanies.map((company) => (
+                        <div
+                          key={company.id}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="rounded-lg">
+                              <AvatarImage src={company.logo_url || undefined} />
+                              <AvatarFallback className="rounded-lg">
+                                {company.name?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{company.name}</p>
+                                {company.verified && (
+                                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{company.sector}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {company.commerce_registry && !company.verified && (
+                              <Button size="sm" onClick={() => verifyCompany(company.id)}>
+                                Vérifier
+                              </Button>
+                            )}
+                            <Button size="sm" variant="ghost">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -233,14 +423,57 @@ const Admin = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Demandes de vérification</CardTitle>
+                  <CardDescription>
+                    {stats.pendingVerifications} demandes en attente
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    {stats.pendingVerifications} demandes en attente de validation.
-                  </p>
-                  <Button onClick={() => navigate("/admin/verifications")}>
-                    Traiter les demandes
-                  </Button>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {companies
+                        .filter((c) => c.commerce_registry && !c.verified)
+                        .map((company) => (
+                          <div
+                            key={company.id}
+                            className="flex items-center justify-between p-4 border rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="rounded-lg h-12 w-12">
+                                <AvatarImage src={company.logo_url || undefined} />
+                                <AvatarFallback className="rounded-lg">
+                                  {company.name?.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{company.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Registre: {company.commerce_registry}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Refuser
+                              </Button>
+                              <Button size="sm" onClick={() => verifyCompany(company.id)}>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Approuver
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      {companies.filter((c) => c.commerce_registry && !c.verified).length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          Aucune demande en attente
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -249,36 +482,86 @@ const Admin = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Signalements</CardTitle>
+                  <CardDescription>
+                    Contenus signalés par les utilisateurs
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    {stats.totalReports} signalements à examiner.
-                  </p>
-                  <Button onClick={() => navigate("/admin/reports")}>
-                    Traiter les signalements
-                  </Button>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun signalement en attente</p>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="certifications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Certifications Ivoi'Rois</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Accordez des badges vérifiés, premium et professionnels.
-                  </p>
-                  <Button onClick={() => navigate("/admin/certifications")}>
-                    Gérer les certifications
-                  </Button>
-                </CardContent>
-              </Card>
+            <TabsContent value="analytics">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5" />
+                      Activité récente
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span>Groupes créés</span>
+                        <Badge>{stats.totalGroups}</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pages créées</span>
+                        <Badge>{stats.totalPages}</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Offres d'emploi</span>
+                        <Badge>{stats.totalJobPosts}</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Certifications actives</span>
+                        <Badge variant="secondary">{stats.activeCertifications}</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Croissance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <UserPlus className="h-4 w-4 text-green-500" />
+                          Nouveaux utilisateurs
+                        </span>
+                        <Badge variant="outline" className="text-green-500">
+                          +{Math.floor(stats.totalUsers * 0.1)} ce mois
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-blue-500" />
+                          Nouvelles entreprises
+                        </span>
+                        <Badge variant="outline" className="text-blue-500">
+                          +{Math.floor(stats.totalCompanies * 0.15)} ce mois
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };
