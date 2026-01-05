@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
+import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,13 +16,10 @@ interface Company {
   id: string;
   name: string;
   description: string;
-  industry: string;
+  sector: string;
   logo_url?: string;
   verified: boolean;
   region?: string;
-  profiles?: {
-    full_name: string;
-  };
 }
 
 const Companies = () => {
@@ -37,25 +35,16 @@ const Companies = () => {
 
   const fetchCompanies = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("companies")
-        .select(`
-          id,
-          name,
-          description,
-          industry,
-          logo_url,
-          verified,
-          region,
-          profiles:owner_id (full_name)
-        `)
+        .select("*")
         .order("verified", { ascending: false })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       setCompanies((data as any) || []);
     } catch (error) {
-      toast.error("Erreur lors du chargement des entreprises");
+      console.error("Error fetching companies:", error);
     } finally {
       setLoading(false);
     }
@@ -63,11 +52,11 @@ const Companies = () => {
 
   const filteredCompanies = companies.filter((company) =>
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.industry?.toLowerCase().includes(searchTerm.toLowerCase())
+    company.sector?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -135,9 +124,9 @@ const Companies = () => {
                             <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
                           )}
                         </CardTitle>
-                        {company.industry && (
+                        {company.sector && (
                           <Badge variant="secondary" className="mt-1">
-                            {company.industry}
+                            {company.sector}
                           </Badge>
                         )}
                       </div>
@@ -159,6 +148,7 @@ const Companies = () => {
           )}
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };

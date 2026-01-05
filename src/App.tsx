@@ -20,7 +20,10 @@ import GroupChat from "./pages/GroupChat";
 import Admin from "./pages/Admin";
 import Companies from "./pages/Companies";
 import CreateCompany from "./pages/CreateCompany";
+import CompanyView from "./pages/CompanyView";
 import Jobs from "./pages/Jobs";
+import CreateJob from "./pages/CreateJob";
+import JobView from "./pages/JobView";
 import Resume from "./pages/Resume";
 import CreateResume from "./pages/CreateResume";
 import ResumeView from "./pages/ResumeView";
@@ -58,7 +61,10 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
             <Route path="/companies/create" element={<ProtectedRoute><CreateCompany /></ProtectedRoute>} />
+            <Route path="/companies/:companyId" element={<ProtectedRoute><CompanyView /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path="/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+            <Route path="/jobs/:jobId" element={<ProtectedRoute><JobView /></ProtectedRoute>} />
             <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
             <Route path="/resume/create" element={<ProtectedRoute><CreateResume /></ProtectedRoute>} />
             <Route path="/resume/:id" element={<ProtectedRoute><ResumeView /></ProtectedRoute>} />

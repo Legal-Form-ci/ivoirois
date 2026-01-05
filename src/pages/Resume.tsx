@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
+import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, FileText, Eye, Download } from "lucide-react";
@@ -50,7 +51,7 @@ const Resume = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -165,6 +166,7 @@ const Resume = () => {
           )}
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Briefcase, Search, MapPin, Building2, Clock } from "lucide-react";
+import { Briefcase, Search, MapPin, Building2, Clock, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -75,7 +76,7 @@ const Jobs = () => {
   );
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -89,6 +90,10 @@ const Jobs = () => {
                 Trouvez votre prochain emploi en Côte d'Ivoire
               </p>
             </div>
+            <Button onClick={() => navigate("/jobs/create")} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Publier une offre
+            </Button>
           </div>
 
           <div className="relative">
@@ -182,6 +187,7 @@ const Jobs = () => {
           )}
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };

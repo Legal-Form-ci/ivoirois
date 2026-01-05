@@ -1030,6 +1030,63 @@ export type Database = {
         }
         Relationships: []
       }
+      resumes: {
+        Row: {
+          certifications: Json | null
+          created_at: string
+          education: Json | null
+          experience: Json | null
+          id: string
+          interests: string[] | null
+          is_primary: boolean | null
+          is_public: boolean | null
+          languages: Json | null
+          projects: Json | null
+          skills: string[] | null
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          user_references: string | null
+        }
+        Insert: {
+          certifications?: Json | null
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          interests?: string[] | null
+          is_primary?: boolean | null
+          is_public?: boolean | null
+          languages?: Json | null
+          projects?: Json | null
+          skills?: string[] | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          user_references?: string | null
+        }
+        Update: {
+          certifications?: Json | null
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          interests?: string[] | null
+          is_primary?: boolean | null
+          is_public?: boolean | null
+          languages?: Json | null
+          projects?: Json | null
+          skills?: string[] | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          user_references?: string | null
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           content: string | null
