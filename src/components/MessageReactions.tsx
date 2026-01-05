@@ -15,12 +15,16 @@ interface MessageReactionsProps {
 }
 
 const REACTIONS = [
-  { emoji: "👍", type: "like" },
-  { emoji: "❤️", type: "love" },
-  { emoji: "😂", type: "laugh" },
-  { emoji: "😮", type: "wow" },
-  { emoji: "😢", type: "sad" },
-  { emoji: "🙏", type: "pray" },
+  { emoji: "👍", type: "like", label: "J'aime" },
+  { emoji: "❤️", type: "love", label: "J'adore" },
+  { emoji: "😂", type: "laugh", label: "Haha" },
+  { emoji: "😮", type: "wow", label: "Wouah" },
+  { emoji: "😢", type: "sad", label: "Triste" },
+  { emoji: "😡", type: "angry", label: "Grrr" },
+  { emoji: "🙏", type: "pray", label: "Merci" },
+  { emoji: "🔥", type: "fire", label: "Feu" },
+  { emoji: "💯", type: "hundred", label: "100%" },
+  { emoji: "👏", type: "clap", label: "Bravo" },
 ];
 
 interface Reaction {
@@ -117,19 +121,25 @@ const MessageReactions = ({ messageId, showPicker = true }: MessageReactionsProp
     <div className="flex items-center gap-1">
       {/* Display existing reactions */}
       {Object.entries(reactionCounts).length > 0 && (
-        <div className="flex items-center gap-0.5 bg-muted/80 rounded-full px-1.5 py-0.5">
+        <div className="flex items-center gap-0.5 bg-muted/80 rounded-full px-2 py-1 shadow-sm">
           {Object.entries(reactionCounts).map(([type, count]) => {
             const reaction = REACTIONS.find((r) => r.type === type);
+            const isMyReaction = myReaction?.reaction_type === type;
             return (
               <button
                 key={type}
                 onClick={() => toggleReaction(type)}
-                className={`text-xs hover:scale-110 transition-transform ${
-                  myReaction?.reaction_type === type ? "scale-110" : ""
+                className={`text-sm hover:scale-125 transition-all duration-200 ${
+                  isMyReaction ? "scale-110 animate-bounce-once" : ""
                 }`}
+                title={reaction?.label}
               >
                 {reaction?.emoji}
-                {count > 1 && <span className="text-[10px] ml-0.5">{count}</span>}
+                {count > 1 && (
+                  <span className="text-[10px] ml-0.5 text-muted-foreground font-medium">
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -143,22 +153,23 @@ const MessageReactions = ({ messageId, showPicker = true }: MessageReactionsProp
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
             >
-              <Smile className="h-3.5 w-3.5" />
+              <Smile className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2" side="top">
-            <div className="flex gap-1">
+          <PopoverContent className="w-auto p-2 bg-card/95 backdrop-blur-sm" side="top" align="start">
+            <div className="flex gap-1 flex-wrap max-w-[200px]">
               {REACTIONS.map((reaction) => (
                 <button
                   key={reaction.type}
                   onClick={() => toggleReaction(reaction.type)}
-                  className={`text-xl p-1.5 rounded-full hover:bg-muted transition-colors ${
+                  className={`text-xl p-2 rounded-lg hover:bg-muted transition-all duration-200 hover:scale-125 ${
                     myReaction?.reaction_type === reaction.type
-                      ? "bg-primary/20"
+                      ? "bg-primary/20 scale-110"
                       : ""
                   }`}
+                  title={reaction.label}
                 >
                   {reaction.emoji}
                 </button>

@@ -220,7 +220,7 @@ const CreateResume = () => {
           languages: formData.languages,
           projects: formData.projects,
           interests: formData.interests,
-          references: formData.references,
+          user_references: formData.references,
           is_public: formData.is_public,
           is_primary: formData.is_primary,
         });

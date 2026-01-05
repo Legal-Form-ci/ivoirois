@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
+import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,12 +21,13 @@ const CreateCompany = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    industry: "",
+    sector: "",
     size: "",
     website: "",
     email: "",
     phone: "",
     address: "",
+    city: "",
     region: "",
     logo_url: "",
   });
@@ -41,18 +43,19 @@ const CreateCompany = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("companies")
         .insert({
-          owner_id: user.id,
+          created_by: user.id,
           name: formData.name.trim(),
           description: formData.description.trim() || null,
-          industry: formData.industry || null,
+          sector: formData.sector || null,
           size: formData.size || null,
           website: formData.website.trim() || null,
           email: formData.email.trim() || null,
           phone: formData.phone.trim() || null,
           address: formData.address.trim() || null,
+          city: formData.city.trim() || null,
           region: formData.region || null,
           logo_url: formData.logo_url.trim() || null,
         })
@@ -90,12 +93,12 @@ const CreateCompany = () => {
       const fileName = `companies/${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from("companies")
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      const { data } = supabase.storage.from("companies").getPublicUrl(fileName);
       setFormData({ ...formData, logo_url: data.publicUrl });
       toast.success("Logo téléchargé");
     } catch (error: any) {
@@ -104,7 +107,7 @@ const CreateCompany = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-2xl mx-auto">
@@ -176,10 +179,10 @@ const CreateCompany = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="industry">Secteur d'activité</Label>
+                    <Label htmlFor="sector">Secteur d'activité</Label>
                     <Select
-                      value={formData.industry}
-                      onValueChange={(value) => setFormData({ ...formData, industry: value })}
+                      value={formData.sector}
+                      onValueChange={(value) => setFormData({ ...formData, sector: value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionnez" />
@@ -248,33 +251,35 @@ const CreateCompany = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">Adresse</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Cocody, Abidjan"
-                  />
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Ville</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="Abidjan"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="region">Région</Label>
-                  <Select
-                    value={formData.region}
-                    onValueChange={(value) => setFormData({ ...formData, region: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {REGIONS_COTE_IVOIRE.map((region) => (
-                        <SelectItem key={region} value={region}>
-                          {region}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Label htmlFor="region">Région</Label>
+                    <Select
+                      value={formData.region}
+                      onValueChange={(value) => setFormData({ ...formData, region: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGIONS_COTE_IVOIRE.map((region) => (
+                          <SelectItem key={region} value={region}>
+                            {region}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -295,6 +300,7 @@ const CreateCompany = () => {
           </Card>
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };

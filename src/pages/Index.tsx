@@ -28,10 +28,10 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
-              <Link to="/auth">Commencer maintenant</Link>
+              <Link to="/auth">Se connecter</Link>
             </Button>
             <Button variant="outline" size="lg" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20" asChild>
-              <Link to="/feed">Découvrir</Link>
+              <Link to="/auth?mode=signup">Créer mon compte</Link>
             </Button>
           </div>
         </div>
@@ -72,18 +72,30 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
+      {/* Stats Section */}
+      <section className="py-16 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
         <div className="container text-center px-4">
-          <h2 className="text-4xl font-bold mb-6">
-            Rejoignez la communauté ivoirienne
+          <h2 className="text-3xl font-bold mb-8">
+            Rejoignez des milliers d'utilisateurs
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Partagez vos moments, découvrez l'actualité locale et restez connecté avec vos proches
-          </p>
-          <Button variant="hero" size="lg" asChild>
-            <Link to="/auth">Créer mon compte</Link>
-          </Button>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="p-4">
+              <p className="text-4xl font-bold text-primary">100K+</p>
+              <p className="text-muted-foreground">Utilisateurs</p>
+            </div>
+            <div className="p-4">
+              <p className="text-4xl font-bold text-primary">50K+</p>
+              <p className="text-muted-foreground">Publications</p>
+            </div>
+            <div className="p-4">
+              <p className="text-4xl font-bold text-primary">1K+</p>
+              <p className="text-muted-foreground">Entreprises</p>
+            </div>
+            <div className="p-4">
+              <p className="text-4xl font-bold text-primary">500+</p>
+              <p className="text-muted-foreground">Offres d'emploi</p>
+            </div>
+          </div>
         </div>
       </section>
 
