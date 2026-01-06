@@ -32,7 +32,10 @@ import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
 import PageView from "./pages/PageView";
 import Search from "./pages/Search";
+import Reels from "./pages/Reels";
+import CreateReel from "./pages/CreateReel";
 import NotFound from "./pages/NotFound";
+import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,7 @@ const App = () => (
       <InstallPrompt />
       <BrowserRouter>
         <AuthProvider>
+          <IncomingCallHandler />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -71,6 +75,8 @@ const App = () => (
             <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
             <Route path="/pages/create" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
             <Route path="/pages/:pageId" element={<ProtectedRoute><PageView /></ProtectedRoute>} />
+            <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
+            <Route path="/reels/create" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
