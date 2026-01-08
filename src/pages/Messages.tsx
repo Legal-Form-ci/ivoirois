@@ -10,10 +10,12 @@ import WebRTCCall from "@/components/WebRTCCall";
 import OnlineStatus from "@/components/OnlineStatus";
 import TypingIndicator, { useSendTypingIndicator } from "@/components/TypingIndicator";
 import MessageReactions from "@/components/MessageReactions";
+import ScheduledMessaging from "@/components/ScheduledMessaging";
+import VoiceRecorder from "@/components/VoiceRecorder";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft, Phone, Video, Search, Plus, Check, CheckCheck } from "lucide-react";
+import { Send, ArrowLeft, Phone, Video, Search, Plus, Check, CheckCheck, Mic, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -529,7 +531,51 @@ const Messages = () => {
                     placeholder="Écrivez un message..."
                     minHeight="60px"
                   />
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <ScheduledMessaging 
+                        conversationId={conversationId} 
+                        onMessageScheduled={() => {}}
+                      />
+                      <VoiceRecorder 
+                        onSend={async (audioBlob, duration) => {
+                          const fileName = `voice-${Date.now()}.webm`;
+                          const filePath = `${user!.id}/${fileName}`;
+                          
+                          const { error: uploadError } = await supabase.storage
+                            .from('messages')
+                            .upload(filePath, audioBlob);
+                          
+                          if (uploadError) {
+                            toast.error("Erreur lors de l'envoi du message vocal");
+                            return;
+                          }
+                          
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('messages')
+                            .getPublicUrl(filePath);
+                          
+                          const messageContent = `
+                            <div class="voice-message">
+                              <audio controls src="${publicUrl}" class="w-full"></audio>
+                              <p class="text-xs mt-1 text-muted-foreground">🎤 ${Math.round(duration)}s</p>
+                            </div>
+                          `;
+                          
+                          const { error } = await supabase.from("messages").insert({
+                            conversation_id: conversationId,
+                            sender_id: user!.id,
+                            content: messageContent.trim(),
+                          });
+                          
+                          if (error) {
+                            toast.error("Erreur lors de l'envoi");
+                          } else {
+                            toast.success("Message vocal envoyé");
+                          }
+                        }}
+                      />
+                    </div>
                     <Button type="submit" disabled={!newMessage.trim()}>
                       <Send className="h-4 w-4 mr-2" />
                       Envoyer

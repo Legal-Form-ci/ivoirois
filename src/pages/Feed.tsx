@@ -1,24 +1,31 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
-import CreatePost from "@/components/CreatePost";
-import PostCard from "@/components/PostCard";
+import EnhancedCreatePost from "@/components/EnhancedCreatePost";
+import EnhancedPostCard from "@/components/EnhancedPostCard";
 import Stories from "@/components/Stories";
 import SearchUsers from "@/components/SearchUsers";
 import SuggestedUsers from "@/components/SuggestedUsers";
+import MobileNav from "@/components/MobileNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-
 interface Post {
   id: string;
   content: string;
+  title?: string;
+  hook?: string;
   image_url?: string;
+  media_urls?: string[];
+  media_types?: string[];
+  links?: string[];
+  hashtags?: string[];
   created_at: string;
   user_id: string;
   profiles: {
     username: string;
     full_name: string;
     avatar_url?: string;
+    region?: string;
   };
   likes: { count: number }[];
   comments: { count: number }[];
@@ -117,14 +124,14 @@ const Feed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
         <div className="max-w-2xl mx-auto space-y-6">
           <SearchUsers />
           <SuggestedUsers />
           <Stories />
-          <CreatePost onPostCreated={fetchPosts} />
+          <EnhancedCreatePost onPostCreated={fetchPosts} />
 
           <div className="space-y-4">
             {loading ? (
@@ -139,23 +146,30 @@ const Feed = () => {
               </div>
             ) : (
               posts.map((post) => (
-                <PostCard
+                <EnhancedPostCard
                   key={post.id}
-                  postId={post.id}
-                  userId={post.user_id}
-                  author={post.profiles.full_name}
-                  authorAvatar={post.profiles.avatar_url}
+                  id={post.id}
+                  authorId={post.user_id}
+                  authorName={post.profiles.full_name}
+                  authorAvatar={post.profiles.avatar_url || ''}
+                  title={post.title}
+                  hook={post.hook}
                   content={post.content}
-                  image={post.image_url}
-                  likes={post.likes[0]?.count || 0}
-                  comments={post.comments[0]?.count || 0}
-                  timeAgo={getTimeAgo(post.created_at)}
+                  mediaUrls={post.media_urls}
+                  mediaTypes={post.media_types}
+                  links={post.links}
+                  hashtags={post.hashtags}
+                  imageUrl={post.image_url}
+                  createdAt={post.created_at}
+                  likesCount={post.likes[0]?.count || 0}
+                  commentsCount={post.comments[0]?.count || 0}
                 />
               ))
             )}
           </div>
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 };
