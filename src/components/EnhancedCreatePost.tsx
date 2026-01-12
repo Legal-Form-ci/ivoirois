@@ -16,7 +16,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import RichTextEditor from './RichTextEditor';
+import AdvancedRichTextEditor from './AdvancedRichTextEditor';
 
 interface EnhancedCreatePostProps {
   onPostCreated?: () => void;
@@ -213,7 +213,7 @@ const EnhancedCreatePost = ({ onPostCreated }: EnhancedCreatePostProps) => {
           {/* Rich Text Content */}
           <div className="space-y-1">
             <Label className="text-sm font-medium">Contenu</Label>
-            <RichTextEditor
+            <AdvancedRichTextEditor
               content={content}
               onChange={setContent}
               placeholder="Écrivez votre publication... Utilisez le formatage pour structurer votre texte."
