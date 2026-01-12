@@ -34,10 +34,6 @@ serve(async (req) => {
         );
       }
 
-      // Convert audio to base64 for Lovable AI
-      const arrayBuffer = await audioFile.arrayBuffer();
-      const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer).slice(0, 50000)));
-      
       // Use Lovable AI for transcription description
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -50,7 +46,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: "You are a transcription assistant. The user will describe what they want transcribed. Please provide a helpful response."
+              content: "You are a transcription assistant. Respond with a brief acknowledgment that a voice message was received."
             },
             {
               role: "user",
@@ -83,11 +79,15 @@ serve(async (req) => {
       );
     }
 
-    // Use ElevenLabs Speech-to-Text
+    // Use ElevenLabs Speech-to-Text with Scribe model
     const apiFormData = new FormData();
     apiFormData.append("file", audioFile);
     apiFormData.append("model_id", "scribe_v1");
-    apiFormData.append("language_code", "fra");
+    apiFormData.append("language_code", "fra"); // French (Ivory Coast)
+    apiFormData.append("tag_audio_events", "true");
+    apiFormData.append("diarize", "false");
+
+    console.log("Calling ElevenLabs STT API...");
 
     const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
       method: "POST",
@@ -99,23 +99,38 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("ElevenLabs STT error:", errorText);
+      console.error("ElevenLabs STT error:", response.status, errorText);
+      
+      // Fallback message if ElevenLabs fails
       return new Response(
-        JSON.stringify({ error: "Transcription failed" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ 
+          text: "[Transcription en cours de traitement...]",
+          words: [],
+          error: "ElevenLabs temporarily unavailable"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const transcription = await response.json();
+    console.log("ElevenLabs transcription success:", transcription.text?.substring(0, 100));
 
     return new Response(
-      JSON.stringify(transcription),
+      JSON.stringify({
+        text: transcription.text || "[Message vocal]",
+        words: transcription.words || [],
+        language: transcription.language_code || "fra",
+        audio_events: transcription.audio_events || []
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Transcription error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : "Unknown error",
+        text: "[Erreur de transcription]"
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

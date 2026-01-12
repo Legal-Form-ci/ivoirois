@@ -15,6 +15,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
+import AIWritingAssistant from '@/components/AIWritingAssistant';
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, 
   List, ListOrdered, Table as TableIcon, Undo, Redo,
@@ -497,6 +498,20 @@ const AdvancedRichTextEditor = ({
             </div>
           </PopoverContent>
         </Popover>
+
+        <div className="w-px h-6 bg-border mx-1 self-center" />
+
+        {/* AI Assistant */}
+        <AIWritingAssistant
+          text={editor.getText()}
+          onTextChange={(newText) => {
+            editor.commands.setContent(`<p>${newText}</p>`);
+          }}
+          onSuggestion={(suggestion) => {
+            // Insert suggestion at cursor or append
+            editor.chain().focus().insertContent(`<p>${suggestion}</p>`).run();
+          }}
+        />
       </div>
 
       {/* Editor Content */}

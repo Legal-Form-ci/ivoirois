@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_media: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          media_types: string[] | null
+          media_urls: string[] | null
+          section_key: string
+          section_name: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          section_key: string
+          section_name: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          section_key?: string
+          section_name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       call_signals: {
         Row: {
           callee_id: string
@@ -1467,6 +1503,36 @@ export type Database = {
           },
         ]
       }
+      translations: {
+        Row: {
+          context: string | null
+          created_at: string | null
+          id: string
+          key: string
+          language_code: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string | null
+          id?: string
+          key: string
+          language_code: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string | null
+          id?: string
+          key?: string
+          language_code?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       typing_indicators: {
         Row: {
           conversation_id: string | null
@@ -1608,12 +1674,76 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_friends_with_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          avatar_url: string
+          friend_id: string
+          full_name: string
+          is_online: boolean
+          last_seen: string
+          username: string
+        }[]
+      }
+      get_personalized_feed: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: {
+          author_avatar: string
+          author_id: string
+          author_name: string
+          comments_count: number
+          content: string
+          created_at: string
+          hook: string
+          likes_count: number
+          media_urls: string[]
+          post_id: string
+          relevance_score: number
+          title: string
+        }[]
+      }
+      get_platform_stats: {
+        Args: never
+        Returns: {
+          active_users_today: number
+          posts_today: number
+          total_companies: number
+          total_jobs: number
+          total_posts: number
+          total_users: number
+        }[]
+      }
+      get_translation: {
+        Args: { p_key: string; p_lang?: string }
+        Returns: string
+      }
+      get_unread_count: { Args: { p_user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      record_interaction: {
+        Args: {
+          p_content_id: string
+          p_content_type: string
+          p_interaction_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      search_content: {
+        Args: { p_query: string; p_type?: string }
+        Returns: {
+          created_at: string
+          description: string
+          image_url: string
+          result_id: string
+          result_type: string
+          title: string
+        }[]
       }
     }
     Enums: {

@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, BellOff, Smartphone } from "lucide-react";
+import { Bell, BellOff, Smartphone, Calendar, MessageSquare, Heart, UserPlus, Video } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { toast } from "sonner";
 
 const NotificationSettings = () => {
   const {
@@ -16,16 +17,22 @@ const NotificationSettings = () => {
   } = usePushNotifications();
 
   const handleToggle = async () => {
-    if (isSubscribed) {
-      await unsubscribe();
-    } else {
-      await subscribe();
+    try {
+      if (isSubscribed) {
+        await unsubscribe();
+        toast.success("Notifications désactivées");
+      } else {
+        await subscribe();
+        toast.success("Notifications activées");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la configuration des notifications");
     }
   };
 
   const testNotification = () => {
-    showNotification("Test de notification", {
-      body: "Les notifications fonctionnent correctement ! 🎉",
+    showNotification("Test Ivoi'Rois 👑", {
+      body: "Vos notifications fonctionnent correctement !",
       tag: "test-notification",
     });
   };
@@ -76,6 +83,34 @@ const NotificationSettings = () => {
             disabled={permission === "denied"}
           />
         </div>
+
+        {isSubscribed && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium">Types de notifications:</p>
+            <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                <span>Nouveaux messages</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span>Messages et publications programmés</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-primary" />
+                <span>Commentaires et réactions</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-primary" />
+                <span>Demandes d'amis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Video className="h-4 w-4 text-primary" />
+                <span>Appels entrants</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isSubscribed && (
           <Button variant="outline" onClick={testNotification} className="w-full">
