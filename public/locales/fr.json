@@ -224,11 +224,17 @@
   "settings": {
     "title": "Paramètres",
     "account": "Compte",
+    "security": "Sécurité",
     "privacy": "Confidentialité",
     "notifications": "Notifications",
     "language": "Langue",
+    "appearance": "Apparence",
+    "languageDescription": "Choisissez la langue de l'interface",
+    "selectLanguage": "Sélectionner une langue",
+    "languageChanged": "Langue changée avec succès",
     "theme": "Thème",
-    "dark": "Sombre",
+    "dark": "Mode sombre",
+    "darkDescription": "Utiliser le thème sombre",
     "light": "Clair",
     "system": "Système",
     "deleteAccount": "Supprimer le compte"
