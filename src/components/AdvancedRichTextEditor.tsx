@@ -9,7 +9,6 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
-import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ import {
   List, ListOrdered, Table as TableIcon, Undo, Redo,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   Heading1, Heading2, Heading3, Heading4, Heading5, Heading6,
-  Palette, Image as ImageIcon, Link as LinkIcon, Highlighter,
+  Palette, Link as LinkIcon, Highlighter,
   Plus, Minus, RowsIcon, ColumnsIcon, Trash2
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
@@ -46,7 +45,6 @@ const AdvancedRichTextEditor = ({
   minHeight = '150px' 
 }: AdvancedRichTextEditorProps) => {
   const [linkUrl, setLinkUrl] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -85,10 +83,6 @@ const AdvancedRichTextEditor = ({
       }),
       TextStyle,
       Color,
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -109,13 +103,6 @@ const AdvancedRichTextEditor = ({
       },
     },
   });
-
-  const addImage = useCallback(() => {
-    if (imageUrl && editor) {
-      editor.chain().focus().setImage({ src: imageUrl }).run();
-      setImageUrl('');
-    }
-  }, [editor, imageUrl]);
 
   const setLink = useCallback(() => {
     if (linkUrl && editor) {
@@ -477,27 +464,6 @@ const AdvancedRichTextEditor = ({
           </PopoverContent>
         </Popover>
 
-        {/* Image */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <ImageIcon className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-2" align="start">
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="URL de l'image..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-              <Button type="button" size="sm" onClick={addImage} className="w-full">
-                Insérer image
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
 
         <div className="w-px h-6 bg-border mx-1 self-center" />
 
