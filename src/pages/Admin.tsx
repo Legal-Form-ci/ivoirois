@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
+import AdminMediaManager from "@/components/AdminMediaManager";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, Building2, AlertCircle, Award, FileText, TrendingUp, 
   Search, Shield, CheckCircle2, XCircle, Eye, Ban, MessageSquare,
-  Activity, BarChart3, Settings, Flag, Bell, UserPlus
+  Activity, BarChart3, Settings, Flag, Bell, UserPlus, Image
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Stats {
   totalUsers: number;
@@ -56,6 +58,7 @@ interface Company {
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -198,7 +201,7 @@ const Admin = () => {
       <div className="min-h-screen bg-muted/30">
         <Header />
         <div className="container py-6 text-center">
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -217,9 +220,9 @@ const Admin = () => {
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <Shield className="h-8 w-8 text-primary" />
-                Espace Super Admin
+                {t('admin.title')}
               </h1>
-              <p className="text-muted-foreground">Gestion complète de la plateforme Ivoi'Rois</p>
+              <p className="text-muted-foreground">{t('admin.subtitle')}</p>
             </div>
             <Badge variant="destructive" className="text-lg px-4 py-2">
               Super Admin
@@ -230,7 +233,7 @@ const Admin = () => {
           <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('admin.users')}</CardTitle>
                 <Users className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
@@ -240,7 +243,7 @@ const Admin = () => {
 
             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Entreprises</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('admin.companies')}</CardTitle>
                 <Building2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
@@ -250,7 +253,7 @@ const Admin = () => {
 
             <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Publications</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('admin.posts')}</CardTitle>
                 <FileText className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
@@ -260,7 +263,7 @@ const Admin = () => {
 
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Vérifications</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('admin.verifications')}</CardTitle>
                 <AlertCircle className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
@@ -270,7 +273,7 @@ const Admin = () => {
 
             <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Signalements</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('admin.reports')}</CardTitle>
                 <Flag className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
@@ -283,7 +286,7 @@ const Admin = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un utilisateur, une entreprise..."
+              placeholder={t('admin.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -292,35 +295,39 @@ const Admin = () => {
 
           {/* Management Tabs */}
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-6 w-full">
               <TabsTrigger value="users" className="gap-2">
                 <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Utilisateurs</span>
+                <span className="hidden sm:inline">{t('admin.users')}</span>
               </TabsTrigger>
               <TabsTrigger value="companies" className="gap-2">
                 <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Entreprises</span>
+                <span className="hidden sm:inline">{t('admin.companies')}</span>
               </TabsTrigger>
               <TabsTrigger value="verifications" className="gap-2">
                 <CheckCircle2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Vérifications</span>
+                <span className="hidden sm:inline">{t('admin.verifications')}</span>
               </TabsTrigger>
               <TabsTrigger value="reports" className="gap-2">
                 <Flag className="h-4 w-4" />
-                <span className="hidden sm:inline">Signalements</span>
+                <span className="hidden sm:inline">{t('admin.reports')}</span>
+              </TabsTrigger>
+              <TabsTrigger value="media" className="gap-2">
+                <Image className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('admin.media')}</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Analytics</span>
+                <span className="hidden sm:inline">{t('admin.analytics')}</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des utilisateurs</CardTitle>
+                  <CardTitle>{t('admin.userManagement')}</CardTitle>
                   <CardDescription>
-                    {stats.totalUsers} utilisateurs inscrits sur la plateforme
+                    {stats.totalUsers} {t('admin.usersRegistered')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -371,9 +378,9 @@ const Admin = () => {
             <TabsContent value="companies">
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des entreprises</CardTitle>
+                  <CardTitle>{t('admin.companyManagement')}</CardTitle>
                   <CardDescription>
-                    {stats.totalCompanies} entreprises enregistrées
+                    {stats.totalCompanies} {t('admin.companiesRegistered')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -404,7 +411,7 @@ const Admin = () => {
                           <div className="flex items-center gap-2">
                             {company.commerce_registry && !company.verified && (
                               <Button size="sm" onClick={() => verifyCompany(company.id)}>
-                                Vérifier
+                                {t('admin.verify')}
                               </Button>
                             )}
                             <Button size="sm" variant="ghost">
@@ -422,9 +429,9 @@ const Admin = () => {
             <TabsContent value="verifications">
               <Card>
                 <CardHeader>
-                  <CardTitle>Demandes de vérification</CardTitle>
+                  <CardTitle>{t('admin.verificationRequests')}</CardTitle>
                   <CardDescription>
-                    {stats.pendingVerifications} demandes en attente
+                    {stats.pendingVerifications} {t('admin.pendingRequests')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -458,18 +465,18 @@ const Admin = () => {
                                 className="text-destructive"
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
-                                Refuser
+                                {t('admin.reject')}
                               </Button>
                               <Button size="sm" onClick={() => verifyCompany(company.id)}>
                                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Approuver
+                                {t('admin.approve')}
                               </Button>
                             </div>
                           </div>
                         ))}
                       {companies.filter((c) => c.commerce_registry && !c.verified).length === 0 && (
                         <p className="text-center text-muted-foreground py-8">
-                          Aucune demande en attente
+                          {t('admin.noPendingRequests')}
                         </p>
                       )}
                     </div>
@@ -481,18 +488,22 @@ const Admin = () => {
             <TabsContent value="reports">
               <Card>
                 <CardHeader>
-                  <CardTitle>Signalements</CardTitle>
+                  <CardTitle>{t('admin.reports')}</CardTitle>
                   <CardDescription>
-                    Contenus signalés par les utilisateurs
+                    {t('admin.reportedContent')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-12 text-muted-foreground">
                     <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucun signalement en attente</p>
+                    <p>{t('admin.noReports')}</p>
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="media">
+              <AdminMediaManager />
             </TabsContent>
 
             <TabsContent value="analytics">
@@ -501,25 +512,25 @@ const Admin = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="h-5 w-5" />
-                      Activité récente
+                      {t('admin.recentActivity')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between">
-                        <span>Groupes créés</span>
+                        <span>{t('admin.groupsCreated')}</span>
                         <Badge>{stats.totalGroups}</Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span>Pages créées</span>
+                        <span>{t('admin.pagesCreated')}</span>
                         <Badge>{stats.totalPages}</Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span>Offres d'emploi</span>
+                        <span>{t('admin.jobOffers')}</span>
                         <Badge>{stats.totalJobPosts}</Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span>Certifications actives</span>
+                        <span>{t('admin.activeCertifications')}</span>
                         <Badge variant="secondary">{stats.activeCertifications}</Badge>
                       </div>
                     </div>
@@ -530,7 +541,7 @@ const Admin = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
-                      Croissance
+                      {t('admin.growth')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -538,19 +549,19 @@ const Admin = () => {
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-2">
                           <UserPlus className="h-4 w-4 text-green-500" />
-                          Nouveaux utilisateurs
+                          {t('admin.newUsers')}
                         </span>
                         <Badge variant="outline" className="text-green-500">
-                          +{Math.floor(stats.totalUsers * 0.1)} ce mois
+                          +{Math.floor(stats.totalUsers * 0.1)} {t('admin.thisMonth')}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-blue-500" />
-                          Nouvelles entreprises
+                          {t('admin.newCompanies')}
                         </span>
                         <Badge variant="outline" className="text-blue-500">
-                          +{Math.floor(stats.totalCompanies * 0.15)} ce mois
+                          +{Math.floor(stats.totalCompanies * 0.15)} {t('admin.thisMonth')}
                         </Badge>
                       </div>
                     </div>
