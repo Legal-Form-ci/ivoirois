@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useTheme } from "@/hooks/useTheme";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
 import NotificationSettings from "@/components/NotificationSettings";
@@ -14,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Lock, Bell, Shield, Eye, EyeOff, User, Palette, Globe } from "lucide-react";
+import { ArrowLeft, Lock, Bell, Shield, Eye, EyeOff, User, Palette, Globe, Sun, Moon, Monitor } from "lucide-react";
 
 const LANGUAGES = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
@@ -29,6 +30,7 @@ const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useTranslation();
+  const { theme, setTheme, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [showPasswords, setShowPasswords] = useState({
     current: false,
@@ -44,7 +46,6 @@ const Settings = () => {
     emailNotifications: true,
     pushNotifications: true,
     messageSound: true,
-    darkMode: false,
     showOnlineStatus: true,
     showReadReceipts: true,
   });
@@ -369,21 +370,42 @@ const Settings = () => {
                     <Palette className="h-5 w-5" />
                     {t('settings.appearance') || 'Apparence'}
                   </CardTitle>
+                  <CardDescription>
+                    {t('settings.appearanceDescription') || 'Personnalisez l\'apparence de l\'application'}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>{t('settings.dark') || 'Mode sombre'}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.darkDescription') || 'Utiliser le thème sombre'}
-                      </p>
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <Label className="text-base">{t('settings.theme') || 'Thème'}</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <Button
+                        variant={theme === 'light' ? 'default' : 'outline'}
+                        className="flex flex-col items-center gap-2 h-auto py-4"
+                        onClick={() => setTheme('light')}
+                      >
+                        <Sun className="h-6 w-6" />
+                        <span className="text-sm">{t('settings.light') || 'Clair'}</span>
+                      </Button>
+                      <Button
+                        variant={theme === 'dark' ? 'default' : 'outline'}
+                        className="flex flex-col items-center gap-2 h-auto py-4"
+                        onClick={() => setTheme('dark')}
+                      >
+                        <Moon className="h-6 w-6" />
+                        <span className="text-sm">{t('settings.dark') || 'Sombre'}</span>
+                      </Button>
+                      <Button
+                        variant={theme === 'system' ? 'default' : 'outline'}
+                        className="flex flex-col items-center gap-2 h-auto py-4"
+                        onClick={() => setTheme('system')}
+                      >
+                        <Monitor className="h-6 w-6" />
+                        <span className="text-sm">{t('settings.system') || 'Système'}</span>
+                      </Button>
                     </div>
-                    <Switch
-                      checked={preferences.darkMode}
-                      onCheckedChange={(checked) => 
-                        setPreferences({ ...preferences, darkMode: checked })
-                      }
-                    />
+                    <p className="text-sm text-muted-foreground">
+                      {t('settings.themeDescription') || 'Le mode système utilise automatiquement le thème de votre appareil'}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
