@@ -219,9 +219,9 @@ const EnhancedPostCard = ({
         {renderMedia()}
 
         {/* Links - Blue and underlined */}
-        {links.length > 0 && (
+        {(links || []).length > 0 && (
           <div className="space-y-1">
-            {links.map((link, index) => (
+            {(links || []).map((link, index) => (
               <a
                 key={index}
                 href={link}
@@ -237,9 +237,9 @@ const EnhancedPostCard = ({
         )}
 
         {/* Hashtags */}
-        {hashtags.length > 0 && (
+        {(hashtags || []).length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {hashtags.map((tag, index) => (
+            {(hashtags || []).map((tag, index) => (
               <Badge 
                 key={index} 
                 variant="secondary" 
