@@ -105,7 +105,10 @@ const EnhancedPostCard = ({
   };
 
   const renderMedia = () => {
-    if (mediaUrls.length === 0 && imageUrl) {
+    const urls = mediaUrls || [];
+    const types = mediaTypes || [];
+    
+    if (urls.length === 0 && imageUrl) {
       return (
         <img
           src={imageUrl}
@@ -115,12 +118,12 @@ const EnhancedPostCard = ({
       );
     }
 
-    if (mediaUrls.length === 0) return null;
+    if (urls.length === 0) return null;
 
     return (
-      <div className={`grid gap-2 ${mediaUrls.length === 1 ? 'grid-cols-1' : mediaUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
-        {mediaUrls.map((url, index) => {
-          const type = mediaTypes[index] || '';
+      <div className={`grid gap-2 ${urls.length === 1 ? 'grid-cols-1' : urls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+        {urls.map((url, index) => {
+          const type = types[index] || '';
           
           if (type.startsWith('image/')) {
             return (
