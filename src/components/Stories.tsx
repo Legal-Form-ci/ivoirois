@@ -76,7 +76,22 @@ const Stories = () => {
 
   const uploadStory = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'audio') => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    
+    console.log('[Stories] uploadStory called');
+    console.log('[Stories] File:', file);
+    console.log('[Stories] User:', user);
+    console.log('[Stories] Type:', type);
+    
+    if (!file) {
+      console.error('[Stories] No file selected');
+      return;
+    }
+    
+    if (!user) {
+      console.error('[Stories] No user found - cannot upload story');
+      toast.error('Vous devez être connecté pour publier une story');
+      return;
+    }
 
     setUploading(true);
     try {
@@ -88,29 +103,41 @@ const Stories = () => {
       else if (file.type.startsWith("audio")) mediaType = "audio";
       else if (file.type.startsWith("image")) mediaType = "image";
 
+      console.log('[Stories] Uploading file:', fileName, 'Type:', mediaType);
+
       const { error: uploadError } = await supabase.storage
         .from("stories")
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('[Stories] Storage upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from("stories")
         .getPublicUrl(fileName);
 
-      const { error: insertError } = await supabase.from("stories" as any).insert({
+      console.log('[Stories] File uploaded, public URL:', publicUrl);
+      console.log('[Stories] Inserting story into database...');
+
+      const { error: insertError } = await supabase.from("stories").insert({
         user_id: user.id,
         media_url: publicUrl,
         media_type: mediaType,
       });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('[Stories] Database insert error:', insertError);
+        throw insertError;
+      }
 
+      console.log('[Stories] Story published successfully!');
       toast.success("Story publiée !");
       fetchStories();
     } catch (error: any) {
-      console.error("Error uploading story:", error);
-      toast.error("Erreur lors de la publication: " + error.message);
+      console.error('[Stories] Error:', error);
+      toast.error(`Erreur lors de la publication: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setUploading(false);
     }

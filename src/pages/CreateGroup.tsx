@@ -25,12 +25,22 @@ const CreateGroup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
+    console.log('[CreateGroup] handleSubmit called');
+    console.log('[CreateGroup] User:', user);
+    console.log('[CreateGroup] FormData:', formData);
+    
+    if (!user) {
+      console.error('[CreateGroup] No user found - cannot create group');
+      toast.error('Vous devez être connecté pour créer un groupe');
+      return;
+    }
 
     setLoading(true);
     try {
+      console.log('[CreateGroup] Inserting group...');
       const { data: group, error: groupError } = await supabase
-        .from('groups' as any)
+        .from('groups')
         .insert({
           name: formData.name,
           description: formData.description,
@@ -40,21 +50,33 @@ const CreateGroup = () => {
         .select()
         .single();
 
-      if (groupError) throw groupError;
+      console.log('[CreateGroup] Group insert result:', { group, groupError });
+
+      if (groupError) {
+        console.error('[CreateGroup] Group creation error:', groupError);
+        throw groupError;
+      }
 
       // Add creator as admin
-      await supabase
-        .from('group_members' as any)
+      console.log('[CreateGroup] Adding creator as admin...');
+      const { error: memberError } = await supabase
+        .from('group_members')
         .insert({
-          group_id: (group as any).id,
+          group_id: group.id,
           user_id: user.id,
           role: 'admin',
         });
 
+      if (memberError) {
+        console.error('[CreateGroup] Member insert error:', memberError);
+      }
+
+      console.log('[CreateGroup] Success! Navigating to group...');
       toast.success('Groupe créé avec succès !');
-      navigate(`/groups/${(group as any).id}`);
+      navigate(`/groups/${group.id}`);
     } catch (error: any) {
-      toast.error('Erreur lors de la création du groupe');
+      console.error('[CreateGroup] Error:', error);
+      toast.error(`Erreur lors de la création du groupe: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }

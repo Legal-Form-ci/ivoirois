@@ -227,20 +227,49 @@ const Messages = () => {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !conversationId) return;
+    
+    console.log('[Messages] sendMessage called');
+    console.log('[Messages] newMessage:', newMessage);
+    console.log('[Messages] conversationId:', conversationId);
+    console.log('[Messages] user:', user);
+    
+    if (!newMessage.trim()) {
+      console.log('[Messages] Empty message, skipping');
+      return;
+    }
+    
+    if (!conversationId) {
+      console.error('[Messages] No conversation ID');
+      toast.error('Aucune conversation sélectionnée');
+      return;
+    }
+    
+    if (!user) {
+      console.error('[Messages] No user found');
+      toast.error('Vous devez être connecté pour envoyer un message');
+      return;
+    }
 
     try {
-      const { error } = await supabase.from("messages").insert({
+      console.log('[Messages] Inserting message...');
+      const { data, error } = await supabase.from("messages").insert({
         conversation_id: conversationId,
-        sender_id: user!.id,
+        sender_id: user.id,
         content: newMessage.trim(),
-      });
+      }).select();
 
-      if (error) throw error;
+      console.log('[Messages] Insert result:', { data, error });
+
+      if (error) {
+        console.error('[Messages] Message insert error:', error);
+        throw error;
+      }
+      
+      console.log('[Messages] Message sent successfully!');
       setNewMessage("");
     } catch (error: any) {
-      console.error("Send message error:", error);
-      toast.error("Erreur lors de l'envoi du message");
+      console.error('[Messages] Error:', error);
+      toast.error(`Erreur lors de l'envoi du message: ${error.message || 'Erreur inconnue'}`);
     }
   };
 

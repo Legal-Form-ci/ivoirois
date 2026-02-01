@@ -34,15 +34,26 @@ const CreateCompany = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
+    console.log('[CreateCompany] handleSubmit called');
+    console.log('[CreateCompany] User:', user);
+    console.log('[CreateCompany] FormData:', formData);
+    
+    if (!user) {
+      console.error('[CreateCompany] No user found - cannot create company');
+      toast.error('Vous devez être connecté pour créer une entreprise');
+      return;
+    }
 
     if (!formData.name.trim()) {
+      console.error('[CreateCompany] Company name is required');
       toast.error("Le nom de l'entreprise est requis");
       return;
     }
 
     setLoading(true);
     try {
+      console.log('[CreateCompany] Inserting company...');
       const { data, error } = await supabase
         .from("companies")
         .insert({
@@ -62,13 +73,19 @@ const CreateCompany = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      console.log('[CreateCompany] Company insert result:', { data, error });
 
+      if (error) {
+        console.error('[CreateCompany] Company creation error:', error);
+        throw error;
+      }
+
+      console.log('[CreateCompany] Success! Navigating to company...');
       toast.success("Entreprise créée avec succès !");
       navigate(`/companies/${data.id}`);
     } catch (error: any) {
-      toast.error("Erreur lors de la création");
-      console.error(error);
+      console.error('[CreateCompany] Error:', error);
+      toast.error(`Erreur lors de la création: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
