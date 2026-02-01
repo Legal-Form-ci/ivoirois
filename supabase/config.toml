@@ -1,1 +1,13 @@
 project_id = "uvrarcaespimpsejmgqy"
+
+[functions.ai-assistant]
+verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false
+
+[functions.scheduled-notifications]
+verify_jwt = false
+
+[functions.transcribe-voice]
+verify_jwt = false

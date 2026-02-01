@@ -34,6 +34,8 @@ import PageView from "./pages/PageView";
 import Search from "./pages/Search";
 import Reels from "./pages/Reels";
 import CreateReel from "./pages/CreateReel";
+import Events from "./pages/Events";
+import Marketplace from "./pages/Marketplace";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 
@@ -78,6 +80,8 @@ const App = () => (
             <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/reels/create" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+            <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
