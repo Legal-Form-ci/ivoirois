@@ -26,12 +26,22 @@ const CreatePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
+    console.log('[CreatePage] handleSubmit called');
+    console.log('[CreatePage] User:', user);
+    console.log('[CreatePage] FormData:', formData);
+    
+    if (!user) {
+      console.error('[CreatePage] No user found - cannot create page');
+      toast.error('Vous devez être connecté pour créer une page');
+      return;
+    }
 
     setLoading(true);
     try {
+      console.log('[CreatePage] Inserting page...');
       const { data: page, error: pageError } = await supabase
-        .from('pages' as any)
+        .from('pages')
         .insert({
           name: formData.name,
           description: formData.description,
@@ -42,21 +52,32 @@ const CreatePage = () => {
         .select()
         .single();
 
-      if (pageError) throw pageError;
+      console.log('[CreatePage] Page insert result:', { page, pageError });
+
+      if (pageError) {
+        console.error('[CreatePage] Page creation error:', pageError);
+        throw pageError;
+      }
 
       // Auto-follow the page
-      await supabase
-        .from('page_followers' as any)
+      console.log('[CreatePage] Auto-following page...');
+      const { error: followError } = await supabase
+        .from('page_followers')
         .insert({
-          page_id: (page as any).id,
+          page_id: page.id,
           user_id: user.id,
         });
 
+      if (followError) {
+        console.error('[CreatePage] Follow error:', followError);
+      }
+
+      console.log('[CreatePage] Success! Navigating to pages...');
       toast.success('Page créée avec succès !');
       navigate('/pages');
     } catch (error: any) {
-      toast.error('Erreur lors de la création de la page');
-      console.error(error);
+      console.error('[CreatePage] Error:', error);
+      toast.error(`Erreur lors de la création de la page: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
