@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
-import EnhancedCreatePost from "@/components/EnhancedCreatePost";
+import UltraCreatePost from "@/components/UltraCreatePost";
 import EnhancedPostCard from "@/components/EnhancedPostCard";
 import Stories from "@/components/Stories";
 import SearchUsers from "@/components/SearchUsers";
@@ -131,7 +131,7 @@ const Feed = () => {
           <SearchUsers />
           <SuggestedUsers />
           <Stories />
-          <EnhancedCreatePost onPostCreated={fetchPosts} />
+          <UltraCreatePost onPostCreated={fetchPosts} />
 
           <div className="space-y-4">
             {loading ? (
