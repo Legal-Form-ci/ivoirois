@@ -58,19 +58,28 @@ const Stories = () => {
   }, [user]);
 
   const fetchStories = async () => {
-    const { data } = await supabase
-      .from("stories" as any)
-      .select("*, profiles(full_name, avatar_url)")
-      .gt("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("stories")
+        .select("*, profiles(full_name, avatar_url)")
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false });
 
-    if (data) {
-      const grouped = data.reduce((acc: Story[], story: any) => {
-        const existing = acc.find((s) => s.user_id === story.user_id);
-        if (!existing) acc.push(story);
-        return acc;
-      }, []);
-      setStories(grouped as Story[]);
+      if (error) {
+        console.error('[Stories] Fetch error:', error);
+        return;
+      }
+
+      if (data) {
+        const grouped = data.reduce((acc: Story[], story: any) => {
+          const existing = acc.find((s) => s.user_id === story.user_id);
+          if (!existing) acc.push(story);
+          return acc;
+        }, []);
+        setStories(grouped as Story[]);
+      }
+    } catch (err) {
+      console.error('[Stories] Error fetching stories:', err);
     }
   };
 
@@ -121,16 +130,19 @@ const Stories = () => {
       console.log('[Stories] File uploaded, public URL:', publicUrl);
       console.log('[Stories] Inserting story into database...');
 
-      const { error: insertError } = await supabase.from("stories").insert({
+      const { data: insertData, error: insertError } = await supabase.from("stories").insert({
         user_id: user.id,
         media_url: publicUrl,
         media_type: mediaType,
-      });
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h expiry
+      }).select();
 
       if (insertError) {
         console.error('[Stories] Database insert error:', insertError);
         throw insertError;
       }
+      
+      console.log('[Stories] Story insert result:', insertData);
 
       console.log('[Stories] Story published successfully!');
       toast.success("Story publiée !");
@@ -147,10 +159,14 @@ const Stories = () => {
     setSelectedStory(story);
     
     if (user) {
-      await supabase.from("story_views" as any).upsert({
-        story_id: story.id,
-        viewer_id: user.id,
-      }, { onConflict: 'story_id,viewer_id' });
+      try {
+        await supabase.from("story_views").upsert({
+          story_id: story.id,
+          viewer_id: user.id,
+        }, { onConflict: 'story_id,viewer_id' });
+      } catch (err) {
+        console.error('[Stories] Error recording view:', err);
+      }
     }
   };
 

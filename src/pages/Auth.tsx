@@ -88,6 +88,16 @@ const Auth = () => {
               region: region,
             })
             .eq("id", data.user.id);
+          
+          // Auto-assign super_admin role for admin@ivoirois.com
+          if (email.toLowerCase() === 'admin@ivoirois.com') {
+            await supabase
+              .from("user_roles")
+              .upsert({
+                user_id: data.user.id,
+                role: 'super_admin'
+              }, { onConflict: 'user_id,role' });
+          }
         }
         
         toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
