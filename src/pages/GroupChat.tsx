@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import { messageSchema } from "@/lib/validation";
+import { handleError } from "@/lib/errorHandler";
 
 interface Message {
   id: string;
@@ -106,6 +108,13 @@ const GroupChat = () => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
+    // Validate message
+    const validation = messageSchema.safeParse({ content: newMessage.trim() });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0]?.message);
+      return;
+    }
+
     try {
       await supabase.from("group_messages" as any).insert({
         group_id: groupId,
@@ -116,7 +125,7 @@ const GroupChat = () => {
       setNewMessage("");
       handleTyping(false);
     } catch (error) {
-      toast.error("Erreur lors de l'envoi du message");
+      toast.error(handleError(error));
     }
   };
 

@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { postSchema } from "@/lib/validation";
+import { handleError } from "@/lib/errorHandler";
 import {
   Popover,
   PopoverContent,
@@ -62,6 +64,15 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
   const handleSubmit = async () => {
     if ((!content.trim() && !selectedFile) || !user) return;
 
+    // Validate content if present
+    if (content.trim()) {
+      const validation = postSchema.safeParse({ content: content.trim() });
+      if (!validation.success) {
+        toast.error(validation.error.errors[0]?.message || "Contenu invalide");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       let imageUrl = null;
@@ -96,8 +107,8 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
       setContent("");
       removeFile();
       onPostCreated?.();
-    } catch (error: any) {
-      toast.error("Erreur lors de la publication");
+    } catch (error: unknown) {
+      toast.error(handleError(error));
     } finally {
       setLoading(false);
     }

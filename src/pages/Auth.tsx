@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import appLogo from "@/assets/app-logo.png";
 import { REGIONS_COTE_IVOIRE } from "@/constants/regions";
 import { Eye, EyeOff } from "lucide-react";
+import { signupSchema, authSchema } from "@/lib/validation";
+import { handleError } from "@/lib/errorHandler";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +34,13 @@ const Auth = () => {
 
     try {
       if (isForgotPassword) {
+        const emailValidation = authSchema.shape.email.safeParse(email);
+        if (!emailValidation.success) {
+          toast.error(emailValidation.error.errors[0]?.message);
+          setLoading(false);
+          return;
+        }
+        
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/feed`,
         });
@@ -39,6 +48,14 @@ const Auth = () => {
         toast.success("Email de réinitialisation envoyé");
         setIsForgotPassword(false);
       } else if (isLogin) {
+        // Validate login inputs
+        const validation = authSchema.safeParse({ email, password });
+        if (!validation.success) {
+          toast.error(validation.error.errors[0]?.message);
+          setLoading(false);
+          return;
+        }
+        
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -48,18 +65,18 @@ const Auth = () => {
         toast.success("Connexion réussie !");
         navigate(redirectTo);
       } else {
-        // Validation du numéro de téléphone (10 chiffres)
-        const phoneRegex = /^[0-9]{10}$/;
-        if (!phoneRegex.test(phoneNumber)) {
-          toast.error("Le numéro de téléphone doit contenir 10 chiffres");
-          setLoading(false);
-          return;
-        }
-
-        // Validation du username (alphanumérique et underscore)
-        const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-        if (!usernameRegex.test(username)) {
-          toast.error("Le nom d'utilisateur doit contenir entre 3 et 30 caractères (lettres, chiffres et _)");
+        // Validate all signup inputs with Zod
+        const validation = signupSchema.safeParse({
+          email,
+          password,
+          username,
+          full_name: fullName,
+          phone_number: phoneNumber,
+          region,
+        });
+        
+        if (!validation.success) {
+          toast.error(validation.error.errors[0]?.message);
           setLoading(false);
           return;
         }
@@ -104,8 +121,8 @@ const Auth = () => {
         toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
         navigate(redirectTo);
       }
-    } catch (error: any) {
-      toast.error(error.message || "Une erreur s'est produite");
+    } catch (error: unknown) {
+      toast.error(handleError(error));
     } finally {
       setLoading(false);
     }
