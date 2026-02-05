@@ -325,11 +325,26 @@ const Messages = () => {
       return;
     }
 
-    // Add participants
-    await supabase.from("conversation_participants").insert([
-      { conversation_id: newConvo.id, user_id: user!.id },
-      { conversation_id: newConvo.id, user_id: targetUserId },
-    ]);
+    // Add participants (sequential to satisfy stricter RLS)
+    const { error: p1Error } = await supabase.from("conversation_participants").insert({
+      conversation_id: newConvo.id,
+      user_id: user!.id,
+    });
+    if (p1Error) {
+      console.error("[Messages] Failed to add self participant:", p1Error);
+      toast.error("Erreur lors de la création de la conversation");
+      return;
+    }
+
+    const { error: p2Error } = await supabase.from("conversation_participants").insert({
+      conversation_id: newConvo.id,
+      user_id: targetUserId,
+    });
+    if (p2Error) {
+      console.error("[Messages] Failed to add other participant:", p2Error);
+      toast.error("Erreur lors de la création de la conversation");
+      return;
+    }
 
     setShowNewConvo(false);
     fetchConversations();

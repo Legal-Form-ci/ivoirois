@@ -2332,6 +2332,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_message: {
+        Args: { _message_id: string; _user_id: string }
+        Returns: boolean
+      }
       get_friends_with_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -2381,6 +2385,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
       record_interaction: {
