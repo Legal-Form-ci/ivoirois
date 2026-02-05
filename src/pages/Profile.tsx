@@ -235,10 +235,18 @@ const Profile = () => {
 
       if (convError) throw convError;
 
-      await supabase.from("conversation_participants").insert([
-        { conversation_id: newConv.id, user_id: user!.id },
-        { conversation_id: newConv.id, user_id: id },
-      ]);
+      // Add participants (sequential to satisfy stricter RLS)
+      const { error: p1Error } = await supabase.from("conversation_participants").insert({
+        conversation_id: newConv.id,
+        user_id: user!.id,
+      });
+      if (p1Error) throw p1Error;
+
+      const { error: p2Error } = await supabase.from("conversation_participants").insert({
+        conversation_id: newConv.id,
+        user_id: id,
+      });
+      if (p2Error) throw p2Error;
 
       navigate(`/messages/${newConv.id}`);
     } catch (error) {

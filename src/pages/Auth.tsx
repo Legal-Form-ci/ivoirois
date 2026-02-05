@@ -24,6 +24,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const redirectTo = searchParams.get("redirect") || "/feed";
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +46,7 @@ const Auth = () => {
 
         if (error) throw error;
         toast.success("Connexion réussie !");
-        navigate("/feed");
+        navigate(redirectTo);
       } else {
         // Validation du numéro de téléphone (10 chiffres)
         const phoneRegex = /^[0-9]{10}$/;
@@ -101,7 +102,7 @@ const Auth = () => {
         }
         
         toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
-        navigate("/feed");
+        navigate(redirectTo);
       }
     } catch (error: any) {
       toast.error(error.message || "Une erreur s'est produite");
