@@ -1,25 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const [gracePeriod, setGracePeriod] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Avoid redirect flicker right after sign-in while auth state is still propagating.
   useEffect(() => {
-    if (loading) return;
-    if (user) {
-      setGracePeriod(false);
+    // If loading is done and we have a user, we're ready immediately
+    if (!loading && user) {
+      setIsReady(true);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       return;
     }
 
-    const t = window.setTimeout(() => setGracePeriod(false), 1200);
-    return () => window.clearTimeout(t);
+    // If loading is done and no user, wait a bit more (session might be propagating)
+    if (!loading && !user) {
+      // Give extra time for session to propagate after page load
+      timeoutRef.current = setTimeout(() => {
+        setIsReady(true);
+      }, 800);
+      
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }
   }, [loading, user]);
 
-  if (loading || (!user && gracePeriod)) {
+  // Still loading or waiting for grace period
+  if (loading || !isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -30,8 +46,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Ready and no user = redirect to auth
   if (!user) {
-    const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+    // Clean the redirect URL - remove internal lovable tokens
+    const cleanPath = location.pathname;
+    const cleanSearch = location.search.replace(/[?&]__lovable_token=[^&]+/, '').replace(/^\?$/, '');
+    const redirect = encodeURIComponent(`${cleanPath}${cleanSearch}`);
     return <Navigate to={`/auth?redirect=${redirect}`} replace />;
   }
 

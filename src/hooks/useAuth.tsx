@@ -65,25 +65,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener
+    let isMounted = true;
+    let initialSessionChecked = false;
+
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!isMounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           // Defer profile fetch to avoid Supabase deadlock
-          setTimeout(() => fetchProfile(session.user.id), 0);
+          setTimeout(() => {
+            if (isMounted) fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
         
-        setLoading(false);
+        // Only set loading to false after initial session check
+        if (initialSessionChecked) {
+          setLoading(false);
+        }
       }
     );
 
-    // Check for existing session
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      
+      initialSessionChecked = true;
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -91,10 +104,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         fetchProfile(session.user.id);
       }
       
+      // Now we can safely set loading to false
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
