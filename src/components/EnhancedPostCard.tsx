@@ -37,10 +37,10 @@ const EnhancedPostCard = ({
   title,
   hook,
   content,
-  mediaUrls = [],
-  mediaTypes = [],
-  links = [],
-  hashtags = [],
+  mediaUrls,
+  mediaTypes,
+  links,
+  hashtags,
   imageUrl,
   createdAt,
   likesCount,
@@ -51,6 +51,12 @@ const EnhancedPostCard = ({
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [commentCount, setCommentCount] = useState(commentsCount);
+
+  // Ensure arrays are never null
+  const safeMediaUrls = mediaUrls ?? [];
+  const safeMediaTypes = mediaTypes ?? [];
+  const safeLinks = links ?? [];
+  const safeHashtags = hashtags ?? [];
 
   const getTimeAgo = (date: string) => {
     const now = new Date();
@@ -105,8 +111,8 @@ const EnhancedPostCard = ({
   };
 
   const renderMedia = () => {
-    const urls = mediaUrls || [];
-    const types = mediaTypes || [];
+    const urls = safeMediaUrls;
+    const types = safeMediaTypes;
     
     if (urls.length === 0 && imageUrl) {
       return (
@@ -219,9 +225,9 @@ const EnhancedPostCard = ({
         {renderMedia()}
 
         {/* Links - Blue and underlined */}
-        {links.length > 0 && (
+        {safeLinks.length > 0 && (
           <div className="space-y-1">
-            {links.map((link, index) => (
+            {safeLinks.map((link, index) => (
               <a
                 key={index}
                 href={link}
@@ -237,10 +243,10 @@ const EnhancedPostCard = ({
         )}
 
         {/* Hashtags */}
-        {hashtags.length > 0 && (
+        {safeHashtags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {hashtags.map((tag, index) => (
-              <Badge 
+            {safeHashtags.map((tag, index) => (
+              <Badge
                 key={index} 
                 variant="secondary" 
                 className="text-primary cursor-pointer hover:bg-primary/20"
