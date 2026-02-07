@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UltraAdvancedEditor from './UltraAdvancedEditor';
+import AIPostGenerator from './AIPostGenerator';
 
 interface UltraCreatePostProps {
   onPostCreated?: () => void;
@@ -186,6 +187,18 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
       </CardHeader>
       <CardContent className="pt-4">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* AI Generator */}
+          <div className="flex justify-end">
+            <AIPostGenerator 
+              onGenerated={(generatedContent, generatedHashtags, generatedTitle, generatedHook) => {
+                setContent(generatedContent);
+                setHashtags(generatedHashtags.map(h => `#${h}`).join(' '));
+                if (generatedTitle) setTitle(generatedTitle);
+                if (generatedHook) setHook(generatedHook);
+              }}
+            />
+          </div>
+          
           {/* Title */}
           <div className="space-y-1">
             <Label htmlFor="title" className="text-sm font-medium">Titre (optionnel)</Label>
