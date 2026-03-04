@@ -12,6 +12,7 @@ import TypingIndicator, { useSendTypingIndicator } from "@/components/TypingIndi
 import MessageReactions from "@/components/MessageReactions";
 import ScheduledMessaging from "@/components/ScheduledMessaging";
 import VoiceRecorder from "@/components/VoiceRecorder";
+import SmartReply from "@/components/SmartReply";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -564,6 +565,15 @@ const Messages = () => {
                 {conversationId && (
                   <TypingIndicator conversationId={conversationId} />
                 )}
+
+                {/* AI Smart Reply Suggestions */}
+                <SmartReply
+                  messages={messages.slice(-5).map(m => ({
+                    sender: m.sender_id === user?.id ? "me" : "other",
+                    content: m.content.replace(/<[^>]*>/g, "").slice(0, 100),
+                  }))}
+                  onSelectReply={(reply) => setNewMessage(reply)}
+                />
 
                 <form onSubmit={sendMessage} className="p-3 md:p-4 border-t space-y-2">
                   <RichTextEditor
