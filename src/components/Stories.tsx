@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Plus, X, Music, Image, Video } from "lucide-react";
+import { Plus, X, Music, Image, Video, ChevronLeft, ChevronRight, Heart, Send, Wand2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,34 +28,30 @@ interface Story {
   };
 }
 
+const STORY_DURATION = 6000; // 6 seconds per story
+
 const Stories = () => {
   const { user } = useAuth();
   const [stories, setStories] = useState<Story[]>([]);
+  const [allUserStories, setAllUserStories] = useState<Story[]>([]);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [caption, setCaption] = useState("");
+  const [generatingCaption, setGeneratingCaption] = useState(false);
+  const [reactionText, setReactionText] = useState("");
+  const timerRef = useRef<NodeJS.Timeout>();
+  const progressRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (user) {
       fetchStories();
-      
       const channel = supabase
         .channel("stories-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "stories",
-          },
-          () => {
-            fetchStories();
-          }
-        )
+        .on("postgres_changes", { event: "*", schema: "public", table: "stories" }, () => fetchStories())
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => { supabase.removeChannel(channel); };
     }
   }, [user]);
 
@@ -65,40 +63,77 @@ const Stories = () => {
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error('[Stories] Fetch error:', error);
-        return;
-      }
-
+      if (error) { console.error("[Stories] Fetch error:", error); return; }
       if (data) {
+        setAllUserStories(data as Story[]);
         const grouped = data.reduce((acc: Story[], story: any) => {
-          const existing = acc.find((s) => s.user_id === story.user_id);
-          if (!existing) acc.push(story);
+          if (!acc.find((s) => s.user_id === story.user_id)) acc.push(story);
           return acc;
         }, []);
         setStories(grouped as Story[]);
       }
-    } catch (err) {
-      console.error('[Stories] Error fetching stories:', err);
+    } catch (err) { console.error("[Stories] Error:", err); }
+  };
+
+  const startAutoAdvance = useCallback(() => {
+    clearTimers();
+    setProgress(0);
+    const startTime = Date.now();
+    
+    progressRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setProgress(Math.min((elapsed / STORY_DURATION) * 100, 100));
+    }, 50);
+
+    timerRef.current = setTimeout(() => {
+      goToNext();
+    }, STORY_DURATION);
+  }, [currentIndex, allUserStories]);
+
+  const clearTimers = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (progressRef.current) clearInterval(progressRef.current);
+  };
+
+  useEffect(() => {
+    if (selectedStory) {
+      startAutoAdvance();
+    }
+    return clearTimers;
+  }, [selectedStory, currentIndex]);
+
+  const goToNext = () => {
+    const userStories = allUserStories.filter(s => s.user_id === selectedStory?.user_id);
+    const nextIdx = currentIndex + 1;
+    if (nextIdx < userStories.length) {
+      setCurrentIndex(nextIdx);
+      setSelectedStory(userStories[nextIdx]);
+    } else {
+      // Move to next user
+      const currentUserIdx = stories.findIndex(s => s.user_id === selectedStory?.user_id);
+      if (currentUserIdx < stories.length - 1) {
+        const nextUser = stories[currentUserIdx + 1];
+        const nextUserStories = allUserStories.filter(s => s.user_id === nextUser.user_id);
+        setCurrentIndex(0);
+        setSelectedStory(nextUserStories[0]);
+      } else {
+        setSelectedStory(null);
+      }
+    }
+  };
+
+  const goToPrev = () => {
+    if (currentIndex > 0) {
+      const userStories = allUserStories.filter(s => s.user_id === selectedStory?.user_id);
+      setCurrentIndex(currentIndex - 1);
+      setSelectedStory(userStories[currentIndex - 1]);
     }
   };
 
   const uploadStory = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'audio') => {
     const file = event.target.files?.[0];
-    
-    console.log('[Stories] uploadStory called');
-    console.log('[Stories] File:', file);
-    console.log('[Stories] User:', user);
-    console.log('[Stories] Type:', type);
-    
-    if (!file) {
-      console.error('[Stories] No file selected');
-      return;
-    }
-    
-    if (!user) {
-      console.error('[Stories] No user found - cannot upload story');
-      toast.error('Vous devez être connecté pour publier une story');
+    if (!file || !user) {
+      if (!user) toast.error("Vous devez être connecté");
       return;
     }
 
@@ -106,72 +141,64 @@ const Stories = () => {
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
       let mediaType = type;
       if (file.type.startsWith("video")) mediaType = "video";
       else if (file.type.startsWith("audio")) mediaType = "audio";
       else if (file.type.startsWith("image")) mediaType = "image";
 
-      console.log('[Stories] Uploading file:', fileName, 'Type:', mediaType);
+      const { error: uploadError } = await supabase.storage.from("stories").upload(fileName, file);
+      if (uploadError) throw uploadError;
 
-      const { error: uploadError } = await supabase.storage
-        .from("stories")
-        .upload(fileName, file);
+      const { data: { publicUrl } } = supabase.storage.from("stories").getPublicUrl(fileName);
 
-      if (uploadError) {
-        console.error('[Stories] Storage upload error:', uploadError);
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("stories")
-        .getPublicUrl(fileName);
-
-      console.log('[Stories] File uploaded, public URL:', publicUrl);
-      console.log('[Stories] Inserting story into database...');
-
-      const { data: insertData, error: insertError } = await supabase.from("stories").insert({
+      const { error: insertError } = await supabase.from("stories").insert({
         user_id: user.id,
         media_url: publicUrl,
         media_type: mediaType,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h expiry
-      }).select();
+        content: caption || null,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      });
 
-      if (insertError) {
-        console.error('[Stories] Database insert error:', insertError);
-        throw insertError;
-      }
-      
-      console.log('[Stories] Story insert result:', insertData);
-
-      console.log('[Stories] Story published successfully!');
+      if (insertError) throw insertError;
       toast.success("Story publiée !");
+      setCaption("");
       fetchStories();
     } catch (error: any) {
-      console.error('[Stories] Error:', error);
-      toast.error(`Erreur lors de la publication: ${error.message || 'Erreur inconnue'}`);
+      toast.error(`Erreur: ${error.message || "Erreur inconnue"}`);
     } finally {
       setUploading(false);
     }
   };
 
   const viewStory = async (story: Story) => {
-    setSelectedStory(story);
-    
+    const userStories = allUserStories.filter(s => s.user_id === story.user_id);
+    setCurrentIndex(0);
+    setSelectedStory(userStories[0] || story);
+
     if (user) {
       try {
-        await supabase.from("story_views").upsert({
-          story_id: story.id,
-          viewer_id: user.id,
-        }, { onConflict: 'story_id,viewer_id' });
-      } catch (err) {
-        console.error('[Stories] Error recording view:', err);
-      }
+        await supabase.from("story_views").upsert(
+          { story_id: story.id, viewer_id: user.id },
+          { onConflict: "story_id,viewer_id" }
+        );
+      } catch (err) { console.error("[Stories] View error:", err); }
     }
   };
 
+  const sendReaction = async () => {
+    if (!reactionText.trim() || !selectedStory || !user) return;
+    // Could send as a message or notification
+    toast.success("Réaction envoyée !");
+    setReactionText("");
+  };
+
+  const currentUserStories = selectedStory
+    ? allUserStories.filter(s => s.user_id === selectedStory.user_id)
+    : [];
+
   return (
     <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+      {/* Add Story */}
       <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
         <div className="relative">
           <Avatar className="h-16 w-16 border-2 border-primary cursor-pointer">
@@ -180,143 +207,145 @@ const Stories = () => {
           </Avatar>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50"
-                disabled={uploading}
-              >
+              <button className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50" disabled={uploading}>
                 <Plus className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem asChild>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Image className="h-4 w-4" />
-                  Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => uploadStory(e, 'image')}
-                    disabled={uploading}
-                  />
+                  <Image className="h-4 w-4" /> Photo
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadStory(e, "image")} disabled={uploading} />
                 </label>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Video className="h-4 w-4" />
-                  Vidéo
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={(e) => uploadStory(e, 'video')}
-                    disabled={uploading}
-                  />
+                  <Video className="h-4 w-4" /> Vidéo
+                  <input type="file" accept="video/*" className="hidden" onChange={(e) => uploadStory(e, "video")} disabled={uploading} />
                 </label>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Music className="h-4 w-4" />
-                  Audio
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    className="hidden"
-                    onChange={(e) => uploadStory(e, 'audio')}
-                    disabled={uploading}
-                  />
+                  <Music className="h-4 w-4" /> Audio
+                  <input type="file" accept="audio/*" className="hidden" onChange={(e) => uploadStory(e, "audio")} disabled={uploading} />
                 </label>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <span className="text-xs text-center">
-          {uploading ? "Envoi..." : "Votre story"}
-        </span>
+        <span className="text-xs text-center">{uploading ? "Envoi..." : "Votre story"}</span>
       </div>
 
-      {stories.map((story) => (
-        <div
-          key={story.id}
-          className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0 cursor-pointer"
-          onClick={() => viewStory(story)}
-        >
-          <Avatar className="h-16 w-16 border-2 border-primary ring-2 ring-primary/20">
-            <AvatarImage src={story.profiles?.avatar_url} />
-            <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
-          </Avatar>
-          <span className="text-xs text-center truncate max-w-[80px]">
-            {story.profiles?.full_name || "Utilisateur"}
-          </span>
-        </div>
-      ))}
+      {/* Story list */}
+      {stories.map((story) => {
+        const userStoryCount = allUserStories.filter(s => s.user_id === story.user_id).length;
+        return (
+          <div
+            key={story.id}
+            className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0 cursor-pointer"
+            onClick={() => viewStory(story)}
+          >
+            <div className="relative">
+              <Avatar className="h-16 w-16 border-2 border-primary ring-2 ring-primary/20">
+                <AvatarImage src={story.profiles?.avatar_url} />
+                <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
+              </Avatar>
+              {userStoryCount > 1 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                  {userStoryCount}
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-center truncate max-w-[80px]">
+              {story.profiles?.full_name || "Utilisateur"}
+            </span>
+          </div>
+        );
+      })}
 
-      <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
+      {/* Story Viewer Dialog */}
+      <Dialog open={!!selectedStory} onOpenChange={() => { setSelectedStory(null); clearTimers(); }}>
         <DialogContent className="max-w-md p-0 bg-black overflow-hidden">
           {selectedStory && (
-            <div className="relative min-h-[400px] flex flex-col">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
-                onClick={() => setSelectedStory(null)}
-              >
+            <div className="relative min-h-[500px] flex flex-col">
+              {/* Progress bars */}
+              <div className="absolute top-2 left-3 right-3 z-20 flex gap-1">
+                {currentUserStories.map((_, idx) => (
+                  <div key={idx} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white rounded-full transition-all"
+                      style={{
+                        width: idx < currentIndex ? "100%" : idx === currentIndex ? `${progress}%` : "0%",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Close button */}
+              <Button variant="ghost" size="icon" className="absolute top-6 right-2 z-20 text-white hover:bg-white/20" onClick={() => { setSelectedStory(null); clearTimers(); }}>
                 <X className="h-5 w-5" />
               </Button>
-              <div className="flex items-center gap-3 absolute top-4 left-4 z-10">
-                <Avatar className="h-10 w-10 border-2 border-white">
+
+              {/* User info */}
+              <div className="flex items-center gap-3 absolute top-8 left-4 z-10">
+                <Avatar className="h-8 w-8 border-2 border-white">
                   <AvatarImage src={selectedStory.profiles?.avatar_url} />
-                  <AvatarFallback className="bg-white text-black">
+                  <AvatarFallback className="bg-white text-black text-xs">
                     {selectedStory.profiles?.full_name?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-white font-semibold">
-                    {selectedStory.profiles?.full_name || "Utilisateur"}
-                  </p>
-                  <p className="text-white/80 text-xs">
-                    {new Date(selectedStory.created_at).toLocaleTimeString("fr-FR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                  <p className="text-white font-semibold text-sm">{selectedStory.profiles?.full_name || "Utilisateur"}</p>
+                  <p className="text-white/70 text-[10px]">
+                    {new Date(selectedStory.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
               </div>
-              
-              <div className="flex-1 flex items-center justify-center pt-16 pb-4">
+
+              {/* Navigation */}
+              <button className="absolute left-0 top-0 bottom-0 w-1/3 z-10" onClick={goToPrev} />
+              <button className="absolute right-0 top-0 bottom-0 w-1/3 z-10" onClick={goToNext} />
+
+              {/* Media content */}
+              <div className="flex-1 flex items-center justify-center pt-20 pb-16">
                 {selectedStory.media_type === "video" ? (
-                  <video
-                    src={selectedStory.media_url}
-                    className="w-full max-h-[70vh] object-contain"
-                    controls
-                    autoPlay
-                  />
+                  <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted />
                 ) : selectedStory.media_type === "audio" ? (
                   <div className="flex flex-col items-center gap-4 p-8">
                     <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center animate-pulse">
                       <Music className="h-16 w-16 text-white" />
                     </div>
-                    <audio
-                      src={selectedStory.media_url}
-                      className="w-full max-w-xs"
-                      controls
-                      autoPlay
-                    />
+                    <audio src={selectedStory.media_url} className="w-full max-w-xs" controls autoPlay />
                   </div>
                 ) : (
-                  <img
-                    src={selectedStory.media_url}
-                    alt="Story"
-                    className="w-full max-h-[70vh] object-contain"
-                  />
+                  <img src={selectedStory.media_url} alt="Story" className="w-full max-h-[70vh] object-contain" />
                 )}
               </div>
-              
+
+              {/* Caption */}
               {selectedStory.content && (
-                <p className="absolute bottom-4 left-4 right-4 text-white text-center bg-black/50 p-2 rounded">
+                <p className="absolute bottom-14 left-4 right-4 text-white text-center bg-black/50 p-2 rounded text-sm">
                   {selectedStory.content}
                 </p>
               )}
+
+              {/* Reply bar */}
+              <div className="absolute bottom-2 left-2 right-2 flex gap-2 z-20">
+                <Input
+                  placeholder="Répondre..."
+                  value={reactionText}
+                  onChange={(e) => setReactionText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendReaction()}
+                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-9 text-sm"
+                />
+                <Button size="icon" variant="ghost" className="text-white h-9 w-9" onClick={sendReaction}>
+                  <Send className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="text-white h-9 w-9" onClick={() => toast.success("❤️")}>
+                  <Heart className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

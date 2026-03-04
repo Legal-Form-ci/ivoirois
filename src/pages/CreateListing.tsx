@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ShoppingBag, ArrowLeft, Image, X, Loader2, MapPin, Truck } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Image, X, Loader2, MapPin, Truck, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { REGIONS_COTE_IVOIRE } from "@/constants/regions";
 
@@ -32,6 +32,7 @@ const CreateListing = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -43,6 +44,28 @@ const CreateListing = () => {
   const [deliveryAvailable, setDeliveryAvailable] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const generateDescription = async () => {
+    if (!title.trim()) {
+      toast.error("Ajoutez d'abord un titre pour générer la description");
+      return;
+    }
+    setGeneratingDesc(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-product-description", {
+        body: { title, category, condition, price },
+      });
+      if (error) throw error;
+      if (data?.description) {
+        setDescription(data.description);
+        toast.success("Description générée par IA !");
+      }
+    } catch (err: any) {
+      toast.error("Erreur lors de la génération");
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
 
   const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -193,12 +216,29 @@ const CreateListing = () => {
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="description">Description</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={generateDescription}
+                      disabled={generatingDesc || !title.trim()}
+                      className="gap-1"
+                    >
+                      {generatingDesc ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Wand2 className="h-3 w-3" />
+                      )}
+                      IA
+                    </Button>
+                  </div>
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Décrivez votre article en détail..."
+                    placeholder="Décrivez votre article en détail... ou cliquez sur IA"
                     rows={4}
                   />
                 </div>

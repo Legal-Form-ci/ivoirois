@@ -11,8 +11,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { 
   Image, Video, Music, FileText, Link as LinkIcon, Hash, 
-  Calendar as CalendarIcon, Send, X, Loader2
+  Calendar as CalendarIcon, Send, X, Loader2, Wand2
 } from 'lucide-react';
+import AIImageGenerator from './AIImageGenerator';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -337,7 +338,7 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2 border-t">
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -364,6 +365,25 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
                 <FileText className="w-4 h-4 mr-1" />
                 Fichier
               </Button>
+              <AIImageGenerator
+                onImageGenerated={async (imageDataUrl) => {
+                  // Convert base64 to blob and upload
+                  try {
+                    const res = await fetch(imageDataUrl);
+                    const blob = await res.blob();
+                    const fileName = `${user!.id}/ai-${Date.now()}.png`;
+                    const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, blob);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(fileName);
+                    setFilePreviews(prev => [...prev, { url: publicUrl, type: 'image/png', name: 'AI Image' }]);
+                    setFiles(prev => [...prev, new File([blob], 'ai-image.png', { type: 'image/png' })]);
+                  } catch (err: any) {
+                    toast.error("Erreur lors de l'ajout de l'image IA");
+                  }
+                }}
+                triggerLabel="Image IA"
+                className="h-8"
+              />
             </div>
             
             <Button type="submit" disabled={loading} className="bg-gradient-to-r from-primary to-primary/80">
