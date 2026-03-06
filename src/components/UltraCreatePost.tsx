@@ -14,11 +14,11 @@ import {
   Calendar as CalendarIcon, Send, X, Loader2, Wand2
 } from 'lucide-react';
 import AIImageGenerator from './AIImageGenerator';
+import AIPublicationGenerator from './AIPublicationGenerator';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UltraAdvancedEditor from './UltraAdvancedEditor';
-import AIPostGenerator from './AIPostGenerator';
 
 interface UltraCreatePostProps {
   onPostCreated?: () => void;
@@ -190,12 +190,29 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* AI Generator */}
           <div className="flex justify-end">
-            <AIPostGenerator 
-              onGenerated={(generatedContent, generatedHashtags, generatedTitle, generatedHook) => {
-                setContent(generatedContent);
-                setHashtags(generatedHashtags.map(h => `#${h}`).join(' '));
-                if (generatedTitle) setTitle(generatedTitle);
-                if (generatedHook) setHook(generatedHook);
+            <AIPublicationGenerator 
+              onGenerated={({ content, title, hook, hashtags, images }) => {
+                setContent(content);
+                setHashtags(hashtags.map(h => `#${h}`).join(' '));
+                if (title) setTitle(title);
+                if (hook) setHook(hook);
+                // Handle AI-generated images
+                if (images && images.length > 0) {
+                  images.forEach(async (imgDataUrl) => {
+                    try {
+                      const res = await fetch(imgDataUrl);
+                      const blob = await res.blob();
+                      const fileName = `${user!.id}/ai-${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
+                      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, blob);
+                      if (uploadError) throw uploadError;
+                      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(fileName);
+                      setFilePreviews(prev => [...prev, { url: publicUrl, type: 'image/png', name: 'AI Image' }]);
+                      setFiles(prev => [...prev, new File([blob], `ai-image-${Date.now()}.png`, { type: 'image/png' })]);
+                    } catch (err) {
+                      console.error('Error uploading AI image:', err);
+                    }
+                  });
+                }
               }}
             />
           </div>
