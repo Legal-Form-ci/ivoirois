@@ -370,7 +370,7 @@ const Profile = () => {
                   )}
 
                   {user?.id === id ? (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button variant="default" className="gap-2" asChild>
                         <Link to="/edit-profile">
                           <Edit className="h-4 w-4" />
@@ -383,6 +383,11 @@ const Profile = () => {
                           Paramètres
                         </Link>
                       </Button>
+                      <QRCodeProfile
+                        profileId={profile.id}
+                        fullName={profile.full_name}
+                        avatarUrl={profile.avatar_url}
+                      />
                     </div>
                   ) : (
                     <>
