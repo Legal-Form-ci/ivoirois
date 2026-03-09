@@ -7,9 +7,10 @@ import PostCard from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Calendar, UserPlus, UserCheck, UserMinus, Edit, X, Check, MessageCircle, Settings } from "lucide-react";
+import { MapPin, Calendar, UserPlus, UserCheck, UserMinus, Edit, X, Check, MessageCircle, Settings, Video } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import QRCodeProfile from "@/components/QRCodeProfile";
 
 interface Profile {
   id: string;
@@ -369,7 +370,7 @@ const Profile = () => {
                   )}
 
                   {user?.id === id ? (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button variant="default" className="gap-2" asChild>
                         <Link to="/edit-profile">
                           <Edit className="h-4 w-4" />
@@ -382,6 +383,11 @@ const Profile = () => {
                           Paramètres
                         </Link>
                       </Button>
+                      <QRCodeProfile
+                        profileId={profile.id}
+                        fullName={profile.full_name}
+                        avatarUrl={profile.avatar_url}
+                      />
                     </div>
                   ) : (
                     <>

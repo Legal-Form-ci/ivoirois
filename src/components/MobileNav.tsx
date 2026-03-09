@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, Users, MessageCircle, Bell, User, Search, PlusCircle, Menu } from "lucide-react";
+import { Home, Film, Radio, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MobileNav = () => {
@@ -11,8 +11,8 @@ const MobileNav = () => {
 
   const navItems = [
     { icon: Home, path: "/feed", label: "Accueil" },
-    { icon: Search, path: "/search", label: "Rechercher" },
-    { icon: PlusCircle, path: "/create", label: "Créer" },
+    { icon: Film, path: "/reels", label: "Reels" },
+    { icon: Radio, path: "/live", label: "Live" },
     { icon: MessageCircle, path: "/messages", label: "Messages" },
     { icon: User, path: `/profile/${user.id}`, label: "Profil" },
   ];

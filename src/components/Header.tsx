@@ -1,4 +1,4 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Search, FileUser } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,40 +33,32 @@ const Header = () => {
             </div>
             <nav className="hidden md:flex items-center gap-1">
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/feed">
-                  <Home className="h-5 w-5" />
-                </Link>
+                <Link to="/feed"><Home className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/jobs">
-                  <Briefcase />
-                </Link>
+                <Link to="/reels"><Film className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/companies">
-                  <Building2 />
-                </Link>
+                <Link to="/live"><Radio className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/friends">
-                  <Users />
-                </Link>
+                <Link to="/jobs"><Briefcase className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/messages">
-                  <MessageCircle />
-                </Link>
+                <Link to="/marketplace"><ShoppingBag className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/groups">
-                  <UsersRound />
-                </Link>
+                <Link to="/friends"><Users className="h-5 w-5" /></Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/messages"><MessageCircle className="h-5 w-5" /></Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/groups"><UsersRound className="h-5 w-5" /></Link>
               </Button>
               <NotificationBell />
               <Button variant="ghost" size="icon" asChild>
-                <Link to={`/profile/${user.id}`}>
-                  <User />
-                </Link>
+                <Link to={`/profile/${user.id}`}><User className="h-5 w-5" /></Link>
               </Button>
             </nav>
 
@@ -81,81 +73,62 @@ const Header = () => {
                     <Menu />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[280px]">
+                <SheetContent side="right" className="w-[280px] overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle className="text-left">Menu</SheetTitle>
                   </SheetHeader>
-                  <nav className="flex flex-col gap-2 mt-6">
+                  <nav className="flex flex-col gap-1 mt-6">
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/feed">
-                        <Home className="h-5 w-5" />
-                        <span>Accueil</span>
-                      </Link>
+                      <Link to="/feed"><Home className="h-5 w-5" /><span>Accueil</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to={`/profile/${user.id}`}>
-                        <UserCircle className="h-5 w-5" />
-                        <span>Mon Profil</span>
-                      </Link>
+                      <Link to={`/profile/${user.id}`}><UserCircle className="h-5 w-5" /><span>Mon Profil</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/jobs">
-                        <Briefcase className="h-5 w-5" />
-                        <span>Emplois</span>
-                      </Link>
+                      <Link to="/reels"><Film className="h-5 w-5" /><span>Reels</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/companies">
-                        <Building2 className="h-5 w-5" />
-                        <span>Entreprises</span>
-                      </Link>
+                      <Link to="/live"><Radio className="h-5 w-5" /><span>Live</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/resume">
-                        <FileText className="h-5 w-5" />
-                        <span>Mon CV</span>
-                      </Link>
+                      <Link to="/jobs"><Briefcase className="h-5 w-5" /><span>Emplois</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/friends">
-                        <Users className="h-5 w-5" />
-                        <span>Amis</span>
-                      </Link>
+                      <Link to="/companies"><Building2 className="h-5 w-5" /><span>Entreprises</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/messages">
-                        <MessageCircle className="h-5 w-5" />
-                        <span>Messages</span>
-                      </Link>
+                      <Link to="/marketplace"><ShoppingBag className="h-5 w-5" /><span>Marketplace</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/groups">
-                        <UsersRound className="h-5 w-5" />
-                        <span>Groupes</span>
-                      </Link>
+                      <Link to="/events"><CalendarDays className="h-5 w-5" /><span>Événements</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/notifications">
-                        <Bell className="h-5 w-5" />
-                        <span>Notifications</span>
-                      </Link>
+                      <Link to="/resume"><FileText className="h-5 w-5" /><span>Mon CV</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/settings">
-                        <Settings className="h-5 w-5" />
-                        <span>Paramètres</span>
-                      </Link>
+                      <Link to="/pages"><Globe className="h-5 w-5" /><span>Pages</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
-                      <Link to="/admin">
-                        <Shield className="h-5 w-5" />
-                        <span>Admin</span>
-                      </Link>
+                      <Link to="/friends"><Users className="h-5 w-5" /><span>Amis</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/messages"><MessageCircle className="h-5 w-5" /><span>Messages</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/groups"><UsersRound className="h-5 w-5" /><span>Groupes</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/notifications"><Bell className="h-5 w-5" /><span>Notifications</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/settings"><Settings className="h-5 w-5" /><span>Paramètres</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/admin"><Shield className="h-5 w-5" /><span>Admin</span></Link>
                     </Button>
                     <div className="border-t my-4" />
                     <Button variant="destructive" className="justify-start gap-3" onClick={signOut}>
-                      <LogOut className="h-5 w-5" />
-                      <span>Déconnexion</span>
+                      <LogOut className="h-5 w-5" /><span>Déconnexion</span>
                     </Button>
                   </nav>
                 </SheetContent>
