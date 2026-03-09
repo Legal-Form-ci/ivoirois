@@ -19,12 +19,13 @@ serve(async (req) => {
     }
 
     let messages: any[] = [];
+    let model = "google/gemini-3-pro-image-preview";
 
     if (action === "generate") {
       messages = [
         {
           role: "user",
-          content: prompt || "Generate a beautiful professional image",
+          content: `Generate a high-quality, ultra-realistic professional image: ${prompt || "A beautiful professional image"}. No text, no watermark, no logos, clean composition, high resolution.`,
         },
       ];
     } else if (action === "edit" && imageBase64) {
@@ -32,7 +33,7 @@ serve(async (req) => {
         {
           role: "user",
           content: [
-            { type: "text", text: prompt || "Improve this image" },
+            { type: "text", text: prompt || "Improve this image professionally" },
             {
               type: "image_url",
               image_url: { url: imageBase64 },
@@ -41,6 +42,8 @@ serve(async (req) => {
         },
       ];
     } else if (action === "caption") {
+      // Caption uses text-only model
+      model = "google/gemini-2.5-flash";
       messages = [
         {
           role: "user",
@@ -62,17 +65,24 @@ serve(async (req) => {
 
     const isTextOnly = action === "caption";
 
+    const requestBody: any = {
+      model,
+      messages,
+    };
+
+    if (!isTextOnly) {
+      requestBody.modalities = ["image", "text"];
+    }
+
+    console.log(`[ai-image-generate] Action: ${action}, Model: ${model}`);
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
-        modalities: isTextOnly ? ["text"] : ["image", "text"],
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -86,17 +96,40 @@ serve(async (req) => {
         );
       }
 
-      throw new Error(`AI Gateway error: ${response.status}`);
+      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const textContent = data.choices?.[0]?.message?.content || "";
-    const images = data.choices?.[0]?.message?.images || [];
+    
+    // Extract text content
+    const messageContent = data.choices?.[0]?.message?.content;
+    let textContent = "";
+    let images: string[] = [];
+
+    if (typeof messageContent === "string") {
+      textContent = messageContent;
+    } else if (Array.isArray(messageContent)) {
+      for (const part of messageContent) {
+        if (part.type === "text") {
+          textContent += part.text || "";
+        } else if (part.type === "image_url") {
+          images.push(part.image_url?.url || "");
+        }
+      }
+    }
+
+    // Also check for images in the standard location
+    const messageImages = data.choices?.[0]?.message?.images || [];
+    if (messageImages.length > 0) {
+      images = [...images, ...messageImages.map((img: any) => img.image_url?.url || img.url || "")];
+    }
+
+    console.log(`[ai-image-generate] Result: text=${textContent.length}chars, images=${images.length}`);
 
     return new Response(
       JSON.stringify({
         text: textContent,
-        images: images.map((img: any) => img.image_url?.url || ""),
+        images: images.filter(Boolean),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
