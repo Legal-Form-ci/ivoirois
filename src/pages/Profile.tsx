@@ -7,9 +7,10 @@ import PostCard from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Calendar, UserPlus, UserCheck, UserMinus, Edit, X, Check, MessageCircle, Settings } from "lucide-react";
+import { MapPin, Calendar, UserPlus, UserCheck, UserMinus, Edit, X, Check, MessageCircle, Settings, Video } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import QRCodeProfile from "@/components/QRCodeProfile";
 
 interface Profile {
   id: string;

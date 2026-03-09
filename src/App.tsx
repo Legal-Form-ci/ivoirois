@@ -39,6 +39,7 @@ import Events from "./pages/Events";
 import CreateEvent from "./pages/CreateEvent";
 import Marketplace from "./pages/Marketplace";
 import CreateListing from "./pages/CreateListing";
+import LiveStreams from "./pages/LiveStreams";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/fil" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/actualites" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+            <Route path="/index" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             
             {/* Profile */}
             <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -138,6 +140,10 @@ const App = () => (
             <Route path="/shorts" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/reels/create" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
             <Route path="/reels/creer" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
+            
+            {/* Live Streams */}
+            <Route path="/live" element={<ProtectedRoute><LiveStreams /></ProtectedRoute>} />
+            <Route path="/direct" element={<ProtectedRoute><LiveStreams /></ProtectedRoute>} />
             
             {/* Events */}
             <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
