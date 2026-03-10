@@ -41,8 +41,8 @@ const Stories = () => {
   const [caption, setCaption] = useState("");
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [reactionText, setReactionText] = useState("");
-  const timerRef = useRef<NodeJS.Timeout>();
-  const progressRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const progressRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
     if (user) {

@@ -39,7 +39,7 @@ const WebRTCCall = ({
 }: WebRTCCallProps) => {
   const [callDuration, setCallDuration] = useState(0);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const callIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const callIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     callStatus,

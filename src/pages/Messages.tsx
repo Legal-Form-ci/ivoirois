@@ -59,7 +59,7 @@ const Messages = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showNewConvo, setShowNewConvo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const { sendTypingIndicator } = useSendTypingIndicator(conversationId);
 
   useEffect(() => {
