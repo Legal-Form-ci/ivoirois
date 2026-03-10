@@ -45,7 +45,7 @@ const VideoCall = ({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const callIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const callIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (open) {

@@ -163,6 +163,7 @@ const Feed = () => {
                   createdAt={post.created_at}
                   likesCount={post.likes[0]?.count || 0}
                   commentsCount={post.comments[0]?.count || 0}
+                  onDeleted={fetchPosts}
                 />
               ))
             )}

@@ -75,7 +75,7 @@ const GroupVideoCall = ({
   
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
-  const callIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const callIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize local media
   useEffect(() => {
