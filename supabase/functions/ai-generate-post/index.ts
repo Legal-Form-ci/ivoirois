@@ -18,10 +18,9 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Determine if this is a full generation or content structuring
     const isStructuring = !!rawContent;
 
-    const systemPrompt = `Tu es un expert en création de contenu professionnel ultra-structuré pour réseaux sociaux et plateformes professionnelles.
+    const systemPrompt = `Tu es un expert en création de contenu professionnel ultra-structuré pour réseaux sociaux et plateformes professionnelles africaines.
 
 ${isStructuring ? `
 🎯 MODE STRUCTURATION AUTOMATIQUE
@@ -38,7 +37,6 @@ RÈGLES ABSOLUES:
 - Ajoute des sauts de ligne pour la lisibilité
 ` : `
 🎯 MODE GÉNÉRATION COMPLÈTE
-
 Tu génères une publication professionnelle complète à partir du sujet donné.
 `}
 
@@ -53,67 +51,84 @@ Tu génères une publication professionnelle complète à partir du sujet donné
 }
 
 🎨 FORMATAGE HTML OBLIGATOIRE DU CONTENT:
-1. TITRE PRINCIPAL: <h2 style="font-weight: bold;">🎯 Titre avec emoji pertinent</h2>
-2. SOUS-TITRE/ACCROCHE: <p style="font-style: italic; color: #666;">Phrase captivante</p>
+
+1. TITRE PRINCIPAL: <h2 style="font-weight:bold;margin-bottom:12px;">🎯 Titre avec emoji pertinent</h2>
+
+2. SOUS-TITRE/ACCROCHE: <p style="font-style:italic;color:#666;margin-bottom:16px;">Phrase captivante</p>
+
 3. PARAGRAPHES: 
-   - Séparés par <br><br> ou dans des <p> distincts
+   - Dans des <p style="margin-bottom:12px;line-height:1.7;"> distincts
    - Maximum 4-5 lignes par paragraphe
-   - Sauts de ligne visuels obligatoires entre sections
+   - Séparation nette entre sections
 
 4. HIÉRARCHIE DES TITRES:
-   - <h2> pour sections majeures
-   - <h3> pour sous-sections
-   - <h4> pour points importants
+   - <h2 style="font-weight:bold;margin:20px 0 10px;"> pour sections majeures
+   - <h3 style="font-weight:600;margin:16px 0 8px;"> pour sous-sections
 
-5. MISE EN FORME DU TEXTE:
+5. MISE EN FORME:
    - <strong>Mots clés importants</strong>
    - <em>Termes techniques ou accent</em>
-   - <span style="color: #1a73e8;">Texte coloré pour emphase</span>
-   - <mark style="background: #fff3cd;">Surlignage pour focus</mark>
+   - <span style="color:#1a73e8;">Texte coloré pour emphase</span>
+   - <mark style="background:#fff3cd;padding:2px 4px;border-radius:3px;">Surlignage pour focus</mark>
 
 6. LISTES STRUCTURÉES:
-   <ul style="margin: 16px 0; padding-left: 24px;">
-     <li style="margin-bottom: 8px;">Point 1</li>
-     <li style="margin-bottom: 8px;">Point 2</li>
+   <ul style="margin:12px 0;padding-left:24px;">
+     <li style="margin-bottom:8px;">✅ Point 1</li>
+     <li style="margin-bottom:8px;">✅ Point 2</li>
    </ul>
 
-7. TABLEAUX (si pertinent):
-   <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-     <thead style="background: #f8f9fa;">
-       <tr>
-         <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; font-weight: 600;">En-tête</th>
+7. TABLEAUX (OBLIGATOIRE si demandé ou pertinent - comparatifs, statistiques, planning, prix):
+   <table style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:8px;overflow:hidden;">
+     <thead>
+       <tr style="background:linear-gradient(135deg,#1a73e8,#4285f4);">
+         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 1</th>
+         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 2</th>
+         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 3</th>
        </tr>
      </thead>
      <tbody>
+       <tr style="background:#f8f9fa;">
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+       </tr>
        <tr>
-         <td style="border: 1px solid #dee2e6; padding: 12px;">Valeur</td>
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
        </tr>
      </tbody>
    </table>
 
 8. CITATIONS:
-   <blockquote style="border-left: 4px solid #1a73e8; padding-left: 16px; margin: 16px 0; font-style: italic;">
-     Citation importante
+   <blockquote style="border-left:4px solid #1a73e8;padding:12px 16px;margin:16px 0;font-style:italic;background:#f8f9ff;border-radius:0 8px 8px 0;">
+     Citation importante ou témoignage
    </blockquote>
 
-9. CALL-TO-ACTION FINAL:
-   <p style="margin-top: 24px; font-weight: 500;">
-     👉 <strong>Action attendue</strong> - Question engageante pour les commentaires
-   </p>
+9. ENCADRÉ IMPORTANT:
+   <div style="background:linear-gradient(135deg,#e8f0fe,#f0f5ff);border:1px solid #1a73e8;border-radius:12px;padding:16px;margin:16px 0;">
+     <strong>💡 Point clé:</strong> Information importante mise en valeur
+   </div>
+
+10. CALL-TO-ACTION FINAL:
+    <div style="margin-top:24px;padding:16px;background:linear-gradient(135deg,#1a73e8,#4285f4);border-radius:12px;text-align:center;">
+      <p style="color:white;font-weight:600;margin:0;">👉 Action attendue - Question engageante</p>
+    </div>
 
 📝 RÈGLES DE STYLE:
-- Professionnel mais accessible
-- Dynamique et engageant  
+- Professionnel mais accessible et humain
+- Dynamique et engageant - pas de ton robotique
 - Orienté valeur pour le lecteur
 - Adapté au contexte ivoirien et africain
-- Paragraphes courts et aérés
-- Utiliser des emojis pertinents (pas trop)
+- Paragraphes courts et aérés (max 4 lignes)
+- Emojis pertinents mais pas excessifs
 - JAMAIS de blocs de texte compacts illisibles
+- TOUJOURS inclure un tableau si le contenu s'y prête (comparaisons, statistiques, planning, prix, avantages)
 
 #️⃣ HASHTAGS:
 - 5-8 hashtags pertinents et professionnels
 - En rapport avec le secteur et le contexte local
-- Mix de généraux et spécifiques
+- Mix de généraux (#CoteDIvoire #Afrique) et spécifiques
 
 ⚠️ RÉPONSE UNIQUEMENT EN FORMAT JSON VALIDE`;
 
@@ -130,7 +145,7 @@ ${formFields ? `CHAMPS DU FORMULAIRE À REMPLIR: ${JSON.stringify(formFields)}` 
 Analyse ce texte brut et génère une réponse JSON complète avec:
 - Un titre accrocheur extrait/généré
 - Une phrase d'accroche captivante
-- Le contenu restructuré professionnellement en HTML
+- Le contenu restructuré professionnellement en HTML avec des TABLEAUX si pertinent
 - Des hashtags pertinents
 - La catégorie détectée
 - Un résumé court`;
@@ -138,14 +153,15 @@ Analyse ce texte brut et génère une réponse JSON complète avec:
       userPrompt = `SUJET: "${topic}"
 
 STYLE: ${style || 'professional'}
-${includeTable ? '\n✅ INCLURE UN TABLEAU COMPARATIF OU INFORMATIF' : ''}
+${includeTable ? '\n✅ INCLURE OBLIGATOIREMENT UN TABLEAU COMPARATIF OU INFORMATIF BIEN STYLISÉ' : ''}
 ${mentions && mentions.length > 0 ? `\n👥 MENTIONNER: ${mentions.join(', ')}` : ''}
 ${context ? `\n📝 CONTEXTE ADDITIONNEL: ${context}` : ''}
 
-Génère une publication professionnelle complète au format JSON avec tous les champs requis.`;
+Génère une publication professionnelle complète au format JSON avec tous les champs requis.
+${includeTable ? 'Le TABLEAU est OBLIGATOIRE dans le contenu HTML.' : 'Inclus un tableau si c\'est pertinent pour le sujet.'}`;
     }
 
-    console.log("[ai-generate-post] Processing request:", { isStructuring, topic, hasRawContent: !!rawContent });
+    console.log("[ai-generate-post] Processing request:", { isStructuring, topic, hasRawContent: !!rawContent, includeTable });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -174,6 +190,12 @@ Génère une publication professionnelle complète au format JSON avec tous les 
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Crédits IA épuisés. Veuillez recharger." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       
       throw new Error(`AI Gateway error: ${response.status}`);
     }
@@ -186,7 +208,6 @@ Génère une publication professionnelle complète au format JSON avec tous les 
       parsedResult = JSON.parse(rawContent2);
     } catch (e) {
       console.error("[ai-generate-post] Failed to parse JSON:", rawContent2);
-      // Fallback: extract from raw text
       parsedResult = {
         title: "",
         hook: "",
@@ -197,7 +218,6 @@ Génère une publication professionnelle complète au format JSON avec tous les 
       };
     }
 
-    // Ensure hashtags are clean
     const hashtags = (parsedResult.hashtags || []).map((h: string) => 
       h.replace(/^#/, '').trim()
     ).filter((h: string) => h.length > 0);

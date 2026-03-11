@@ -19,13 +19,15 @@ serve(async (req) => {
     }
 
     let messages: any[] = [];
-    let model = "google/gemini-3-pro-image-preview";
+    // Use latest high-quality model for image generation
+    let model = "google/gemini-3.1-flash-image-preview";
 
     if (action === "generate") {
       messages = [
         {
           role: "user",
-          content: `Generate a high-quality, ultra-realistic professional image: ${prompt || "A beautiful professional image"}. No text, no watermark, no logos, clean composition, high resolution.`,
+          content: `Generate a stunning, ultra-realistic, professional photograph: ${prompt || "A beautiful professional image"}. 
+Requirements: photorealistic quality, professional lighting, sharp focus, high dynamic range, no text, no watermarks, no logos, clean composition, 8K resolution quality, cinematic color grading, professional photography style.`,
         },
       ];
     } else if (action === "edit" && imageBase64) {
@@ -33,7 +35,7 @@ serve(async (req) => {
         {
           role: "user",
           content: [
-            { type: "text", text: prompt || "Improve this image professionally" },
+            { type: "text", text: `${prompt || "Enhance this image professionally"}. Make it ultra-realistic, professional quality, sharp, well-lit.` },
             {
               type: "image_url",
               image_url: { url: imageBase64 },
@@ -42,7 +44,6 @@ serve(async (req) => {
         },
       ];
     } else if (action === "caption") {
-      // Caption uses text-only model
       model = "google/gemini-2.5-flash";
       messages = [
         {
@@ -95,13 +96,18 @@ serve(async (req) => {
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Crédits IA épuisés. Veuillez recharger votre compte." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
     
-    // Extract text content
     const messageContent = data.choices?.[0]?.message?.content;
     let textContent = "";
     let images: string[] = [];

@@ -4,10 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Plus, X, Music, Image, Video, ChevronLeft, ChevronRight, Heart, Send, Wand2, Loader2 } from "lucide-react";
+import { Plus, X, Music, Image, Video, ChevronLeft, ChevronRight, Heart, Send, Wand2, Loader2, Camera, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,7 @@ interface Story {
   };
 }
 
-const STORY_DURATION = 6000; // 6 seconds per story
+const STORY_DURATION = 6000;
 
 const Stories = () => {
   const { user } = useAuth();
@@ -39,10 +39,14 @@ const Stories = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [caption, setCaption] = useState("");
-  const [generatingCaption, setGeneratingCaption] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [reactionText, setReactionText] = useState("");
+  const [viewCount, setViewCount] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const progressRef = useRef<ReturnType<typeof setInterval>>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -109,7 +113,6 @@ const Stories = () => {
       setCurrentIndex(nextIdx);
       setSelectedStory(userStories[nextIdx]);
     } else {
-      // Move to next user
       const currentUserIdx = stories.findIndex(s => s.user_id === selectedStory?.user_id);
       if (currentUserIdx < stories.length - 1) {
         const nextUser = stories[currentUserIdx + 1];
@@ -130,23 +133,27 @@ const Stories = () => {
     }
   };
 
-  const uploadStory = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'audio') => {
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) {
-      if (!user) toast.error("Vous devez être connecté");
-      return;
-    }
+    if (!file) return;
+    
+    setSelectedFile(file);
+    setFilePreview(URL.createObjectURL(file));
+    setShowCreateDialog(true);
+  };
+
+  const publishStory = async () => {
+    if (!selectedFile || !user) return;
 
     setUploading(true);
     try {
-      const fileExt = file.name.split(".").pop();
+      const fileExt = selectedFile.name.split(".").pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      let mediaType = type;
-      if (file.type.startsWith("video")) mediaType = "video";
-      else if (file.type.startsWith("audio")) mediaType = "audio";
-      else if (file.type.startsWith("image")) mediaType = "image";
+      let mediaType = "image";
+      if (selectedFile.type.startsWith("video")) mediaType = "video";
+      else if (selectedFile.type.startsWith("audio")) mediaType = "audio";
 
-      const { error: uploadError } = await supabase.storage.from("stories").upload(fileName, file);
+      const { error: uploadError } = await supabase.storage.from("stories").upload(fileName, selectedFile);
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage.from("stories").getPublicUrl(fileName);
@@ -160,13 +167,42 @@ const Stories = () => {
       });
 
       if (insertError) throw insertError;
-      toast.success("Story publiée !");
+      toast.success("Story publiée ! 🎉");
       setCaption("");
+      setSelectedFile(null);
+      setFilePreview(null);
+      setShowCreateDialog(false);
       fetchStories();
     } catch (error: any) {
       toast.error(`Erreur: ${error.message || "Erreur inconnue"}`);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const generateAICaption = async () => {
+    if (!filePreview || !selectedFile?.type.startsWith("image")) {
+      toast.error("La légende IA fonctionne uniquement avec les images");
+      return;
+    }
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        const { data, error } = await supabase.functions.invoke("ai-image-generate", {
+          body: { action: "caption", imageBase64: base64 }
+        });
+        if (!error && data?.text) {
+          setCaption(data.text);
+          toast.success("Légende générée !");
+        } else {
+          toast.error("Erreur de génération");
+        }
+      };
+      reader.readAsDataURL(selectedFile);
+    } catch (err) {
+      toast.error("Erreur IA");
     }
   };
 
@@ -177,91 +213,174 @@ const Stories = () => {
 
     if (user) {
       try {
-        await supabase.from("story_views").upsert(
+        await supabase.from("story_views" as any).upsert(
           { story_id: story.id, viewer_id: user.id },
           { onConflict: "story_id,viewer_id" }
         );
-      } catch (err) { console.error("[Stories] View error:", err); }
+      } catch (err) { /* silent */ }
     }
+
+    // Fetch view count
+    try {
+      const { count } = await supabase
+        .from("story_views" as any)
+        .select("*", { count: "exact", head: true })
+        .eq("story_id", story.id);
+      setViewCount(count || 0);
+    } catch (e) { /* silent */ }
   };
 
   const sendReaction = async () => {
     if (!reactionText.trim() || !selectedStory || !user) return;
-    // Could send as a message or notification
-    toast.success("Réaction envoyée !");
-    setReactionText("");
+    
+    // Send as a story reaction
+    try {
+      await supabase.from("story_reactions").insert({
+        story_id: selectedStory.id,
+        user_id: user.id,
+        reaction_type: reactionText.trim(),
+      });
+      toast.success("Réaction envoyée !");
+      setReactionText("");
+    } catch (err) {
+      toast.error("Erreur");
+    }
+  };
+
+  const sendHeartReaction = async () => {
+    if (!selectedStory || !user) return;
+    try {
+      await supabase.from("story_reactions").insert({
+        story_id: selectedStory.id,
+        user_id: user.id,
+        reaction_type: "❤️",
+      });
+      toast.success("❤️");
+    } catch (err) { /* already reacted */ }
   };
 
   const currentUserStories = selectedStory
     ? allUserStories.filter(s => s.user_id === selectedStory.user_id)
     : [];
 
+  const hasMyStory = stories.some(s => s.user_id === user?.id);
+
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-      {/* Add Story */}
-      <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
-        <div className="relative">
-          <Avatar className="h-16 w-16 border-2 border-primary cursor-pointer">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback>Vous</AvatarFallback>
-          </Avatar>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50" disabled={uploading}>
-                <Plus className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Image className="h-4 w-4" /> Photo
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadStory(e, "image")} disabled={uploading} />
-                </label>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Video className="h-4 w-4" /> Vidéo
-                  <input type="file" accept="video/*" className="hidden" onChange={(e) => uploadStory(e, "video")} disabled={uploading} />
-                </label>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Music className="h-4 w-4" /> Audio
-                  <input type="file" accept="audio/*" className="hidden" onChange={(e) => uploadStory(e, "audio")} disabled={uploading} />
-                </label>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <>
+      <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+        {/* Add Story */}
+        <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
+          <div className="relative">
+            <Avatar className={`h-16 w-16 border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer`}>
+              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarFallback className="bg-muted">
+                <Plus className="h-5 w-5 text-muted-foreground" />
+              </AvatarFallback>
+            </Avatar>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*,audio/*"
+              className="hidden"
+              onChange={handleFileSelected}
+            />
+            <button 
+              className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50 shadow-md"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+            </button>
+          </div>
+          <span className="text-xs text-center text-muted-foreground">{uploading ? "Envoi..." : "Votre story"}</span>
         </div>
-        <span className="text-xs text-center">{uploading ? "Envoi..." : "Votre story"}</span>
+
+        {/* Story list */}
+        {stories.map((story) => {
+          const userStoryCount = allUserStories.filter(s => s.user_id === story.user_id).length;
+          const isOwn = story.user_id === user?.id;
+          return (
+            <div
+              key={story.id}
+              className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0 cursor-pointer group"
+              onClick={() => viewStory(story)}
+            >
+              <div className="relative">
+                <div className="p-[2px] rounded-full bg-gradient-to-tr from-primary via-primary/80 to-accent group-hover:scale-105 transition-transform">
+                  <Avatar className="h-16 w-16 border-2 border-background">
+                    <AvatarImage src={story.profiles?.avatar_url} />
+                    <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
+                  </Avatar>
+                </div>
+                {userStoryCount > 1 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold shadow">
+                    {userStoryCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-center truncate max-w-[80px] font-medium">
+                {isOwn ? "Votre story" : story.profiles?.full_name || "Utilisateur"}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Story list */}
-      {stories.map((story) => {
-        const userStoryCount = allUserStories.filter(s => s.user_id === story.user_id).length;
-        return (
-          <div
-            key={story.id}
-            className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0 cursor-pointer"
-            onClick={() => viewStory(story)}
-          >
-            <div className="relative">
-              <Avatar className="h-16 w-16 border-2 border-primary ring-2 ring-primary/20">
-                <AvatarImage src={story.profiles?.avatar_url} />
-                <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
-              </Avatar>
-              {userStoryCount > 1 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
-                  {userStoryCount}
-                </span>
+      {/* Create Story Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowCreateDialog(false);
+          setSelectedFile(null);
+          setFilePreview(null);
+          setCaption("");
+        }
+      }}>
+        <DialogContent className="max-w-md p-0 bg-black overflow-hidden">
+          <div className="relative min-h-[500px] flex flex-col">
+            {/* Preview */}
+            <div className="flex-1 flex items-center justify-center p-4">
+              {filePreview && selectedFile?.type.startsWith("image") && (
+                <img src={filePreview} alt="Preview" className="max-h-[50vh] rounded-lg object-contain" />
+              )}
+              {filePreview && selectedFile?.type.startsWith("video") && (
+                <video src={filePreview} className="max-h-[50vh] rounded-lg" controls />
+              )}
+              {filePreview && selectedFile?.type.startsWith("audio") && (
+                <div className="flex flex-col items-center gap-4 p-8">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
+                    <Music className="h-16 w-16 text-white" />
+                  </div>
+                  <audio src={filePreview} controls className="w-full max-w-xs" />
+                </div>
               )}
             </div>
-            <span className="text-xs text-center truncate max-w-[80px]">
-              {story.profiles?.full_name || "Utilisateur"}
-            </span>
+
+            {/* Caption & Actions */}
+            <div className="p-4 space-y-3">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Ajouter une légende..."
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none h-20"
+                />
+              </div>
+              <div className="flex gap-2">
+                {selectedFile?.type.startsWith("image") && (
+                  <Button variant="outline" size="sm" onClick={generateAICaption} className="gap-1 border-white/20 text-white hover:bg-white/10">
+                    <Wand2 className="h-3 w-3" /> Légende IA
+                  </Button>
+                )}
+                <div className="flex-1" />
+                <Button onClick={publishStory} disabled={uploading} className="gap-2">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Publier
+                </Button>
+              </div>
+            </div>
           </div>
-        );
-      })}
+        </DialogContent>
+      </Dialog>
 
       {/* Story Viewer Dialog */}
       <Dialog open={!!selectedStory} onOpenChange={() => { setSelectedStory(null); clearTimers(); }}>
@@ -297,20 +416,27 @@ const Stories = () => {
                 </Avatar>
                 <div>
                   <p className="text-white font-semibold text-sm">{selectedStory.profiles?.full_name || "Utilisateur"}</p>
-                  <p className="text-white/70 text-[10px]">
-                    {new Date(selectedStory.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white/70 text-[10px]">
+                      {new Date(selectedStory.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    {viewCount > 0 && (
+                      <span className="text-white/50 text-[10px] flex items-center gap-0.5">
+                        <Eye className="h-2.5 w-2.5" /> {viewCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Navigation */}
+              {/* Navigation zones */}
               <button className="absolute left-0 top-0 bottom-0 w-1/3 z-10" onClick={goToPrev} />
               <button className="absolute right-0 top-0 bottom-0 w-1/3 z-10" onClick={goToNext} />
 
               {/* Media content */}
               <div className="flex-1 flex items-center justify-center pt-20 pb-16">
                 {selectedStory.media_type === "video" ? (
-                  <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted />
+                  <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted playsInline />
                 ) : selectedStory.media_type === "audio" ? (
                   <div className="flex flex-col items-center gap-4 p-8">
                     <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center animate-pulse">
@@ -325,7 +451,7 @@ const Stories = () => {
 
               {/* Caption */}
               {selectedStory.content && (
-                <p className="absolute bottom-14 left-4 right-4 text-white text-center bg-black/50 p-2 rounded text-sm">
+                <p className="absolute bottom-14 left-4 right-4 text-white text-center bg-black/60 backdrop-blur-sm p-3 rounded-xl text-sm">
                   {selectedStory.content}
                 </p>
               )}
@@ -333,16 +459,16 @@ const Stories = () => {
               {/* Reply bar */}
               <div className="absolute bottom-2 left-2 right-2 flex gap-2 z-20">
                 <Input
-                  placeholder="Répondre..."
+                  placeholder="Répondre à la story..."
                   value={reactionText}
                   onChange={(e) => setReactionText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendReaction()}
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-9 text-sm"
+                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-9 text-sm backdrop-blur-sm"
                 />
-                <Button size="icon" variant="ghost" className="text-white h-9 w-9" onClick={sendReaction}>
+                <Button size="icon" variant="ghost" className="text-white h-9 w-9 hover:bg-white/20" onClick={sendReaction}>
                   <Send className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="text-white h-9 w-9" onClick={() => toast.success("❤️")}>
+                <Button size="icon" variant="ghost" className="text-white h-9 w-9 hover:bg-white/20 hover:text-red-400" onClick={sendHeartReaction}>
                   <Heart className="h-4 w-4" />
                 </Button>
               </div>
@@ -350,7 +476,7 @@ const Stories = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
