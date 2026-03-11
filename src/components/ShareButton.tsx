@@ -1,4 +1,4 @@
-import { Share2, Copy, MessageCircle, Facebook, Twitter } from 'lucide-react';
+import { Share2, Copy, MessageCircle, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -94,19 +94,19 @@ const ShareButton = ({ postId, content }: ShareButtonProps) => {
           </>
         )}
         <DropdownMenuItem onClick={shareOnWhatsApp} className="gap-3">
-          <MessageCircle className="h-4 w-4 text-green-500" /> WhatsApp
+          <MessageCircle className="h-4 w-4" /> WhatsApp
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareOnFacebook} className="gap-3">
-          <Facebook className="h-4 w-4 text-blue-600" /> Facebook
+          <Share2 className="h-4 w-4" /> Facebook
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareOnTwitter} className="gap-3">
-          <Twitter className="h-4 w-4 text-sky-500" /> Twitter / X
+          <Share2 className="h-4 w-4" /> Twitter / X
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareOnLinkedIn} className="gap-3">
-          <Share2 className="h-4 w-4 text-blue-700" /> LinkedIn
+          <Share2 className="h-4 w-4" /> LinkedIn
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareOnTelegram} className="gap-3">
-          <Send className="h-4 w-4 text-blue-400" /> Telegram
+          <Send className="h-4 w-4" /> Telegram
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={copyToClipboard} className="gap-3">
@@ -116,8 +116,5 @@ const ShareButton = ({ postId, content }: ShareButtonProps) => {
     </DropdownMenu>
   );
 };
-
-// Need to import Send
-import { Send } from 'lucide-react';
 
 export default ShareButton;
