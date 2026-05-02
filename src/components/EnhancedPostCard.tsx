@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-import { sanitizeHtml } from '@/lib/sanitize';
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,6 +15,7 @@ import { sanitizeHtml } from '@/lib/sanitize';
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MessageCircle, ExternalLink, FileText, Image, Video, Music, MoreHorizontal, Bookmark, BookmarkCheck, Trash2, Flag, Copy } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitize';
 import ReactionPicker from './ReactionPicker';
 import ShareButton from './ShareButton';
 import { toast } from 'sonner';
