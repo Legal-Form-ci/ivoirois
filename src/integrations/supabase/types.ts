@@ -2375,6 +2375,25 @@ export type Database = {
           total_users: number
         }[]
       }
+      get_safe_live_streams: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          ended_at: string
+          host_id: string
+          id: string
+          peak_viewers: number
+          privacy: string
+          scheduled_at: string
+          started_at: string
+          status: string
+          stream_key: string
+          thumbnail_url: string
+          title: string
+          viewers_count: number
+        }[]
+      }
       get_translation: {
         Args: { p_key: string; p_lang?: string }
         Returns: string
