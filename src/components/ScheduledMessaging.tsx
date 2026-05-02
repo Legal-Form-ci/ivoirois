@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
@@ -225,10 +226,9 @@ const ScheduledMessaging = ({ conversationId, onMessageScheduled }: ScheduledMes
                         <div className="flex-1 min-w-0">
                           <div 
                             className="text-sm line-clamp-2"
-                            dangerouslySetInnerHTML={{ 
-                              __html: msg.content.replace(/<[^>]*>/g, '').slice(0, 80) + '...' 
-                            }}
-                          />
+                          >
+                            {msg.content.replace(/<[^>]*>/g, '').slice(0, 80) + '...'}
+                          </div>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline" className="text-xs">
                               {format(new Date(msg.scheduled_at), 'PPp', { locale: fr })}

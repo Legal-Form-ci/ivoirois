@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Calendar, UserPlus, UserCheck, UserMinus, Edit, X, Check, MessageCircle, Settings, Video } from "lucide-react";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import QRCodeProfile from "@/components/QRCodeProfile";
@@ -301,7 +302,7 @@ const Profile = () => {
                   {profile.bio && (
                     <div
                       className="prose prose-sm max-w-none text-foreground"
-                      dangerouslySetInnerHTML={{ __html: profile.bio }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(profile.bio) }}
                     />
                   )}
 

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
   Sparkles, Loader2, Image, Film, Images, FileText, 
@@ -325,7 +326,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
                   {/* Content */}
                   <div 
                     className="px-4 pb-3 prose prose-sm max-w-none dark:prose-invert text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: generatedData.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(generatedData.content) }}
                   />
 
                   {/* Images */}

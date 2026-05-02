@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
+import { sanitizeHtml } from '@/lib/sanitize';
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -246,7 +247,7 @@ const EnhancedPostCard = ({
         {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3">{hook}</p>}
 
         {displayContent && (
-          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: displayContent }} />
+          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
         )}
         {shouldTruncate && (
           <button onClick={() => setIsExpanded(true)} className="text-primary text-sm font-medium hover:underline">
