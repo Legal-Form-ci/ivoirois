@@ -2347,6 +2347,14 @@ export type Database = {
           username: string
         }[]
       }
+      get_own_sensitive_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          marital_status: string
+          phone_number: string
+          religion: string
+        }[]
+      }
       get_personalized_feed: {
         Args: { p_limit?: number; p_user_id: string }
         Returns: {
