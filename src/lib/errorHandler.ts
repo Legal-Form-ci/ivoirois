@@ -24,6 +24,7 @@ const AUTH_ERROR_MAP: Record<string, string> = {
   'email_not_confirmed': 'Veuillez confirmer votre email',
   'user_not_found': 'Compte introuvable',
   'weak_password': 'Mot de passe trop faible (min. 6 caractères)',
+  'password_in_hibp_database': 'Ce mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre.',
   'over_request_rate_limit': 'Trop de tentatives, réessayez plus tard',
   'signup_disabled': 'Les inscriptions sont temporairement désactivées',
   'session_not_found': 'Session expirée, reconnectez-vous',
