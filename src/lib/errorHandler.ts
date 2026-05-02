@@ -91,6 +91,10 @@ export function mapToUserError(error: unknown): string {
   }
   
   // Check for specific patterns
+  if (message.includes('hibp') || message.includes('breached') || message.includes('leaked') || message.includes('compromised password')) {
+    return 'Ce mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre plus sécurisé.';
+  }
+  
   if (message.includes('duplicate key')) {
     return 'Cet élément existe déjà';
   }
