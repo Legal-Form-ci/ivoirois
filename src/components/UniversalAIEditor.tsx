@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { Table } from '@tiptap/extension-table';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -620,7 +621,7 @@ const UniversalAIEditor = ({
             <div className="p-6 prose prose-sm max-w-none dark:prose-invert">
               {title && <h1 className="text-2xl font-bold mb-2">{title}</h1>}
               {hook && <p className="text-lg italic text-muted-foreground mb-4">{hook}</p>}
-              <div dangerouslySetInnerHTML={{ __html: content }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />
               {hashtags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t">
                   {hashtags.map(tag => (

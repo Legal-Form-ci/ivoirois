@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { sanitizeHtml } from "@/lib/sanitize";
 import ReactionPicker from "./ReactionPicker";
 import ShareButton from "./ShareButton";
 
@@ -112,7 +113,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
       <CardContent className="pb-3 space-y-3">
         <div
           className="prose prose-sm max-w-none text-foreground leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
         />
         {image && (
           image.match(/\.(mp4|webm|ogg)$/i) ? (

@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MessageCircle, ExternalLink, FileText, Image, Video, Music, MoreHorizontal, Bookmark, BookmarkCheck, Trash2, Flag, Copy } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitize';
 import ReactionPicker from './ReactionPicker';
 import ShareButton from './ShareButton';
 import { toast } from 'sonner';
@@ -246,7 +247,7 @@ const EnhancedPostCard = ({
         {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3">{hook}</p>}
 
         {displayContent && (
-          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: displayContent }} />
+          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
         )}
         {shouldTruncate && (
           <button onClick={() => setIsExpanded(true)} className="text-primary text-sm font-medium hover:underline">

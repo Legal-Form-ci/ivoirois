@@ -2347,6 +2347,14 @@ export type Database = {
           username: string
         }[]
       }
+      get_own_sensitive_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          marital_status: string
+          phone_number: string
+          religion: string
+        }[]
+      }
       get_personalized_feed: {
         Args: { p_limit?: number; p_user_id: string }
         Returns: {
@@ -2373,6 +2381,25 @@ export type Database = {
           total_jobs: number
           total_posts: number
           total_users: number
+        }[]
+      }
+      get_safe_live_streams: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          ended_at: string
+          host_id: string
+          id: string
+          peak_viewers: number
+          privacy: string
+          scheduled_at: string
+          started_at: string
+          status: string
+          stream_key: string
+          thumbnail_url: string
+          title: string
+          viewers_count: number
         }[]
       }
       get_translation: {

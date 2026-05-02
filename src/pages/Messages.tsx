@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import RichTextEditor from "@/components/RichTextEditor";
 import WebRTCCall from "@/components/WebRTCCall";
 import OnlineStatus from "@/components/OnlineStatus";
+import { sanitizeHtml } from "@/lib/sanitize";
 import TypingIndicator, { useSendTypingIndicator } from "@/components/TypingIndicator";
 import MessageReactions from "@/components/MessageReactions";
 import ScheduledMessaging from "@/components/ScheduledMessaging";
@@ -448,9 +449,9 @@ const Messages = () => {
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="font-medium truncate">{conv.other_user.full_name}</p>
-                        <p className="text-sm text-muted-foreground truncate" dangerouslySetInnerHTML={{ 
-                          __html: conv.last_message?.replace(/<[^>]*>/g, '').slice(0, 30) || "Nouvelle conversation" 
-                        }} />
+                        <p className="text-sm text-muted-foreground truncate">
+                          {conv.last_message?.replace(/<[^>]*>/g, '').slice(0, 30) || "Nouvelle conversation"}
+                        </p>
                       </div>
                       {conv.unread_count && conv.unread_count > 0 && (
                         <span className="bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -526,7 +527,7 @@ const Messages = () => {
                         >
                           <div 
                             className="prose prose-sm max-w-none break-words [&_p]:m-0" 
-                            dangerouslySetInnerHTML={{ __html: msg.content }} 
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(msg.content) }} 
                           />
                           <div className={`flex items-center justify-between gap-2 text-xs mt-1 ${
                             msg.sender_id === user?.id 
