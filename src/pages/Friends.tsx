@@ -43,75 +43,69 @@ const Friends = () => {
       // Friends (accepted)
       const { data: acceptedData, error: acceptedError } = await supabase
         .from("friendships")
-        .select(`
-          *,
-          profile:profiles!friendships_friend_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
-        .eq("user_id", user.id)
+        .select("*")
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
         .eq("status", "accepted");
 
       if (acceptedError) throw acceptedError;
 
-      // Also get friendships where current user is the friend
-      const { data: acceptedData2, error: acceptedError2 } = await supabase
-        .from("friendships")
-        .select(`
-          *,
-          profile:profiles!friendships_user_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
-        .eq("friend_id", user.id)
-        .eq("status", "accepted");
-
-      if (acceptedError2) throw acceptedError2;
-
-      setFriends([...(acceptedData || []), ...(acceptedData2 || [])]);
+      // Fetch profiles for the "other" user in each friendship
+      const friendsWithProfiles = await Promise.all(
+        (acceptedData || []).map(async (f) => {
+          const otherId = f.user_id === user.id ? f.friend_id : f.user_id;
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id, full_name, username, avatar_url")
+            .eq("id", otherId)
+            .single();
+          return { ...f, profile: profile || { id: otherId, full_name: "Utilisateur", username: "user", avatar_url: null } };
+        })
+      );
+      setFriends(friendsWithProfiles);
 
       // Received requests
       const { data: requestsData, error: requestsError } = await supabase
         .from("friendships")
-        .select(`
-          *,
-          profile:profiles!friendships_user_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select("*")
         .eq("friend_id", user.id)
         .eq("status", "pending");
 
       if (requestsError) throw requestsError;
-      setRequests(requestsData || []);
+
+      const requestsWithProfiles = await Promise.all(
+        (requestsData || []).map(async (f) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id, full_name, username, avatar_url")
+            .eq("id", f.user_id)
+            .single();
+          return { ...f, profile: profile || { id: f.user_id, full_name: "Utilisateur", username: "user", avatar_url: null } };
+        })
+      );
+      setRequests(requestsWithProfiles);
 
       // Sent requests
       const { data: sentData, error: sentError } = await supabase
         .from("friendships")
-        .select(`
-          *,
-          profile:profiles!friendships_friend_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select("*")
         .eq("user_id", user.id)
         .eq("status", "pending");
 
       if (sentError) throw sentError;
-      setSent(sentData || []);
+
+      const sentWithProfiles = await Promise.all(
+        (sentData || []).map(async (f) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id, full_name, username, avatar_url")
+            .eq("id", f.friend_id)
+            .single();
+          return { ...f, profile: profile || { id: f.friend_id, full_name: "Utilisateur", username: "user", avatar_url: null } };
+        })
+      );
+      setSent(sentWithProfiles);
     } catch (error: any) {
+      console.error("Friendship fetch error:", error);
       toast.error("Erreur lors du chargement");
     } finally {
       setLoading(false);

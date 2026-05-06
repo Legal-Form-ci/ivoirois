@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getStorageUrl } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -110,11 +111,10 @@ const EnhancedCreatePost = ({ onPostCreated }: EnhancedCreatePostProps) => {
           continue;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('posts')
-          .getPublicUrl(fileName);
+        const signedUrl = await getStorageUrl('posts', fileName);
+        if (!signedUrl) continue;
 
-        mediaUrls.push(publicUrl);
+        mediaUrls.push(signedUrl);
         mediaTypes.push(file.type);
       }
 

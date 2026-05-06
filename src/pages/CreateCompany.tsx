@@ -115,8 +115,10 @@ const CreateCompany = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from("companies").getPublicUrl(fileName);
-      setFormData({ ...formData, logo_url: data.publicUrl });
+      const { data: signedData } = await supabase.storage.from("companies").createSignedUrl(fileName, 3600);
+      if (signedData?.signedUrl) {
+        setFormData({ ...formData, logo_url: signedData.signedUrl });
+      }
       toast.success("Logo téléchargé");
     } catch (error: any) {
       toast.error("Erreur lors du téléchargement");

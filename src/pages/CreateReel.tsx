@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getStorageUrl } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -70,9 +71,8 @@ const CreateReel = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('reels')
-        .getPublicUrl(fileName);
+      const signedUrl = await getStorageUrl('reels', fileName);
+      if (!signedUrl) throw new Error("Failed to get URL");
 
       // Get video duration
       const video = document.createElement('video');
@@ -92,7 +92,7 @@ const CreateReel = () => {
         .from('reels')
         .insert({
           user_id: user.id,
-          video_url: publicUrl,
+          video_url: signedUrl,
           caption,
           hashtags: hashtagsArray,
           music_title: musicTitle || null,

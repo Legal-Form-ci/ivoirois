@@ -18,10 +18,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[var(--shadow-card)]">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/feed" className="flex items-center gap-2">
-          <img src={appLogo} alt="Ivoi'Rois" className="h-10 w-10 rounded-lg" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <div className="container flex h-14 md:h-16 items-center justify-between px-2 sm:px-4">
+        <Link to="/feed" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <img src={appLogo} alt="Ivoi'Rois" className="h-8 w-8 md:h-10 md:w-10 rounded-lg" />
+          <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hidden sm:inline">
             Ivoi'Rois
           </span>
         </Link>

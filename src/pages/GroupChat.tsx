@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getStorageUrl } from "@/lib/storage";
 import Header from "@/components/Header";
 import TypingIndicator from "@/components/TypingIndicator";
 import { Button } from "@/components/ui/button";
@@ -144,15 +145,14 @@ const GroupChat = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("groups")
-        .getPublicUrl(fileName);
+      const signedUrl = await getStorageUrl("groups", fileName);
+      if (!signedUrl) throw new Error("Failed to get URL");
 
       await supabase.from("group_messages" as any).insert({
         group_id: groupId,
         sender_id: user!.id,
         content: `Fichier partagé: ${file.name}`,
-        media_url: publicUrl,
+        media_url: signedUrl,
         media_type: mediaType,
       });
 
