@@ -92,7 +92,7 @@ const CreateReel = () => {
         .from('reels')
         .insert({
           user_id: user.id,
-          video_url: publicUrl,
+          video_url: signedUrl,
           caption,
           hashtags: hashtagsArray,
           music_title: musicTitle || null,
