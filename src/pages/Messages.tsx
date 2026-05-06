@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getStorageUrl } from "@/lib/storage";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
@@ -606,13 +607,15 @@ const Messages = () => {
                             return;
                           }
                           
-                          const { data: { publicUrl } } = supabase.storage
-                            .from('messages')
-                            .getPublicUrl(filePath);
+                          const signedUrl = await getStorageUrl('messages', filePath);
+                          if (!signedUrl) {
+                            toast.error("Erreur lors de la récupération du fichier");
+                            return;
+                          }
                           
                           const messageContent = `
                             <div class="voice-message">
-                              <audio controls src="${publicUrl}" class="w-full"></audio>
+                              <audio controls src="${signedUrl}" class="w-full"></audio>
                               <p class="text-xs mt-1 text-muted-foreground">🎤 ${Math.round(duration)}s</p>
                             </div>
                           `;

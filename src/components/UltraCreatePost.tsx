@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { uploadAndGetUrl, getStorageUrl } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,11 +114,10 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
 
         if (uploadError) continue;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('posts')
-          .getPublicUrl(fileName);
+        const signedUrl = await getStorageUrl('posts', fileName);
+        if (!signedUrl) continue;
 
-        mediaUrls.push(publicUrl);
+        mediaUrls.push(signedUrl);
         mediaTypes.push(file.type);
       }
 
@@ -202,11 +202,10 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
                     try {
                       const res = await fetch(imgDataUrl);
                       const blob = await res.blob();
-                      const fileName = `${user!.id}/ai-${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
-                      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, blob);
-                      if (uploadError) throw uploadError;
-                      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(fileName);
-                      setFilePreviews(prev => [...prev, { url: publicUrl, type: 'image/png', name: 'AI Image' }]);
+                      const file = new File([blob], `ai-image-${Date.now()}.png`, { type: 'image/png' });
+                      const result = await uploadAndGetUrl('posts', user!.id, file);
+                      if (!result) return;
+                      setFilePreviews(prev => [...prev, { url: result.url, type: 'image/png', name: 'AI Image' }]);
                       setFiles(prev => [...prev, new File([blob], `ai-image-${Date.now()}.png`, { type: 'image/png' })]);
                     } catch (err) {
                       console.error('Error uploading AI image:', err);
@@ -388,11 +387,10 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
                   try {
                     const res = await fetch(imageDataUrl);
                     const blob = await res.blob();
-                    const fileName = `${user!.id}/ai-${Date.now()}.png`;
-                    const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, blob);
-                    if (uploadError) throw uploadError;
-                    const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(fileName);
-                    setFilePreviews(prev => [...prev, { url: publicUrl, type: 'image/png', name: 'AI Image' }]);
+                    const file = new File([blob], 'ai-image.png', { type: 'image/png' });
+                    const result = await uploadAndGetUrl('posts', user!.id, file);
+                    if (!result) throw new Error('Upload failed');
+                    setFilePreviews(prev => [...prev, { url: result.url, type: 'image/png', name: 'AI Image' }]);
                     setFiles(prev => [...prev, new File([blob], 'ai-image.png', { type: 'image/png' })]);
                   } catch (err: any) {
                     toast.error("Erreur lors de l'ajout de l'image IA");

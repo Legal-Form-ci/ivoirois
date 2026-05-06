@@ -134,9 +134,10 @@ const EditProfile = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
-
-      setFormData({ ...formData, avatar_url: data.publicUrl });
+      const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(fileName, 3600);
+      if (signedData?.signedUrl) {
+        setFormData({ ...formData, avatar_url: signedData.signedUrl });
+      }
       toast.success("Photo téléchargée avec succès");
     } catch (error: any) {
       toast.error("Erreur lors du téléchargement");

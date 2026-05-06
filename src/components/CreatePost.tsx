@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { postSchema } from "@/lib/validation";
 import { handleError } from "@/lib/errorHandler";
+import { uploadAndGetUrl } from "@/lib/storage";
 import {
   Popover,
   PopoverContent,
@@ -79,20 +80,8 @@ const CreatePost = ({ onPostCreated }: CreatePostProps) => {
 
       // Upload file if selected
       if (selectedFile) {
-        const fileExt = selectedFile.name.split(".").pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("posts")
-          .upload(fileName, selectedFile);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("posts")
-          .getPublicUrl(fileName);
-
-        imageUrl = publicUrl;
+        const result = await uploadAndGetUrl("posts", user.id, selectedFile);
+        if (result) imageUrl = result.url;
       }
 
       const { error } = await supabase.from("posts").insert({
