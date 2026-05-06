@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getStorageUrl } from "@/lib/storage";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
@@ -117,10 +118,8 @@ const CreateListing = () => {
           .upload(fileName, image);
 
         if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('posts')
-            .getPublicUrl(fileName);
-          imageUrls.push(publicUrl);
+          const signedUrl = await getStorageUrl('posts', fileName);
+          if (signedUrl) imageUrls.push(signedUrl);
         }
       }
 

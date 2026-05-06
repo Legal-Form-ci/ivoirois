@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getStorageUrl } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -174,11 +175,10 @@ const AdminMediaManager = () => {
           continue;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('posts')
-          .getPublicUrl(fileName);
+        const signedUrl = await getStorageUrl('posts', fileName);
+        if (!signedUrl) continue;
 
-        newUrls.push(publicUrl);
+        newUrls.push(signedUrl);
         newTypes.push(pending.file.type);
       }
 

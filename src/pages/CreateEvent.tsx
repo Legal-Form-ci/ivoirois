@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getStorageUrl } from "@/lib/storage";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
@@ -78,10 +79,8 @@ const CreateEvent = () => {
           .upload(fileName, coverImage);
 
         if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('posts')
-            .getPublicUrl(fileName);
-          coverUrl = publicUrl;
+          const signedUrl = await getStorageUrl('posts', fileName);
+          if (signedUrl) coverUrl = signedUrl;
         }
       }
 
