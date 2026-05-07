@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -61,6 +62,10 @@ const LiveStreams = () => {
   const [comments, setComments] = useState<StreamComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('live');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     fetchAllStreams();
@@ -107,7 +112,15 @@ const LiveStreams = () => {
   const createStream = async () => {
     if (!user || !title.trim()) return;
     setCreating(true);
+    setCameraError(null);
     try {
+      // Request camera access first (must be in user gesture chain)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        audio: true,
+      });
+      localStreamRef.current = stream;
+
       const { error } = await supabase.from('live_streams').insert({
         host_id: user.id,
         title: title.trim(),
@@ -120,14 +133,35 @@ const LiveStreams = () => {
       if (error) throw error;
       toast.success('🔴 Live démarré !');
       setShowCreate(false);
+      setIsStreaming(true);
       setTitle('');
       setDescription('');
       fetchAllStreams();
+      // Attach stream after dialog closes
+      setTimeout(() => {
+        if (localVideoRef.current && localStreamRef.current) {
+          localVideoRef.current.srcObject = localStreamRef.current;
+        }
+      }, 300);
     } catch (error: any) {
-      toast.error(error.message || 'Erreur');
+      const msg = error.name === 'NotAllowedError'
+        ? 'Accès caméra refusé. Vérifiez les permissions.'
+        : error.name === 'NotFoundError'
+        ? 'Aucune caméra détectée.'
+        : (error.message || 'Erreur');
+      setCameraError(msg);
+      toast.error(msg);
+      localStreamRef.current?.getTracks().forEach(t => t.stop());
+      localStreamRef.current = null;
     } finally {
       setCreating(false);
     }
+  };
+
+  const stopStreaming = () => {
+    localStreamRef.current?.getTracks().forEach(t => t.stop());
+    localStreamRef.current = null;
+    setIsStreaming(false);
   };
 
   const openStream = async (stream: LiveStream) => {
@@ -171,6 +205,7 @@ const LiveStreams = () => {
   };
 
   const endStream = async (streamId: string) => {
+    stopStreaming();
     await supabase.from('live_streams').update({
       status: 'ended',
       ended_at: new Date().toISOString(),
