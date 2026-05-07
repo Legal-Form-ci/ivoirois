@@ -229,7 +229,7 @@ const LiveStreams = () => {
       className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden group"
       onClick={() => openStream(stream)}
     >
-      <div className="relative aspect-video bg-gradient-to-br from-red-500/20 to-primary/20 flex items-center justify-center overflow-hidden">
+    <div className="relative aspect-video bg-gradient-to-br from-destructive/10 to-primary/10 flex items-center justify-center overflow-hidden">
         {stream.thumbnail_url ? (
           <img src={stream.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
         ) : (
@@ -237,12 +237,12 @@ const LiveStreams = () => {
             {isReplay ? (
               <Play className="h-12 w-12 text-primary/50" />
             ) : (
-              <Radio className="h-12 w-12 text-red-500/50 animate-pulse" />
+              <Radio className="h-12 w-12 text-destructive/50 animate-pulse" />
             )}
           </div>
         )}
         {!isReplay && stream.status === 'live' && (
-          <Badge className="absolute top-2 left-2 bg-red-500 text-white gap-1 animate-pulse">
+          <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground gap-1 animate-pulse">
             <Wifi className="h-3 w-3" />
             EN DIRECT
           </Badge>
@@ -289,7 +289,7 @@ const LiveStreams = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Radio className="h-6 w-6 text-red-500" />
+              <Radio className="h-6 w-6 text-destructive" />
                 Live & Replays
               </h1>
               <p className="text-muted-foreground">Diffusions en direct et replays</p>
@@ -371,7 +371,7 @@ const LiveStreams = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Radio className="h-5 w-5 text-red-500" />
+              <Radio className="h-5 w-5 text-destructive" />
               Démarrer un Live
             </DialogTitle>
           </DialogHeader>
