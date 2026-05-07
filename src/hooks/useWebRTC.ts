@@ -140,12 +140,24 @@ export const useWebRTC = ({
     try {
       setCallStatus("calling");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: isAudioOnly
-          ? false
-          : { width: { ideal: 1280 }, height: { ideal: 720 } },
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: isAudioOnly
+            ? false
+            : { width: { ideal: 1280 }, height: { ideal: 720 } },
+        });
+      } catch (mediaError: any) {
+        const msg = mediaError.name === 'NotAllowedError'
+          ? "Accès micro/caméra refusé. Vérifiez les permissions."
+          : mediaError.name === 'NotFoundError'
+          ? "Aucun micro/caméra détecté."
+          : "Impossible d'accéder au micro/caméra.";
+        toast.error(msg);
+        setCallStatus("idle");
+        return;
+      }
 
       localStreamRef.current = stream;
       if (localVideoRef.current) {
@@ -220,9 +232,11 @@ export const useWebRTC = ({
   };
 
   const acceptCall = async () => {
-    // The call is automatically accepted when we send the answer
-    setCallStatus("connected");
-    toast.success("Appel connecté");
+    // Answer was already sent in handleOffer; confirm UI state
+    if (callStatus === "receiving") {
+      setCallStatus("connected");
+      toast.success("Appel connecté");
+    }
   };
 
   const rejectCall = async () => {
