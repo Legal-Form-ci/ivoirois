@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -61,6 +62,10 @@ const LiveStreams = () => {
   const [comments, setComments] = useState<StreamComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('live');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     fetchAllStreams();
@@ -107,7 +112,15 @@ const LiveStreams = () => {
   const createStream = async () => {
     if (!user || !title.trim()) return;
     setCreating(true);
+    setCameraError(null);
     try {
+      // Request camera access first (must be in user gesture chain)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        audio: true,
+      });
+      localStreamRef.current = stream;
+
       const { error } = await supabase.from('live_streams').insert({
         host_id: user.id,
         title: title.trim(),
@@ -120,14 +133,35 @@ const LiveStreams = () => {
       if (error) throw error;
       toast.success('🔴 Live démarré !');
       setShowCreate(false);
+      setIsStreaming(true);
       setTitle('');
       setDescription('');
       fetchAllStreams();
+      // Attach stream after dialog closes
+      setTimeout(() => {
+        if (localVideoRef.current && localStreamRef.current) {
+          localVideoRef.current.srcObject = localStreamRef.current;
+        }
+      }, 300);
     } catch (error: any) {
-      toast.error(error.message || 'Erreur');
+      const msg = error.name === 'NotAllowedError'
+        ? 'Accès caméra refusé. Vérifiez les permissions.'
+        : error.name === 'NotFoundError'
+        ? 'Aucune caméra détectée.'
+        : (error.message || 'Erreur');
+      setCameraError(msg);
+      toast.error(msg);
+      localStreamRef.current?.getTracks().forEach(t => t.stop());
+      localStreamRef.current = null;
     } finally {
       setCreating(false);
     }
+  };
+
+  const stopStreaming = () => {
+    localStreamRef.current?.getTracks().forEach(t => t.stop());
+    localStreamRef.current = null;
+    setIsStreaming(false);
   };
 
   const openStream = async (stream: LiveStream) => {
@@ -171,6 +205,7 @@ const LiveStreams = () => {
   };
 
   const endStream = async (streamId: string) => {
+    stopStreaming();
     await supabase.from('live_streams').update({
       status: 'ended',
       ended_at: new Date().toISOString(),
@@ -194,7 +229,7 @@ const LiveStreams = () => {
       className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden group"
       onClick={() => openStream(stream)}
     >
-      <div className="relative aspect-video bg-gradient-to-br from-red-500/20 to-primary/20 flex items-center justify-center overflow-hidden">
+    <div className="relative aspect-video bg-gradient-to-br from-destructive/10 to-primary/10 flex items-center justify-center overflow-hidden">
         {stream.thumbnail_url ? (
           <img src={stream.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
         ) : (
@@ -202,12 +237,12 @@ const LiveStreams = () => {
             {isReplay ? (
               <Play className="h-12 w-12 text-primary/50" />
             ) : (
-              <Radio className="h-12 w-12 text-red-500/50 animate-pulse" />
+              <Radio className="h-12 w-12 text-destructive/50 animate-pulse" />
             )}
           </div>
         )}
         {!isReplay && stream.status === 'live' && (
-          <Badge className="absolute top-2 left-2 bg-red-500 text-white gap-1 animate-pulse">
+          <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground gap-1 animate-pulse">
             <Wifi className="h-3 w-3" />
             EN DIRECT
           </Badge>
@@ -254,7 +289,7 @@ const LiveStreams = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Radio className="h-6 w-6 text-red-500" />
+              <Radio className="h-6 w-6 text-destructive" />
                 Live & Replays
               </h1>
               <p className="text-muted-foreground">Diffusions en direct et replays</p>
@@ -336,7 +371,7 @@ const LiveStreams = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Radio className="h-5 w-5 text-red-500" />
+              <Radio className="h-5 w-5 text-destructive" />
               Démarrer un Live
             </DialogTitle>
           </DialogHeader>
@@ -352,7 +387,10 @@ const LiveStreams = () => {
               onChange={e => setDescription(e.target.value)}
               className="resize-none"
             />
-            <Button onClick={createStream} disabled={creating || !title.trim()} className="w-full gap-2 bg-red-500 hover:bg-red-600">
+            {cameraError && (
+              <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{cameraError}</p>
+            )}
+            <Button onClick={createStream} disabled={creating || !title.trim()} className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground">
               {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radio className="h-4 w-4" />}
               Lancer le Live
             </Button>
@@ -361,36 +399,72 @@ const LiveStreams = () => {
       </Dialog>
 
       {/* Stream Viewer */}
-      <Dialog open={!!selectedStream} onOpenChange={() => {
+      <Dialog open={!!selectedStream || isStreaming} onOpenChange={(open) => {
+        if (!open && isStreaming && !selectedStream) {
+          // Closing own streaming view
+          const ownStream = liveStreams.find(s => s.host_id === user?.id && s.status === 'live');
+          if (ownStream) endStream(ownStream.id);
+          else stopStreaming();
+          return;
+        }
         if (selectedStream) {
           supabase.removeChannel(supabase.channel(`stream-comments-${selectedStream.id}`));
         }
         setSelectedStream(null);
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-          {selectedStream && (
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+          {/* Own camera streaming view */}
+          {isStreaming && !selectedStream && (
+            <div className="flex flex-col h-[80vh]">
+              <div className="relative flex-1 bg-foreground/95 rounded-t-lg overflow-hidden flex items-center justify-center">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+                <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground gap-1 animate-pulse">
+                  <Wifi className="h-3 w-3" /> EN DIRECT
+                </Badge>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2"
+                  onClick={() => {
+                    const ownStream = liveStreams.find(s => s.host_id === user?.id && s.status === 'live');
+                    if (ownStream) endStream(ownStream.id);
+                    else stopStreaming();
+                  }}
+                >
+                  <WifiOff className="h-4 w-4" /> Terminer le Live
+                </Button>
+              </div>
+            </div>
+          )}
+          {selectedStream && !isStreaming && (
             <div className="flex flex-col h-[80vh]">
               {/* Video area */}
-              <div className="relative aspect-video bg-black flex items-center justify-center shrink-0">
-                <div className="text-center text-white">
+              <div className="relative aspect-video bg-foreground/95 flex items-center justify-center shrink-0 rounded-t-lg overflow-hidden">
+                <div className="text-center text-background">
                   {selectedStream.status === 'live' ? (
-                    <Radio className="h-16 w-16 mx-auto mb-4 text-red-500 animate-pulse" />
+                    <Radio className="h-16 w-16 mx-auto mb-4 text-destructive animate-pulse" />
                   ) : (
                     <Play className="h-16 w-16 mx-auto mb-4 text-primary" />
                   )}
-                  <h3 className="text-lg font-semibold">{selectedStream.title}</h3>
-                  <p className="text-white/70 text-sm mt-1">
+                  <h3 className="text-lg font-semibold text-background">{selectedStream.title}</h3>
+                  <p className="text-background/70 text-sm mt-1">
                     {selectedStream.profiles?.full_name}
                   </p>
                   {selectedStream.description && (
-                    <p className="text-white/50 text-xs mt-2 max-w-sm mx-auto">
+                    <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto">
                       {selectedStream.description}
                     </p>
                   )}
                 </div>
                 <div className="absolute top-3 left-3 flex gap-2">
                   {selectedStream.status === 'live' ? (
-                    <Badge className="bg-red-500 text-white gap-1 animate-pulse">
+                    <Badge className="bg-destructive text-destructive-foreground gap-1 animate-pulse">
                       <Wifi className="h-3 w-3" /> LIVE
                     </Badge>
                   ) : (

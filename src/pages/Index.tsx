@@ -11,7 +11,7 @@ const Index = () => {
       <section
         className="relative h-screen flex items-center justify-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(255, 140, 0, 0.9), rgba(0, 165, 80, 0.85)), url(${heroImage})`,
+          backgroundImage: `linear-gradient(135deg, rgba(194, 110, 30, 0.92), rgba(46, 130, 76, 0.88)), url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -80,7 +80,7 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
+      <section className="py-16 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
         <div className="container text-center px-3 sm:px-4">
           <h2 className="text-2xl sm:text-3xl font-bold mb-6 md:mb-8">Rejoignez des milliers d'utilisateurs</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">

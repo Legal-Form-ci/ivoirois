@@ -270,7 +270,7 @@ const EnhancedPostCard = ({
         {safeHashtags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {safeHashtags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-primary cursor-pointer hover:bg-primary/20">
+              <Badge key={index} variant="secondary" className="text-foreground/70 font-medium cursor-pointer hover:bg-accent/20 text-xs">
                 #{tag}
               </Badge>
             ))}
