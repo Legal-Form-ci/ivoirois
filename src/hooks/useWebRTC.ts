@@ -22,7 +22,16 @@ interface CallSignal {
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" },
+  { urls: "stun:stun3.l.google.com:19302" },
 ];
+
+export type WebRTCDiagnosticStep = {
+  step: string;
+  status: "pending" | "ok" | "error" | "info";
+  message?: string;
+  at: number;
+};
 
 export const useWebRTC = ({
   conversationId,
@@ -36,12 +45,28 @@ export const useWebRTC = ({
   >("idle");
   const [isLocalMuted, setIsLocalMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(!isAudioOnly);
+  const [diagnostics, setDiagnostics] = useState<WebRTCDiagnosticStep[]>([]);
+  const [iceState, setIceState] = useState<RTCIceConnectionState | "idle">("idle");
+  const [connState, setConnState] = useState<RTCPeerConnectionState | "idle">("idle");
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const isCallerRef = useRef<boolean>(false);
+  const restartAttemptsRef = useRef<number>(0);
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const log = useCallback(
+    (step: string, status: WebRTCDiagnosticStep["status"], message?: string) => {
+      const entry = { step, status, message, at: Date.now() };
+      // eslint-disable-next-line no-console
+      console.log(`[WebRTC] ${status.toUpperCase()} ${step}${message ? " — " + message : ""}`);
+      setDiagnostics((d) => [...d.slice(-49), entry]);
+    },
+    []
+  );
 
   // Setup signaling channel
   useEffect(() => {
@@ -61,7 +86,7 @@ export const useWebRTC = ({
           const signal = payload.new as CallSignal;
           if (signal.caller_id === user.id) return; // Ignore own signals
 
-          console.log("Received signal:", signal.signal_type);
+          log("signal:received", "info", signal.signal_type);
           await handleSignal(signal);
         }
       )
@@ -113,42 +138,83 @@ export const useWebRTC = ({
     };
 
     pc.ontrack = (event) => {
-      console.log("Received remote track");
+      log("ontrack", "ok", `${event.track.kind}`);
       remoteStreamRef.current = event.streams[0];
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
+    pc.oniceconnectionstatechange = () => {
+      const s = pc.iceConnectionState;
+      setIceState(s);
+      log("iceConnectionState", s === "failed" || s === "disconnected" ? "error" : "info", s);
+      if (s === "failed" || s === "disconnected") {
+        scheduleIceRestart();
+      } else if (s === "connected" || s === "completed") {
+        restartAttemptsRef.current = 0;
+      }
+    };
+
     pc.onconnectionstatechange = () => {
-      console.log("Connection state:", pc.connectionState);
+      const s = pc.connectionState;
+      setConnState(s);
+      log("connectionState", s === "failed" ? "error" : "info", s);
       if (pc.connectionState === "connected") {
         setCallStatus("connected");
-      } else if (
-        pc.connectionState === "disconnected" ||
-        pc.connectionState === "failed"
-      ) {
-        handleCallEnd();
+      } else if (pc.connectionState === "failed") {
+        // Try ICE restart instead of immediately ending
+        scheduleIceRestart();
       }
     };
 
     peerConnectionRef.current = pc;
     return pc;
-  }, [conversationId, remoteUserId]);
+  }, [conversationId, remoteUserId, log]);
+
+  const scheduleIceRestart = useCallback(() => {
+    if (!isCallerRef.current) return; // Only caller initiates restart
+    if (restartTimerRef.current) return;
+    if (restartAttemptsRef.current >= 3) {
+      log("ice-restart", "error", "Trop de tentatives, fin d'appel");
+      handleCallEnd();
+      return;
+    }
+    restartAttemptsRef.current += 1;
+    log("ice-restart", "info", `tentative #${restartAttemptsRef.current}`);
+    restartTimerRef.current = setTimeout(async () => {
+      restartTimerRef.current = null;
+      const pc = peerConnectionRef.current;
+      if (!pc) return;
+      try {
+        const offer = await pc.createOffer({ iceRestart: true });
+        await pc.setLocalDescription(offer);
+        await sendSignal("offer", offer);
+        log("ice-restart", "ok", "offer renvoyée");
+      } catch (e: any) {
+        log("ice-restart", "error", e?.message);
+      }
+    }, 1500);
+  }, [log]);
 
   const startCall = async () => {
     try {
       setCallStatus("calling");
+      isCallerRef.current = true;
+      log("startCall", "info");
 
       let stream: MediaStream;
       try {
+        log("getUserMedia", "pending");
         stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
           video: isAudioOnly
             ? false
             : { width: { ideal: 1280 }, height: { ideal: 720 } },
         });
+        log("getUserMedia", "ok", `${stream.getTracks().map(t => t.kind).join(",")}`);
       } catch (mediaError: any) {
+        log("getUserMedia", "error", mediaError?.name + ": " + mediaError?.message);
         const msg = mediaError.name === 'NotAllowedError'
           ? "Accès micro/caméra refusé. Vérifiez les permissions."
           : mediaError.name === 'NotFoundError'
@@ -169,11 +235,12 @@ export const useWebRTC = ({
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
+      log("offer", "ok", "envoyée");
 
       await sendSignal("offer", offer);
       toast.info("Appel en cours...");
     } catch (error: any) {
-      console.error("Error starting call:", error);
+      log("startCall", "error", error?.message);
       toast.error("Erreur lors du démarrage de l'appel");
       handleCallEnd();
     }
@@ -181,19 +248,33 @@ export const useWebRTC = ({
 
   const handleOffer = async (offer: RTCSessionDescriptionInit) => {
     try {
+      log("handleOffer", "info");
+      // For ICE restart, peer connection already exists with media
+      let pc = peerConnectionRef.current;
+      if (pc && localStreamRef.current) {
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await sendSignal("answer", answer);
+        log("answer", "ok", "ICE restart");
+        return;
+      }
+
+      log("getUserMedia", "pending");
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: isAudioOnly
           ? false
           : { width: { ideal: 1280 }, height: { ideal: 720 } },
       });
+      log("getUserMedia", "ok");
 
       localStreamRef.current = stream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
 
-      const pc = initializePeerConnection();
+      pc = initializePeerConnection();
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -201,8 +282,9 @@ export const useWebRTC = ({
       await pc.setLocalDescription(answer);
 
       await sendSignal("answer", answer);
+      log("answer", "ok");
     } catch (error: any) {
-      console.error("Error handling offer:", error);
+      log("handleOffer", "error", error?.message);
       rejectCall();
     }
   };
@@ -213,9 +295,10 @@ export const useWebRTC = ({
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(answer)
         );
+        log("setRemoteDescription(answer)", "ok");
       }
     } catch (error: any) {
-      console.error("Error handling answer:", error);
+      log("handleAnswer", "error", error?.message);
     }
   };
 
@@ -227,7 +310,7 @@ export const useWebRTC = ({
         );
       }
     } catch (error: any) {
-      console.error("Error handling ICE candidate:", error);
+      log("addIceCandidate", "error", error?.message);
     }
   };
 
@@ -250,6 +333,10 @@ export const useWebRTC = ({
   };
 
   const handleCallEnd = () => {
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
     // Stop all tracks
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     remoteStreamRef.current?.getTracks().forEach((track) => track.stop());
@@ -263,6 +350,7 @@ export const useWebRTC = ({
     peerConnectionRef.current = null;
 
     setCallStatus("ended");
+    log("handleCallEnd", "info");
     onCallEnd?.();
   };
 
@@ -290,6 +378,9 @@ export const useWebRTC = ({
     callStatus,
     isLocalMuted,
     isVideoEnabled,
+    diagnostics,
+    iceState,
+    connState,
     localVideoRef,
     remoteVideoRef,
     startCall,
