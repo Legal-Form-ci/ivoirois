@@ -12,6 +12,7 @@ import {
   PhoneIncoming,
   Volume2,
   VolumeX,
+  Activity,
 } from "lucide-react";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useState } from "react";
@@ -39,12 +40,16 @@ const WebRTCCall = ({
 }: WebRTCCallProps) => {
   const [callDuration, setCallDuration] = useState(0);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const callIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     callStatus,
     isLocalMuted,
     isVideoEnabled,
+    diagnostics,
+    iceState,
+    connState,
     localVideoRef,
     remoteVideoRef,
     startCall,
@@ -192,6 +197,52 @@ const WebRTCCall = ({
             {callStatus === "connected" && !isAudioOnly && (
               <div className="absolute top-4 left-4 bg-background/80 rounded-full px-4 py-2">
                 <p className="text-sm font-medium">{formatDuration(callDuration)}</p>
+              </div>
+            )}
+
+            {/* Diagnostic toggle */}
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-4 right-4 rounded-full h-10 w-10 opacity-80 hover:opacity-100"
+              onClick={() => setShowDiagnostics((v) => !v)}
+              title="Diagnostic WebRTC"
+            >
+              <Activity className="h-4 w-4" />
+            </Button>
+
+            {showDiagnostics && (
+              <div className="absolute top-16 right-4 w-80 max-h-96 overflow-y-auto rounded-lg bg-background/95 backdrop-blur border p-3 text-xs space-y-1 shadow-hover">
+                <div className="flex items-center justify-between font-semibold pb-2 border-b">
+                  <span>Diagnostic WebRTC</span>
+                  <span className="font-mono text-[10px]">
+                    ICE:{iceState} · PC:{connState}
+                  </span>
+                </div>
+                {diagnostics.length === 0 && (
+                  <p className="text-muted-foreground">En attente d'événements…</p>
+                )}
+                {diagnostics.map((d, i) => (
+                  <div key={i} className="flex gap-2 font-mono">
+                    <span
+                      className={
+                        d.status === "ok"
+                          ? "text-secondary"
+                          : d.status === "error"
+                          ? "text-destructive"
+                          : d.status === "pending"
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      ●
+                    </span>
+                    <span className="flex-1 break-all">
+                      <span className="font-semibold">{d.step}</span>
+                      {d.message ? <span className="text-muted-foreground"> — {d.message}</span> : null}
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
