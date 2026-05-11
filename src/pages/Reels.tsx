@@ -237,7 +237,7 @@ const Reels = () => {
                   {reel.hashtags && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {reel.hashtags.map((tag, i) => (
-                        <span key={i} className="text-primary text-sm">#{tag}</span>
+                        <span key={i} className="text-white/80 text-sm">#{tag}</span>
                       ))}
                     </div>
                   )}
