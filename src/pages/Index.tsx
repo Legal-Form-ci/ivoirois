@@ -30,7 +30,7 @@ const Index = () => {
             Le réseau social & professionnel 100% ivoirien. Connectez-vous, partagez, évoluez.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg" asChild>
+            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-card)]" asChild>
               <Link to="/auth">Se connecter</Link>
             </Button>
             <Button variant="outline" size="lg" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20" asChild>
@@ -99,7 +99,7 @@ const Index = () => {
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
             Créez votre compte gratuitement et commencez à connecter, partager et évoluer avec la communauté Ivoi'Rois.
           </p>
-          <Button variant="hero" size="lg" asChild>
+          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-card)]" asChild>
             <Link to="/auth?mode=signup">Créer mon compte gratuitement</Link>
           </Button>
         </div>
