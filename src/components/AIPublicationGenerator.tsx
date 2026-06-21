@@ -169,7 +169,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
         variant="outline"
         size="sm"
         onClick={handleOpen}
-        className="gap-2 bg-gradient-to-r from-primary/10 to-primary/20 border-primary/30 hover:border-primary/50 hover:bg-primary/20"
+        className="gap-2 border-primary/30 hover:border-primary/50 hover:bg-primary/10"
       >
         <Sparkles className="h-4 w-4" />
         Générer avec IA
@@ -182,7 +182,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
             <div className="p-6 space-y-5">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
+                  <div className="p-2 bg-primary/15 rounded-xl">
                     <Wand2 className="h-5 w-5 text-primary" />
                   </div>
                   Publication assistée par IA
@@ -207,7 +207,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
                 <Button
                   onClick={() => setStep('format')}
                   disabled={!rawText.trim()}
-                  className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+                  className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   <Sparkles className="h-4 w-4" />
                   Générer
@@ -259,7 +259,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
             <div className="p-12 flex flex-col items-center justify-center text-center space-y-6">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                <div className="relative p-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10">
+                <div className="relative p-6 rounded-full bg-primary/15">
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                 </div>
               </div>
@@ -367,7 +367,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
                   <Sparkles className="h-4 w-4" />
                   Régénérer
                 </Button>
-                <Button onClick={handleConfirm} className="flex-1 gap-2 bg-gradient-to-r from-primary to-primary/80">
+                <Button onClick={handleConfirm} className="flex-1 gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
                   <Check className="h-4 w-4" />
                   Utiliser cette publication
                 </Button>

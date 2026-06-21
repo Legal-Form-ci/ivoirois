@@ -190,7 +190,7 @@ const ResumeView = () => {
           {/* CV Content */}
           <div ref={printRef} className="bg-card rounded-xl shadow-lg overflow-hidden print:shadow-none">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-primary to-secondary p-6 sm:p-8 text-primary-foreground">
+            <div className="bg-primary p-6 sm:p-8 text-primary-foreground">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-primary-foreground/20">
                   <AvatarImage src={profile.avatar_url} />

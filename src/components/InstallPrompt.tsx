@@ -89,7 +89,7 @@ const InstallPrompt = () => {
             />
             
             <div>
-              <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold mb-2 text-primary">
                 Installer Ivoi'Rois
               </h2>
               <p className="text-muted-foreground">

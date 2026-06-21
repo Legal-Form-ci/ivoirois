@@ -129,7 +129,7 @@ const AIPostGenerator = ({ onGenerated }: AIPostGeneratorProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="gap-2 bg-gradient-to-r from-primary/10 to-primary/20 border-primary/30 hover:border-primary/50 hover:bg-primary/20"
+          className="gap-2 border-primary/30 hover:border-primary/50 hover:bg-primary/10"
         >
           <Sparkles className="h-4 w-4" />
           Générer avec IA
@@ -304,7 +304,7 @@ const AIPostGenerator = ({ onGenerated }: AIPostGeneratorProps) => {
           <Button 
             onClick={generatePost} 
             disabled={loading || (mode === 'topic' ? !topic.trim() : !rawContent.trim())}
-            className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {loading ? (
               <>
