@@ -121,7 +121,7 @@ const FloatingAIChat = () => {
             <Button
               onClick={() => setIsOpen(true)}
               size="lg"
-              className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              className="h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Bot className="h-6 w-6" />
             </Button>
@@ -144,7 +144,7 @@ const FloatingAIChat = () => {
             className="fixed bottom-20 md:bottom-6 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)]"
           >
             <Card className="shadow-2xl border-2">
-              <CardHeader className="pb-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg">
+              <CardHeader className="pb-2 bg-primary text-primary-foreground rounded-t-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8 bg-primary-foreground/20">

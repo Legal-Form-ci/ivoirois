@@ -231,53 +231,53 @@ const Admin = () => {
 
           {/* Statistics Cards */}
           <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t('admin.users')}</CardTitle>
-                <Users className="h-4 w-4 text-blue-500" />
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5">
+            <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t('admin.companies')}</CardTitle>
-                <Building2 className="h-4 w-4 text-green-500" />
+                <Building2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalCompanies}</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5">
+            <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t('admin.posts')}</CardTitle>
-                <FileText className="h-4 w-4 text-purple-500" />
+                <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalPosts}</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5">
+            <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t('admin.verifications')}</CardTitle>
-                <AlertCircle className="h-4 w-4 text-orange-500" />
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-500">{stats.pendingVerifications}</div>
+                <div className="text-2xl font-bold">{stats.pendingVerifications}</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5">
+            <Card className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t('admin.reports')}</CardTitle>
-                <Flag className="h-4 w-4 text-red-500" />
+                <Flag className="h-4 w-4 text-destructive" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-500">{stats.totalReports}</div>
+                <div className="text-2xl font-bold text-destructive">{stats.totalReports}</div>
               </CardContent>
             </Card>
           </div>

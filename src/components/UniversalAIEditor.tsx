@@ -292,7 +292,7 @@ const UniversalAIEditor = ({
   return (
     <div className="border rounded-xl overflow-hidden bg-background shadow-lg">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 border-b">
+      <div className="bg-muted/40 p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/20 rounded-lg">
@@ -309,7 +309,7 @@ const UniversalAIEditor = ({
           <Button
             onClick={generateWithAI}
             disabled={aiLoading}
-            className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {aiLoading ? (
               <>
@@ -704,7 +704,7 @@ const UniversalAIEditor = ({
         <Button 
           onClick={handleSubmit}
           disabled={submitting}
-          className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {submitting ? (
             <>

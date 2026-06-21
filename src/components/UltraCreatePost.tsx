@@ -172,7 +172,7 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
 
   return (
     <Card className="mb-6 overflow-hidden">
-      <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-primary/10">
+      <CardHeader className="pb-3 bg-muted/30">
         <div className="flex items-center gap-3">
           <Avatar className="ring-2 ring-primary/20">
             <AvatarImage src={profile?.avatar_url || undefined} />
@@ -401,7 +401,7 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
               />
             </div>
             
-            <Button type="submit" disabled={loading} className="bg-gradient-to-r from-primary to-primary/80">
+            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

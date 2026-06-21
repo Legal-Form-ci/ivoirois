@@ -147,7 +147,7 @@ const AIStreamingChat = ({ onClose, isFullscreen, onToggleFullscreen }: AIStream
   return (
     <Card className={`flex flex-col ${isFullscreen ? 'fixed inset-4 z-50' : 'h-[500px]'} bg-background shadow-xl`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
+      <div className="flex items-center justify-between p-4 border-b bg-muted/40">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-full bg-primary/10">
             <Bot className="h-5 w-5 text-primary" />
