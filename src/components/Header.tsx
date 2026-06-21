@@ -21,7 +21,7 @@ const Header = () => {
       <div className="container flex h-14 md:h-16 items-center justify-between px-2 sm:px-4">
         <Link to="/feed" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <img src={appLogo} alt="Ivoi'Rois" className="h-8 w-8 md:h-10 md:w-10 rounded-lg" />
-          <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hidden sm:inline">
+          <span className="text-lg md:text-2xl font-bold text-primary hidden sm:inline">
             Ivoi'Rois
           </span>
         </Link>
