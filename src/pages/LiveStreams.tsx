@@ -532,22 +532,34 @@ const LiveStreams = () => {
             <div className="flex flex-col h-[80vh]">
               {/* Video area */}
               <div className="relative aspect-video bg-foreground/95 flex items-center justify-center shrink-0 rounded-t-lg overflow-hidden">
-                <div className="text-center text-background">
-                  {selectedStream.status === 'live' ? (
-                    <Radio className="h-16 w-16 mx-auto mb-4 text-destructive animate-pulse" />
-                  ) : (
-                    <Play className="h-16 w-16 mx-auto mb-4 text-primary" />
-                  )}
-                  <h3 className="text-lg font-semibold text-background">{selectedStream.title}</h3>
-                  <p className="text-background/70 text-sm mt-1">
-                    {selectedStream.profiles?.full_name}
-                  </p>
-                  {selectedStream.description && (
-                    <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto">
-                      {selectedStream.description}
+                {selectedStream.status === 'ended' && replayUrl ? (
+                  <video
+                    src={replayUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain bg-black"
+                  />
+                ) : (
+                  <div className="text-center text-background px-4">
+                    {selectedStream.status === 'live' ? (
+                      <Radio className="h-16 w-16 mx-auto mb-4 text-destructive animate-pulse" />
+                    ) : (
+                      <Play className="h-16 w-16 mx-auto mb-4 text-primary" />
+                    )}
+                    <h3 className="text-lg font-semibold text-background">{selectedStream.title}</h3>
+                    <p className="text-background/70 text-sm mt-1">
+                      {selectedStream.profiles?.full_name}
                     </p>
-                  )}
-                </div>
+                    {selectedStream.description && (
+                      <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto">
+                        {selectedStream.description}
+                      </p>
+                    )}
+                    {selectedStream.status === 'ended' && !selectedStream.recording_url && (
+                      <p className="text-background/60 text-xs mt-3">Aucun replay disponible</p>
+                    )}
+                  </div>
+                )}
                 <div className="absolute top-3 left-3 flex gap-2">
                   {selectedStream.status === 'live' ? (
                     <Badge className="bg-destructive text-destructive-foreground gap-1 animate-pulse">
