@@ -29,6 +29,8 @@ interface LiveStream {
   started_at: string;
   ended_at: string;
   thumbnail_url: string;
+  recording_url: string | null;
+  privacy?: string;
   profiles: {
     full_name: string;
     avatar_url: string;
@@ -66,6 +68,11 @@ const LiveStreams = () => {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const currentStreamIdRef = useRef<string | null>(null);
+  const [replayUrl, setReplayUrl] = useState<string | null>(null);
+  const [uploadingReplay, setUploadingReplay] = useState(false);
 
   useEffect(() => {
     fetchAllStreams();
@@ -121,7 +128,7 @@ const LiveStreams = () => {
       });
       localStreamRef.current = stream;
 
-      const { error } = await supabase.from('live_streams').insert({
+      const { data: created, error } = await supabase.from('live_streams').insert({
         host_id: user.id,
         title: title.trim(),
         description: description.trim() || null,
@@ -131,6 +138,26 @@ const LiveStreams = () => {
       }).select().single();
 
       if (error) throw error;
+      currentStreamIdRef.current = created?.id ?? null;
+
+      // Start MediaRecorder for replay
+      try {
+        const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+          ? 'video/webm;codecs=vp9,opus'
+          : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+          ? 'video/webm;codecs=vp8,opus'
+          : 'video/webm';
+        const rec = new MediaRecorder(stream, { mimeType: mime });
+        recordedChunksRef.current = [];
+        rec.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+        };
+        rec.start(1000);
+        mediaRecorderRef.current = rec;
+      } catch (recErr) {
+        console.warn('[Live] MediaRecorder unavailable', recErr);
+      }
+
       toast.success('🔴 Live démarré !');
       setShowCreate(false);
       setIsStreaming(true);
@@ -159,6 +186,8 @@ const LiveStreams = () => {
   };
 
   const stopStreaming = () => {
+    try { mediaRecorderRef.current?.stop(); } catch {}
+    mediaRecorderRef.current = null;
     localStreamRef.current?.getTracks().forEach(t => t.stop());
     localStreamRef.current = null;
     setIsStreaming(false);
@@ -166,6 +195,7 @@ const LiveStreams = () => {
 
   const openStream = async (stream: LiveStream) => {
     setSelectedStream(stream);
+    setReplayUrl(null);
     fetchComments(stream.id);
 
     // Update viewer count
@@ -174,6 +204,18 @@ const LiveStreams = () => {
         viewers_count: (stream.viewers_count || 0) + 1,
         peak_viewers: Math.max(stream.peak_viewers || 0, (stream.viewers_count || 0) + 1),
       }).eq('id', stream.id);
+    }
+
+    // Replay: create a signed URL for the recording
+    if (stream.status === 'ended' && stream.recording_url) {
+      try {
+        const { data } = await supabase.storage
+          .from('recordings')
+          .createSignedUrl(stream.recording_url, 3600);
+        if (data?.signedUrl) setReplayUrl(data.signedUrl);
+      } catch (e) {
+        console.warn('[Replay] Signed URL error', e);
+      }
     }
 
     supabase
@@ -205,13 +247,57 @@ const LiveStreams = () => {
   };
 
   const endStream = async (streamId: string) => {
+    // Stop recorder & wait for final chunk before stopping tracks
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      setUploadingReplay(true);
+      await new Promise<void>((resolve) => {
+        recorder.onstop = () => resolve();
+        try { recorder.stop(); } catch { resolve(); }
+      });
+      mediaRecorderRef.current = null;
+
+      // Upload to storage
+      try {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        recordedChunksRef.current = [];
+        if (blob.size > 0 && user) {
+          const path = `${streamId}/replay.webm`;
+          const { error: upErr } = await supabase.storage
+            .from('recordings')
+            .upload(path, blob, { upsert: true, contentType: 'video/webm' });
+          if (upErr) {
+            console.error('[Replay] Upload failed', upErr);
+            toast.error('Replay non sauvegardé');
+          } else {
+            await supabase.from('live_streams').update({
+              status: 'ended',
+              ended_at: new Date().toISOString(),
+              recording_url: path,
+            }).eq('id', streamId);
+            setUploadingReplay(false);
+            localStreamRef.current?.getTracks().forEach(t => t.stop());
+            localStreamRef.current = null;
+            setIsStreaming(false);
+            setSelectedStream(null);
+            toast.success('Live terminé. Replay disponible.');
+            fetchAllStreams();
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('[Replay] Error', e);
+      }
+      setUploadingReplay(false);
+    }
+
     stopStreaming();
     await supabase.from('live_streams').update({
       status: 'ended',
       ended_at: new Date().toISOString(),
     }).eq('id', streamId);
     setSelectedStream(null);
-    toast.success('Live terminé. Le replay est disponible.');
+    toast.success('Live terminé.');
     fetchAllStreams();
   };
 
@@ -229,7 +315,7 @@ const LiveStreams = () => {
       className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden group"
       onClick={() => openStream(stream)}
     >
-    <div className="relative aspect-video bg-gradient-to-br from-destructive/10 to-primary/10 flex items-center justify-center overflow-hidden">
+    <div className="relative aspect-video bg-muted flex items-center justify-center overflow-hidden">
         {stream.thumbnail_url ? (
           <img src={stream.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
         ) : (
