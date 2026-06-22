@@ -372,7 +372,7 @@ const EnhancedAdmin = () => {
                   <CardTitle className="text-3xl">{stats?.totalCompanies || 0}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center text-sm text-green-600">
+                  <div className="flex items-center text-sm text-primary">
                     <Check className="w-4 h-4 mr-1" />
                     {stats?.verifiedCompanies || 0} vérifiées
                   </div>
@@ -455,7 +455,7 @@ const EnhancedAdmin = () => {
                             className="h-7 w-7"
                             onClick={() => handleReport(report.id, 'resolved')}
                           >
-                            <Check className="w-4 h-4 text-green-600" />
+                            <Check className="w-4 h-4 text-primary" />
                           </Button>
                           <Button
                             size="icon"
@@ -522,7 +522,7 @@ const EnhancedAdmin = () => {
                           <TableCell>{new Date(u.created_at).toLocaleDateString('fr-FR')}</TableCell>
                           <TableCell>
                             {u.is_online ? (
-                              <Badge variant="outline" className="text-green-600">En ligne</Badge>
+                              <Badge variant="outline" className="text-primary">En ligne</Badge>
                             ) : (
                               <Badge variant="secondary">Hors ligne</Badge>
                             )}
@@ -617,7 +617,7 @@ const EnhancedAdmin = () => {
                                 <Button 
                                   size="icon" 
                                   variant="ghost" 
-                                  className="h-8 w-8 text-green-600"
+                                  className="h-8 w-8 text-primary"
                                   onClick={() => verifyCompany(company.id, true)}
                                 >
                                   <Check className="w-4 h-4" />
@@ -683,7 +683,7 @@ const EnhancedAdmin = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-green-600"
+                                  className="text-primary"
                                   onClick={() => handleReport(report.id, 'resolved')}
                                 >
                                   <Check className="w-4 h-4 mr-1" />
