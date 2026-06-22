@@ -253,11 +253,11 @@ const Marketplace = () => {
                       }}
                     >
                       <Heart 
-                        className={`h-4 w-4 ${listing.is_favorite ? 'fill-red-500 text-red-500' : ''}`} 
+                        className={`h-4 w-4 ${listing.is_favorite ? 'fill-destructive text-destructive' : ''}`} 
                       />
                     </Button>
                     {listing.is_negotiable && (
-                      <Badge className="absolute bottom-2 left-2 bg-green-500/90">
+                      <Badge className="absolute bottom-2 left-2 bg-primary/90 text-primary-foreground">
                         Négociable
                       </Badge>
                     )}

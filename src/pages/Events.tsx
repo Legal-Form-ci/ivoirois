@@ -136,7 +136,7 @@ const Events = () => {
   );
 
   const EventCard = ({ event }: { event: Event }) => (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/events/${event.id}`)}>
       {event.cover_image && (
         <div className="h-40 overflow-hidden">
           <img
@@ -195,7 +195,7 @@ const Events = () => {
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           {event.user_status === 'going' ? (
             <Badge className="bg-primary/10 text-primary border-primary/20">
               Vous participez
