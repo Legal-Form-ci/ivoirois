@@ -197,7 +197,7 @@ const Events = () => {
 
         <div className="flex gap-2">
           {event.user_status === 'going' ? (
-            <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+            <Badge className="bg-primary/10 text-primary border-primary/20">
               Vous participez
             </Badge>
           ) : event.user_status === 'interested' ? (

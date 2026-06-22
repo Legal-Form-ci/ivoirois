@@ -135,11 +135,11 @@ const Notifications = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case "like":
-        return <Heart className="h-5 w-5 text-red-500" />;
+        return <Heart className="h-5 w-5 text-destructive" />;
       case "comment":
-        return <MessageCircle className="h-5 w-5 text-blue-500" />;
+        return <MessageCircle className="h-5 w-5 text-primary" />;
       case "friend_request":
-        return <UserPlus className="h-5 w-5 text-green-500" />;
+        return <UserPlus className="h-5 w-5 text-primary" />;
       default:
         return <Bell className="h-5 w-5 text-primary" />;
     }

@@ -146,16 +146,16 @@ const NotificationBell = () => {
     switch (type) {
       case "like":
       case "reaction":
-        return <Heart className="h-4 w-4 text-red-500" />;
+        return <Heart className="h-4 w-4 text-destructive" />;
       case "comment":
-        return <MessageCircle className="h-4 w-4 text-blue-500" />;
+        return <MessageCircle className="h-4 w-4 text-primary" />;
       case "friend_request":
       case "friend_accepted":
-        return <UserPlus className="h-4 w-4 text-green-500" />;
+        return <UserPlus className="h-4 w-4 text-primary" />;
       case "follow":
-        return <Eye className="h-4 w-4 text-purple-500" />;
+        return <Eye className="h-4 w-4 text-muted-foreground" />;
       case "group":
-        return <Users className="h-4 w-4 text-orange-500" />;
+        return <Users className="h-4 w-4 text-primary" />;
       default:
         return <Bell className="h-4 w-4 text-primary" />;
     }
