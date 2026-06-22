@@ -39,6 +39,8 @@ import Events from "./pages/Events";
 import CreateEvent from "./pages/CreateEvent";
 import Marketplace from "./pages/Marketplace";
 import CreateListing from "./pages/CreateListing";
+import ListingDetail from "./pages/ListingDetail";
+import EventDetail from "./pages/EventDetail";
 import LiveStreams from "./pages/LiveStreams";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
@@ -150,12 +152,16 @@ const App = () => (
             <Route path="/evenements" element={<ProtectedRoute><Events /></ProtectedRoute>} />
             <Route path="/events/create" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
             <Route path="/evenements/creer" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+            <Route path="/events/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+            <Route path="/evenements/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
             
             {/* Marketplace */}
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/marche" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/marketplace/create" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />
             <Route path="/marche/creer" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />
+            <Route path="/marketplace/:id" element={<ProtectedRoute><ListingDetail /></ProtectedRoute>} />
+            <Route path="/marche/:id" element={<ProtectedRoute><ListingDetail /></ProtectedRoute>} />
             
             {/* Search */}
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
