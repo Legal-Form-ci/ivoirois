@@ -831,6 +831,8 @@ export type Database = {
           id: string
           peak_viewers: number | null
           privacy: string | null
+          recording_enabled: boolean
+          recording_url: string | null
           scheduled_at: string | null
           started_at: string | null
           status: string | null
@@ -847,6 +849,8 @@ export type Database = {
           id?: string
           peak_viewers?: number | null
           privacy?: string | null
+          recording_enabled?: boolean
+          recording_url?: string | null
           scheduled_at?: string | null
           started_at?: string | null
           status?: string | null
@@ -863,6 +867,8 @@ export type Database = {
           id?: string
           peak_viewers?: number | null
           privacy?: string | null
+          recording_enabled?: boolean
+          recording_url?: string | null
           scheduled_at?: string | null
           started_at?: string | null
           status?: string | null
