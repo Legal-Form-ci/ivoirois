@@ -163,7 +163,7 @@ const PageView = () => {
           <Card className="overflow-hidden">
             <div className="relative">
               <div 
-                className="h-32 md:h-48 bg-gradient-to-r from-primary/20 to-primary/40"
+                className="h-32 md:h-48 bg-muted"
                 style={page.cover_image ? { 
                   backgroundImage: `url(${page.cover_image})`,
                   backgroundSize: 'cover',

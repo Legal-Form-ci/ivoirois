@@ -124,7 +124,7 @@ const Resume = () => {
                           </span>
                         )}
                         {resume.is_public && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
                             Public
                           </span>
                         )}

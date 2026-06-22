@@ -79,8 +79,8 @@ const FileAttachmentPicker = ({
     if (type.startsWith('video/')) return <Video className="w-4 h-4" />;
     if (type.startsWith('audio/')) return <Music className="w-4 h-4" />;
     if (type.includes('pdf')) return <FileText className="w-4 h-4 text-red-500" />;
-    if (type.includes('word') || type.includes('document')) return <FileText className="w-4 h-4 text-blue-500" />;
-    if (type.includes('excel') || type.includes('spreadsheet')) return <FileText className="w-4 h-4 text-green-500" />;
+    if (type.includes('word') || type.includes('document')) return <FileText className="w-4 h-4 text-muted-foreground" />;
+    if (type.includes('excel') || type.includes('spreadsheet')) return <FileText className="w-4 h-4 text-muted-foreground" />;
     if (type.includes('powerpoint') || type.includes('presentation')) return <FileText className="w-4 h-4 text-orange-500" />;
     return <File className="w-4 h-4" />;
   };

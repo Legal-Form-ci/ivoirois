@@ -31,21 +31,18 @@ const FORMAT_OPTIONS = [
     label: 'Publication + Image IA',
     description: 'L\'IA génère une image ultra-réaliste cohérente avec votre message',
     icon: ImagePlus,
-    color: 'from-blue-500 to-cyan-500',
   },
   {
     id: 'text_multi_images',
     label: 'Publication + Carrousel',
     description: 'Galerie de plusieurs images thématiques cohérentes',
     icon: Images,
-    color: 'from-purple-500 to-pink-500',
   },
   {
     id: 'text_only',
     label: 'Publication texte',
     description: 'Texte pur, naturel et engageant sans élément visuel',
     icon: FileText,
-    color: 'from-emerald-500 to-teal-500',
   },
 ];
 
@@ -233,7 +230,7 @@ const AIPublicationGenerator = ({ onGenerated }: AIPublicationGeneratorProps) =>
                     onClick={() => handleSelectFormat(format.id)}
                     className="flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all text-left group"
                   >
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${format.color} text-white shrink-0`}>
+                    <div className="p-3 rounded-xl bg-primary text-primary-foreground shrink-0">
                       <format.icon className="h-6 w-6" />
                     </div>
                     <div className="flex-1">

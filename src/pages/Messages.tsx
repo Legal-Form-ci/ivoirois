@@ -544,7 +544,7 @@ const Messages = () => {
                             {msg.sender_id === user?.id && (
                               <span className="ml-1">
                                 {msg.read_at ? (
-                                  <CheckCheck className="h-3.5 w-3.5 text-blue-400" />
+                                  <CheckCheck className="h-3.5 w-3.5 text-primary" />
                                 ) : msg.delivered_at ? (
                                   <CheckCheck className="h-3.5 w-3.5" />
                                 ) : (

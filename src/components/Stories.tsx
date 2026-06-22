@@ -308,7 +308,7 @@ const Stories = () => {
               onClick={() => viewStory(story)}
             >
               <div className="relative">
-                <div className="p-[2px] rounded-full bg-gradient-to-tr from-primary via-primary/80 to-accent group-hover:scale-105 transition-transform">
+                <div className="p-[2px] rounded-full bg-primary group-hover:scale-105 transition-transform">
                   <Avatar className="h-16 w-16 border-2 border-background">
                     <AvatarImage src={story.profiles?.avatar_url} />
                     <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
@@ -349,8 +349,8 @@ const Stories = () => {
               )}
               {filePreview && selectedFile?.type.startsWith("audio") && (
                 <div className="flex flex-col items-center gap-4 p-8">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
-                    <Music className="h-16 w-16 text-white" />
+                  <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center">
+                    <Music className="h-16 w-16 text-primary-foreground" />
                   </div>
                   <audio src={filePreview} controls className="w-full max-w-xs" />
                 </div>
@@ -441,8 +441,8 @@ const Stories = () => {
                   <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted playsInline />
                 ) : selectedStory.media_type === "audio" ? (
                   <div className="flex flex-col items-center gap-4 p-8">
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center animate-pulse">
-                      <Music className="h-16 w-16 text-white" />
+                    <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center animate-pulse">
+                      <Music className="h-16 w-16 text-primary-foreground" />
                     </div>
                     <audio src={selectedStory.media_url} className="w-full max-w-xs" controls autoPlay />
                   </div>
