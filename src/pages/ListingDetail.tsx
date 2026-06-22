@@ -66,9 +66,21 @@ const ListingDetail = () => {
     if (seller.id === user.id) return;
     setContacting(true);
     try {
-      // Find or create 1-1 conversation
-      const { data: existing } = await supabase.rpc("get_or_create_dm" as any, { other: seller.id }).maybeSingle?.() ?? { data: null };
-      let convId: string | null = (existing as any)?.id ?? null;
+      // Find an existing 1-1 conversation between the two users
+      const { data: mine } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user.id);
+      const myIds = (mine || []).map((m: any) => m.conversation_id);
+      let convId: string | null = null;
+      if (myIds.length) {
+        const { data: shared } = await supabase
+          .from("conversation_participants")
+          .select("conversation_id")
+          .eq("user_id", seller.id)
+          .in("conversation_id", myIds);
+        if (shared && shared.length) convId = shared[0].conversation_id as string;
+      }
       if (!convId) {
         const { data: conv, error: cErr } = await supabase.from("conversations").insert({}).select().single();
         if (cErr) throw cErr;
