@@ -279,6 +279,7 @@ const LiveStreams = () => {
             localStreamRef.current?.getTracks().forEach(t => t.stop());
             localStreamRef.current = null;
             setIsStreaming(false);
+            currentStreamIdRef.current = null;
             setSelectedStream(null);
             toast.success('Live terminé. Replay disponible.');
             fetchAllStreams();
@@ -297,6 +298,7 @@ const LiveStreams = () => {
       ended_at: new Date().toISOString(),
     }).eq('id', streamId);
     setSelectedStream(null);
+    currentStreamIdRef.current = null;
     toast.success('Live terminé.');
     fetchAllStreams();
   };
@@ -500,7 +502,7 @@ const LiveStreams = () => {
       }}>
         <DialogContent className="max-w-3xl max-h-[90vh] p-0">
           {/* Own camera streaming view */}
-          {isStreaming && !selectedStream && (
+          {isStreaming && (!selectedStream || selectedStream.host_id === user?.id) && (
             <div className="flex flex-col h-[80vh]">
               <div className="relative flex-1 bg-foreground/95 rounded-t-lg overflow-hidden flex items-center justify-center">
                 <video
@@ -528,7 +530,7 @@ const LiveStreams = () => {
               </div>
             </div>
           )}
-          {selectedStream && !isStreaming && (
+          {selectedStream && (!isStreaming || selectedStream.host_id !== user?.id) && (
             <div className="flex flex-col h-[80vh]">
               {/* Video area */}
               <div className="relative aspect-video bg-foreground/95 flex items-center justify-center shrink-0 rounded-t-lg overflow-hidden">
