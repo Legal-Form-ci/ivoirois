@@ -48,16 +48,31 @@ const Auth = () => {
         toast.success("Email de réinitialisation envoyé");
         setIsForgotPassword(false);
       } else if (isLogin) {
-        // Validate login inputs
-        const validation = authSchema.safeParse({ email, password });
+        const identifier = email.trim();
+        let loginEmail = identifier;
+
+        if (!identifier.includes("@")) {
+          const { data: resolvedEmail, error: resolveError } = await supabase.rpc(
+            "resolve_login_identifier",
+            { _identifier: identifier }
+          );
+          if (resolveError || !resolvedEmail) {
+            toast.error("Identifiant introuvable");
+            setLoading(false);
+            return;
+          }
+          loginEmail = resolvedEmail;
+        }
+
+        const validation = authSchema.safeParse({ email: loginEmail, password });
         if (!validation.success) {
           toast.error(validation.error.errors[0]?.message);
           setLoading(false);
           return;
         }
-        
+
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: loginEmail,
           password,
         });
 
@@ -206,11 +221,11 @@ const Auth = () => {
               </>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{isLogin ? "Email ou identifiant" : "Email"}</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="exemple@gmail.com"
+                type={isLogin ? "text" : "email"}
+                placeholder={isLogin ? "Ivoi'Rois ou exemple@gmail.com" : "exemple@gmail.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

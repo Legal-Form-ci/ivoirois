@@ -92,6 +92,7 @@ const CreateJob = () => {
 
     setLoading(true);
     try {
+      await supabase.rpc('ensure_my_profile');
       const { error } = await supabase.from("job_posts").insert({
         ...formData,
         created_by: user.id,

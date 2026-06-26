@@ -67,6 +67,7 @@ const CreateEvent = () => {
     setLoading(true);
 
     try {
+      await supabase.rpc('ensure_my_profile');
       let coverUrl = null;
 
       // Upload cover image if provided
