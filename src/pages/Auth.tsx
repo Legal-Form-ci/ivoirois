@@ -12,6 +12,7 @@ import { REGIONS_COTE_IVOIRE } from "@/constants/regions";
 import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, authSchema } from "@/lib/validation";
 import { handleError } from "@/lib/errorHandler";
+import { lovable } from "@/integrations/lovable";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -136,6 +137,20 @@ const Auth = () => {
         toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
         navigate(redirectTo);
       }
+    } catch (error: unknown) {
+      toast.error(handleError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}${redirectTo}`,
+      });
+      if (result.error) throw result.error;
     } catch (error: unknown) {
       toast.error(handleError(error));
     } finally {
@@ -288,6 +303,18 @@ const Auth = () => {
                 : "S'inscrire"}
             </Button>
           </form>
+
+          {!isForgotPassword && (
+            <div className="mt-4 space-y-3">
+              <div className="relative text-center text-xs text-muted-foreground">
+                <span className="bg-card px-2 relative z-10">ou</span>
+                <div className="absolute inset-x-0 top-1/2 border-t" />
+              </div>
+              <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+                Continuer avec Google
+              </Button>
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             {isForgotPassword ? (

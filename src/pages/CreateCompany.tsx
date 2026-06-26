@@ -144,7 +144,7 @@ const CreateCompany = () => {
 
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `companies/${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("companies")
