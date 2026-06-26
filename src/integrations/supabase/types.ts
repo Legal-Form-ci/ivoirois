@@ -265,7 +265,63 @@ export type Database = {
           verified_at?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_team_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          role: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          role?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          role?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_team_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_recommendations: {
         Row: {
@@ -740,6 +796,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_posts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1252,6 +1315,7 @@ export type Database = {
       pages: {
         Row: {
           category: string | null
+          company_id: string | null
           cover_image: string | null
           created_at: string
           created_by: string
@@ -1264,6 +1328,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          company_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by: string
@@ -1276,6 +1341,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          company_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string
@@ -1287,6 +1353,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pages_created_by_fkey"
             columns: ["created_by"]
@@ -1561,6 +1634,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cover_url: string | null
           created_at: string
           education_level: string | null
           experience_level: string | null
@@ -1584,6 +1658,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           education_level?: string | null
           experience_level?: string | null
@@ -1607,6 +1682,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           education_level?: string | null
           experience_level?: string | null
@@ -1628,6 +1704,75 @@ export type Database = {
           years_of_experience?: number | null
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          category: string | null
+          company_id: string | null
+          cover_image: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_public: boolean
+          location: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          category?: string | null
+          company_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_public?: boolean
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          category?: string | null
+          company_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_public?: boolean
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
@@ -1926,7 +2071,15 @@ export type Database = {
           user_id?: string
           user_references?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "resumes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_posts: {
         Row: {
@@ -2342,6 +2495,8 @@ export type Database = {
         Args: { _message_id: string; _user_id: string }
         Returns: boolean
       }
+      ensure_my_profile: { Args: never; Returns: undefined }
+      ensure_profile_for: { Args: { _user_id: string }; Returns: undefined }
       get_friends_with_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -2419,6 +2574,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_live_viewer: {
+        Args: { _stream_id: string }
+        Returns: undefined
       }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
