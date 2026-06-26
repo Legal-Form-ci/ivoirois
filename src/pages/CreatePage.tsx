@@ -39,6 +39,7 @@ const CreatePage = () => {
 
     setLoading(true);
     try {
+      await supabase.rpc('ensure_my_profile');
       console.log('[CreatePage] Inserting page...');
       const { data: page, error: pageError } = await supabase
         .from('pages')
@@ -72,9 +73,9 @@ const CreatePage = () => {
         console.error('[CreatePage] Follow error:', followError);
       }
 
-      console.log('[CreatePage] Success! Navigating to pages...');
+      console.log('[CreatePage] Success! Navigating to page...');
       toast.success('Page créée avec succès !');
-      navigate('/pages');
+      navigate(`/pages/${page.id}`);
     } catch (error: any) {
       console.error('[CreatePage] Error:', error);
       toast.error(`Erreur lors de la création de la page: ${error.message || 'Erreur inconnue'}`);

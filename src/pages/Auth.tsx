@@ -12,6 +12,7 @@ import { REGIONS_COTE_IVOIRE } from "@/constants/regions";
 import { Eye, EyeOff } from "lucide-react";
 import { signupSchema, authSchema } from "@/lib/validation";
 import { handleError } from "@/lib/errorHandler";
+import { lovable } from "@/integrations/lovable";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -48,16 +49,31 @@ const Auth = () => {
         toast.success("Email de réinitialisation envoyé");
         setIsForgotPassword(false);
       } else if (isLogin) {
-        // Validate login inputs
-        const validation = authSchema.safeParse({ email, password });
+        const identifier = email.trim();
+        let loginEmail = identifier;
+
+        if (!identifier.includes("@")) {
+          const { data: resolvedEmail, error: resolveError } = await supabase.rpc(
+            "resolve_login_identifier",
+            { _identifier: identifier }
+          );
+          if (resolveError || !resolvedEmail) {
+            toast.error("Identifiant introuvable");
+            setLoading(false);
+            return;
+          }
+          loginEmail = resolvedEmail;
+        }
+
+        const validation = authSchema.safeParse({ email: loginEmail, password });
         if (!validation.success) {
           toast.error(validation.error.errors[0]?.message);
           setLoading(false);
           return;
         }
-        
+
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: loginEmail,
           password,
         });
 
@@ -121,6 +137,20 @@ const Auth = () => {
         toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
         navigate(redirectTo);
       }
+    } catch (error: unknown) {
+      toast.error(handleError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}${redirectTo}`,
+      });
+      if (result.error) throw result.error;
     } catch (error: unknown) {
       toast.error(handleError(error));
     } finally {
@@ -206,11 +236,11 @@ const Auth = () => {
               </>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{isLogin ? "Email ou identifiant" : "Email"}</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="exemple@gmail.com"
+                type={isLogin ? "text" : "email"}
+                placeholder={isLogin ? "Ivoi'Rois ou exemple@gmail.com" : "exemple@gmail.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -273,6 +303,18 @@ const Auth = () => {
                 : "S'inscrire"}
             </Button>
           </form>
+
+          {!isForgotPassword && (
+            <div className="mt-4 space-y-3">
+              <div className="relative text-center text-xs text-muted-foreground">
+                <span className="bg-card px-2 relative z-10">ou</span>
+                <div className="absolute inset-x-0 top-1/2 border-t" />
+              </div>
+              <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+                Continuer avec Google
+              </Button>
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             {isForgotPassword ? (

@@ -128,11 +128,14 @@ const LiveStreams = () => {
       });
       localStreamRef.current = stream;
 
+      await supabase.rpc('ensure_my_profile');
+
       const { data: created, error } = await supabase.from('live_streams').insert({
         host_id: user.id,
         title: title.trim(),
         description: description.trim() || null,
         status: 'live',
+        privacy: 'public',
         started_at: new Date().toISOString(),
         stream_key: crypto.randomUUID(),
       }).select().single();
@@ -200,10 +203,7 @@ const LiveStreams = () => {
 
     // Update viewer count
     if (stream.status === 'live') {
-      await supabase.from('live_streams').update({
-        viewers_count: (stream.viewers_count || 0) + 1,
-        peak_viewers: Math.max(stream.peak_viewers || 0, (stream.viewers_count || 0) + 1),
-      }).eq('id', stream.id);
+      await supabase.rpc('increment_live_viewer', { _stream_id: stream.id });
     }
 
     // Replay: create a signed URL for the recording
@@ -279,6 +279,7 @@ const LiveStreams = () => {
             localStreamRef.current?.getTracks().forEach(t => t.stop());
             localStreamRef.current = null;
             setIsStreaming(false);
+            currentStreamIdRef.current = null;
             setSelectedStream(null);
             toast.success('Live terminé. Replay disponible.');
             fetchAllStreams();
@@ -297,6 +298,7 @@ const LiveStreams = () => {
       ended_at: new Date().toISOString(),
     }).eq('id', streamId);
     setSelectedStream(null);
+    currentStreamIdRef.current = null;
     toast.success('Live terminé.');
     fetchAllStreams();
   };
@@ -500,7 +502,7 @@ const LiveStreams = () => {
       }}>
         <DialogContent className="max-w-3xl max-h-[90vh] p-0">
           {/* Own camera streaming view */}
-          {isStreaming && !selectedStream && (
+          {isStreaming && (!selectedStream || selectedStream.host_id === user?.id) && (
             <div className="flex flex-col h-[80vh]">
               <div className="relative flex-1 bg-foreground/95 rounded-t-lg overflow-hidden flex items-center justify-center">
                 <video
@@ -518,8 +520,8 @@ const LiveStreams = () => {
                   size="sm"
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2"
                   onClick={() => {
-                    const ownStream = liveStreams.find(s => s.host_id === user?.id && s.status === 'live');
-                    if (ownStream) endStream(ownStream.id);
+                    const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
+                    if (ownStreamId) endStream(ownStreamId);
                     else stopStreaming();
                   }}
                 >
@@ -528,7 +530,7 @@ const LiveStreams = () => {
               </div>
             </div>
           )}
-          {selectedStream && !isStreaming && (
+          {selectedStream && (!isStreaming || selectedStream.host_id !== user?.id) && (
             <div className="flex flex-col h-[80vh]">
               {/* Video area */}
               <div className="relative aspect-video bg-foreground/95 flex items-center justify-center shrink-0 rounded-t-lg overflow-hidden">

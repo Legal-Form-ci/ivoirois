@@ -18,6 +18,7 @@ interface Profile {
   username: string;
   full_name: string;
   avatar_url?: string;
+  cover_url?: string;
   bio?: string;
   location?: string;
   region?: string;
@@ -283,18 +284,25 @@ const Profile = () => {
       <Header />
       <main className="container py-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <Avatar className="h-32 w-32">
+          <Card className="shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="h-40 md:h-56 bg-muted">
+              {profile.cover_url ? (
+                <img src={profile.cover_url} alt="Couverture" className="h-full w-full object-cover" />
+              ) : (
+                <div className="h-full w-full bg-primary/5" />
+              )}
+            </div>
+            <CardContent className="pt-0">
+              <div className="flex flex-col md:flex-row gap-6 items-start -mt-16 md:-mt-14">
+                <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
                   <AvatarImage src={profile.avatar_url} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-4xl">
                     {profile.full_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 space-y-4">
-                  <div>
+                <div className="flex-1 space-y-4 pt-2 md:pt-16 w-full min-w-0">
+                  <div className="bg-background/90 md:bg-transparent rounded-lg p-2 md:p-0">
                     <h1 className="text-3xl font-bold">{profile.full_name}</h1>
                     <p className="text-muted-foreground">@{profile.username}</p>
                   </div>

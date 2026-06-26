@@ -107,6 +107,7 @@ const CreateListing = () => {
     setLoading(true);
 
     try {
+      await supabase.rpc('ensure_my_profile');
       // Upload images
       const imageUrls: string[] = [];
       for (const image of images) {

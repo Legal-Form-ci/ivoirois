@@ -26,6 +26,7 @@ interface Profile {
   username: string;
   full_name: string;
   avatar_url?: string;
+  cover_url?: string;
   bio?: string;
   location?: string;
   phone_number?: string;
@@ -54,6 +55,7 @@ const EditProfile = () => {
     bio: "",
     location: "",
     avatar_url: "",
+    cover_url: "",
     phone_number: "",
     region: "",
     profession: "",
@@ -90,6 +92,7 @@ const EditProfile = () => {
         bio: data.bio || "",
         location: data.location || "",
         avatar_url: data.avatar_url || "",
+        cover_url: data.cover_url || "",
         phone_number: data.phone_number || "",
         region: data.region || "",
         profession: data.profession || "",
@@ -146,6 +149,43 @@ const EditProfile = () => {
     }
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 8MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/cover-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(fileName, 3600);
+      if (signedData?.signedUrl) {
+        setFormData({ ...formData, cover_url: signedData.signedUrl });
+      }
+      toast.success("Couverture téléchargée avec succès");
+    } catch (error: any) {
+      toast.error("Erreur lors du téléchargement");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -160,6 +200,7 @@ const EditProfile = () => {
           bio: formData.bio.trim(),
           location: formData.location.trim(),
           avatar_url: formData.avatar_url.trim() || null,
+          cover_url: formData.cover_url.trim() || null,
           phone_number: formData.phone_number.trim() || null,
           region: formData.region || null,
           profession: formData.profession.trim() || null,
@@ -217,6 +258,25 @@ const EditProfile = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="flex flex-col items-center gap-4">
+                  <div className="w-full space-y-2">
+                    <Label htmlFor="cover_file">Photo de couverture</Label>
+                    <div className="h-32 md:h-44 rounded-lg overflow-hidden bg-muted border">
+                      {formData.cover_url ? (
+                        <img src={formData.cover_url} alt="Couverture" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+                          Aucune couverture
+                        </div>
+                      )}
+                    </div>
+                    <Input
+                      id="cover_file"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      disabled={uploading}
+                    />
+                  </div>
                   <Avatar className="h-24 w-24">
                     <AvatarImage src={formData.avatar_url} />
                     <AvatarFallback className="bg-primary text-primary-foreground text-2xl">

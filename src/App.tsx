@@ -42,6 +42,8 @@ import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
 import EventDetail from "./pages/EventDetail";
 import LiveStreams from "./pages/LiveStreams";
+import Projects from "./pages/Projects";
+import CreateProject from "./pages/CreateProject";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 
@@ -136,6 +138,14 @@ const App = () => (
             <Route path="/pages/create" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
             <Route path="/pages/creer" element={<ProtectedRoute><CreatePage /></ProtectedRoute>} />
             <Route path="/pages/:pageId" element={<ProtectedRoute><PageView /></ProtectedRoute>} />
+
+            {/* Projects */}
+            <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/projets" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
+            <Route path="/projets/creer" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
+            <Route path="/projects/:projectId/edit" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
+            <Route path="/projets/:projectId/modifier" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
             
             {/* Reels */}
             <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />

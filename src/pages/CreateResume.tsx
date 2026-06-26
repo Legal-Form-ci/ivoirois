@@ -207,6 +207,7 @@ const CreateResume = () => {
 
     setLoading(true);
     try {
+      await supabase.rpc('ensure_my_profile');
       const { error } = await supabase
         .from('resumes' as any)
         .insert({

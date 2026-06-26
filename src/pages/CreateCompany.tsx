@@ -30,6 +30,7 @@ const CreateCompany = () => {
     city: "",
     region: "",
     logo_url: "",
+    cover_image: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +54,7 @@ const CreateCompany = () => {
 
     setLoading(true);
     try {
+      await supabase.rpc('ensure_my_profile');
       console.log('[CreateCompany] Inserting company...');
       const { data, error } = await supabase
         .from("companies")
@@ -69,6 +71,7 @@ const CreateCompany = () => {
           city: formData.city.trim() || null,
           region: formData.region || null,
           logo_url: formData.logo_url.trim() || null,
+          cover_image: formData.cover_image.trim() || null,
         })
         .select()
         .single();
@@ -91,6 +94,40 @@ const CreateCompany = () => {
     }
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 8MB");
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/cover-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("companies")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: signedData } = await supabase.storage.from("companies").createSignedUrl(fileName, 3600);
+      if (signedData?.signedUrl) {
+        setFormData({ ...formData, cover_image: signedData.signedUrl });
+      }
+      toast.success("Couverture téléchargée");
+    } catch (error: any) {
+      toast.error("Erreur lors du téléchargement");
+    }
+  };
+
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
@@ -107,7 +144,7 @@ const CreateCompany = () => {
 
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `companies/${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("companies")
@@ -175,6 +212,23 @@ const CreateCompany = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="cover">Photo de couverture</Label>
+                  {formData.cover_image && (
+                    <img src={formData.cover_image} alt="Couverture" className="h-36 w-full rounded-lg object-cover" />
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById("cover")?.click()}
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Télécharger la couverture
+                  </Button>
+                  <input id="cover" type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="name">Nom de l'entreprise *</Label>
                   <Input
                     id="name"
@@ -196,7 +250,7 @@ const CreateCompany = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="sector">Secteur d'activité</Label>
                     <Select
@@ -246,7 +300,7 @@ const CreateCompany = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -270,7 +324,7 @@ const CreateCompany = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">Ville</Label>
                     <Input

@@ -1,4 +1,4 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe, FolderKanban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -107,6 +107,9 @@ const Header = () => {
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
                       <Link to="/pages"><Globe className="h-5 w-5" /><span>Pages</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/projects"><FolderKanban className="h-5 w-5" /><span>Projets</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
                       <Link to="/friends"><Users className="h-5 w-5" /><span>Amis</span></Link>
