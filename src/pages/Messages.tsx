@@ -219,7 +219,7 @@ const Messages = () => {
     try {
       const { data } = await supabase
         .from("messages")
-        .select("*")
+        .select("*, voice_messages(id, audio_url, duration)")
         .eq("conversation_id", conversationId!)
         .order("created_at", { ascending: true });
 
@@ -304,7 +304,7 @@ const Messages = () => {
         conversation_id: conversationId,
         sender_id: user.id,
         content: newMessage.trim(),
-      }).select();
+      }).select("*, voice_messages(id, audio_url, duration)");
 
       console.log('[Messages] Insert result:', { data, error });
 
