@@ -100,9 +100,9 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
             </AvatarFallback>
           </Avatar>
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <Link to={`/profile/${userId}`}>
-            <p className="font-semibold hover:text-primary transition-colors cursor-pointer">
+            <p className="truncate font-semibold hover:text-primary transition-colors cursor-pointer">
               {author}
             </p>
           </Link>
@@ -173,9 +173,9 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
                       {comment.profiles.full_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 bg-muted rounded-lg p-2">
-                    <p className="font-semibold text-sm">{comment.profiles.full_name}</p>
-                    <p className="text-sm">{comment.content}</p>
+                  <div className="min-w-0 flex-1 bg-muted rounded-lg p-2">
+                    <p className="font-semibold text-sm break-words">{comment.profiles.full_name}</p>
+                    <p className="text-sm break-words">{comment.content}</p>
                   </div>
                 </div>
               ))}
