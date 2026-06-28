@@ -31,6 +31,11 @@ interface Message {
   read: boolean;
   delivered_at?: string;
   read_at?: string;
+  voice_messages?: Array<{
+    id: string;
+    audio_url: string;
+    duration?: number | null;
+  }>;
 }
 
 interface Conversation {
@@ -60,6 +65,7 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showNewConvo, setShowNewConvo] = useState(false);
+  const [voiceUrls, setVoiceUrls] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const { sendTypingIndicator } = useSendTypingIndicator(conversationId);
