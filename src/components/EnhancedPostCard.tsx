@@ -253,7 +253,7 @@ const EnhancedPostCard = ({
         {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3">{hook}</p>}
 
         {displayContent && (
-          <div className="post-content prose prose-sm max-w-none overflow-x-auto break-words dark:prose-invert" dangerouslySetInnerHTML={{ __html: shouldTruncate ? displayContent : sanitizeHtml(displayContent) }} />
+          <div className="post-content prose prose-sm max-w-none overflow-x-auto break-words dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
         )}
         {shouldTruncate && (
           <button onClick={() => setIsExpanded(true)} className="text-primary text-sm font-medium hover:underline">
