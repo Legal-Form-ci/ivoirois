@@ -11,11 +11,12 @@ const Index = () => {
       <section
         className="relative h-screen flex items-center justify-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(194, 110, 30, 0.92), rgba(46, 130, 76, 0.88)), url(${heroImage})`,
+          backgroundImage: `url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
+        <div className="absolute inset-0 bg-primary/80" />
         <div className="container relative z-10 text-center text-white px-4">
           <div className="flex justify-center mb-6">
             <img src={appLogo} alt="Ivoi'Rois" className="h-24 w-24 rounded-2xl shadow-2xl" />
@@ -44,7 +45,7 @@ const Index = () => {
       <section className="py-20 bg-background">
         <div className="container px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
-            C'est quoi <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Ivoi'Rois</span> ?
+            C'est quoi <span className="text-primary">Ivoi'Rois</span> ?
           </h2>
           <p className="text-base sm:text-lg text-center max-w-4xl mx-auto mb-10 md:mb-16 text-muted-foreground">
             Ivoi'Rois est la première plateforme de connexion 100 % ivoirienne, qui réunit chat et réseau social dans un même espace convivial. Ici, chaque utilisateur est roi — libre de s'exprimer, de partager et de briller à l'ivoirienne.
@@ -80,7 +81,7 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
+      <section className="py-16 bg-muted/30">
         <div className="container text-center px-3 sm:px-4">
           <h2 className="text-2xl sm:text-3xl font-bold mb-6 md:mb-8">Rejoignez des milliers d'utilisateurs</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
