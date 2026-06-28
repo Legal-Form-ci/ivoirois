@@ -112,6 +112,14 @@ All colors MUST be HSL.
     overflow-wrap: anywhere;
   }
 
+  html,
+  body,
+  #root {
+    min-width: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
   img,
   video,
   canvas,
@@ -150,6 +158,16 @@ All colors MUST be HSL.
   .message-content {
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .post-content *,
+  .message-content * {
+    max-width: 100%;
+  }
+
+  .post-content a,
+  .message-content a {
+    word-break: break-all;
   }
 
   .post-content table,
