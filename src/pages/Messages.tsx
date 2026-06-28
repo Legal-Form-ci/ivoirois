@@ -107,8 +107,47 @@ const Messages = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    resolveVoiceUrls(messages);
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const extractVoicePathFromContent = (content: string) => {
+    if (!content) return null;
+    const signedMatch = content.match(/\/object\/sign\/messages\/([^?"'<>\s]+)/);
+    if (signedMatch?.[1]) return decodeURIComponent(signedMatch[1]);
+    const publicMatch = content.match(/\/object\/public\/messages\/([^?"'<>\s]+)/);
+    if (publicMatch?.[1]) return decodeURIComponent(publicMatch[1]);
+    const dataPathMatch = content.match(/data-voice-path=["']([^"']+)["']/);
+    if (dataPathMatch?.[1]) return dataPathMatch[1];
+    return null;
+  };
+
+  const getVoiceMeta = (msg: Message) => {
+    const voice = msg.voice_messages?.[0];
+    const path = voice?.audio_url || extractVoicePathFromContent(msg.content);
+    if (!path) return null;
+    return { path, duration: voice?.duration ?? null };
+  };
+
+  const resolveVoiceUrls = async (items: Message[]) => {
+    const missing = items
+      .map((msg) => ({ id: msg.id, meta: getVoiceMeta(msg) }))
+      .filter((item): item is { id: string; meta: { path: string; duration: number | null } } => !!item.meta && !voiceUrls[item.id]);
+
+    if (missing.length === 0) return;
+
+    const resolved = await Promise.all(
+      missing.map(async ({ id, meta }) => [id, await getStorageUrl('messages', meta.path)] as const)
+    );
+
+    setVoiceUrls((prev) => ({
+      ...prev,
+      ...Object.fromEntries(resolved.filter(([, url]) => !!url)),
+    }));
   };
 
   const fetchConversations = async () => {
