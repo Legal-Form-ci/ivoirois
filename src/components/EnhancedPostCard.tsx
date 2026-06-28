@@ -71,6 +71,12 @@ const EnhancedPostCard = ({
   const safeHashtags = hashtags ?? [];
   const isOwner = user?.id === authorId;
 
+  const getReadableExcerpt = (html: string, maxLength: number) => {
+    if (!html) return '';
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+  };
+
   useEffect(() => {
     if (user) checkIfSaved();
   }, [user, id]);
@@ -189,20 +195,20 @@ const EnhancedPostCard = ({
 
   // Truncate long content
   const MAX_LENGTH = 400;
-  const shouldTruncate = content && content.length > MAX_LENGTH && !isExpanded;
-  const displayContent = shouldTruncate ? content.substring(0, MAX_LENGTH) + '...' : content;
+  const shouldTruncate = content && content.replace(/<[^>]+>/g, '').length > MAX_LENGTH && !isExpanded;
+  const displayContent = shouldTruncate ? getReadableExcerpt(content, MAX_LENGTH) : content;
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 overflow-hidden shadow-card">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <Link to={`/profile/${authorId}`} className="flex items-center gap-3">
+          <Link to={`/profile/${authorId}`} className="flex min-w-0 items-center gap-3">
             <Avatar>
               <AvatarImage src={authorAvatar} alt={authorName} />
               <AvatarFallback>{authorName?.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div>
-              <p className="font-semibold hover:underline">{authorName}</p>
+            <div className="min-w-0">
+              <p className="truncate font-semibold hover:underline">{authorName}</p>
               <p className="text-sm text-muted-foreground">{getTimeAgo(createdAt)}</p>
             </div>
           </Link>
@@ -243,11 +249,11 @@ const EnhancedPostCard = ({
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {title && <h3 className="text-xl font-bold text-foreground">{title}</h3>}
-        {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3">{hook}</p>}
+        {title && <h3 className="text-xl font-bold text-foreground break-words">{title}</h3>}
+        {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3 break-words">{hook}</p>}
 
         {displayContent && (
-          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
+          <div className="post-content prose prose-sm max-w-none overflow-x-auto break-words dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
         )}
         {shouldTruncate && (
           <button onClick={() => setIsExpanded(true)} className="text-primary text-sm font-medium hover:underline">
@@ -261,7 +267,7 @@ const EnhancedPostCard = ({
           <div className="space-y-1">
             {safeLinks.map((link, index) => (
               <a key={index} href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline text-sm">
-                <ExternalLink className="w-3 h-3" />{link}
+                <ExternalLink className="w-3 h-3 shrink-0" /><span className="break-all">{link}</span>
               </a>
             ))}
           </div>
@@ -299,9 +305,9 @@ const EnhancedPostCard = ({
                   <AvatarImage src={comment.profiles?.avatar_url} />
                   <AvatarFallback>{comment.profiles?.full_name?.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 bg-muted rounded-lg p-2">
-                  <p className="text-sm font-medium">{comment.profiles?.full_name}</p>
-                  <p className="text-sm">{comment.content}</p>
+                <div className="min-w-0 flex-1 bg-muted rounded-lg p-2">
+                  <p className="text-sm font-medium break-words">{comment.profiles?.full_name}</p>
+                  <p className="text-sm break-words">{comment.content}</p>
                 </div>
               </div>
             ))}

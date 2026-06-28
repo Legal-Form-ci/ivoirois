@@ -90,7 +90,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
   };
 
   return (
-    <Card className="overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-all duration-300">
+    <Card className="overflow-hidden shadow-card transition-all duration-300">
       <CardHeader className="flex flex-row items-center gap-3 pb-3">
         <Link to={`/profile/${userId}`}>
           <Avatar className="cursor-pointer hover:ring-2 ring-primary transition-all">
@@ -100,9 +100,9 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
             </AvatarFallback>
           </Avatar>
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <Link to={`/profile/${userId}`}>
-            <p className="font-semibold hover:text-primary transition-colors cursor-pointer">
+            <p className="truncate font-semibold hover:text-primary transition-colors cursor-pointer">
               {author}
             </p>
           </Link>
@@ -112,7 +112,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
       
       <CardContent className="pb-3 space-y-3">
         <div
-          className="prose prose-sm max-w-none text-foreground leading-relaxed"
+          className="post-content prose prose-sm max-w-none overflow-x-auto break-words text-foreground leading-relaxed"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
         />
         {image && (
@@ -173,9 +173,9 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
                       {comment.profiles.full_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 bg-muted rounded-lg p-2">
-                    <p className="font-semibold text-sm">{comment.profiles.full_name}</p>
-                    <p className="text-sm">{comment.content}</p>
+                  <div className="min-w-0 flex-1 bg-muted rounded-lg p-2">
+                    <p className="font-semibold text-sm break-words">{comment.profiles.full_name}</p>
+                    <p className="text-sm break-words">{comment.content}</p>
                   </div>
                 </div>
               ))}

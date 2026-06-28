@@ -442,7 +442,7 @@ const GroupVideoCall = ({
                       isLocal={participant.id === user?.id}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
                       <Avatar className="h-20 w-20 border-4 border-white/20">
                         <AvatarImage src={participant.avatar} />
                         <AvatarFallback className="text-2xl">
@@ -453,7 +453,7 @@ const GroupVideoCall = ({
                   )}
                   
                   {/* Participant overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/70 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-white text-sm font-medium truncate">

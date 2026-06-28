@@ -159,18 +159,13 @@ const Auth = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
-      }}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img src={appLogo} alt="Ivoi'Rois" className="h-16 w-16 rounded-xl" />
           </div>
-          <CardTitle className="text-3xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <CardTitle className="text-3xl text-primary">
             {isForgotPassword ? "Mot de passe oublié" : "Ivoi'Rois"}
           </CardTitle>
           <CardDescription>

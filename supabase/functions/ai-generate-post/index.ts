@@ -68,8 +68,8 @@ Tu génères une publication professionnelle complète à partir du sujet donné
 5. MISE EN FORME:
    - <strong>Mots clés importants</strong>
    - <em>Termes techniques ou accent</em>
-   - <span style="color:#1a73e8;">Texte coloré pour emphase</span>
-   - <mark style="background:#fff3cd;padding:2px 4px;border-radius:3px;">Surlignage pour focus</mark>
+   - <strong>Texte important</strong> plutôt que des couleurs agressives
+   - <mark style="background:#f4f4f5;padding:2px 4px;border-radius:3px;">Surlignage discret pour focus</mark>
 
 6. LISTES STRUCTURÉES:
    <ul style="margin:12px 0;padding-left:24px;">
@@ -80,39 +80,39 @@ Tu génères une publication professionnelle complète à partir du sujet donné
 7. TABLEAUX (OBLIGATOIRE si demandé ou pertinent - comparatifs, statistiques, planning, prix):
    <table style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:8px;overflow:hidden;">
      <thead>
-       <tr style="background:linear-gradient(135deg,#1a73e8,#4285f4);">
-         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 1</th>
-         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 2</th>
-         <th style="border:1px solid #dee2e6;padding:12px 16px;text-align:left;font-weight:600;color:white;">En-tête 3</th>
+       <tr style="background:#f4f4f5;">
+          <th style="border:1px solid #d4d4d8;padding:12px 16px;text-align:left;font-weight:700;color:#18181b;">En-tête 1</th>
+          <th style="border:1px solid #d4d4d8;padding:12px 16px;text-align:left;font-weight:700;color:#18181b;">En-tête 2</th>
+          <th style="border:1px solid #d4d4d8;padding:12px 16px;text-align:left;font-weight:700;color:#18181b;">En-tête 3</th>
        </tr>
      </thead>
      <tbody>
-       <tr style="background:#f8f9fa;">
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+        <tr style="background:#ffffff;">
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
        </tr>
        <tr>
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
-         <td style="border:1px solid #dee2e6;padding:10px 16px;">Valeur</td>
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
+          <td style="border:1px solid #d4d4d8;padding:10px 16px;">Valeur</td>
        </tr>
      </tbody>
    </table>
 
 8. CITATIONS:
-   <blockquote style="border-left:4px solid #1a73e8;padding:12px 16px;margin:16px 0;font-style:italic;background:#f8f9ff;border-radius:0 8px 8px 0;">
+   <blockquote style="border-left:4px solid #c26e1e;padding:12px 16px;margin:16px 0;font-style:italic;background:#fafafa;border-radius:0 8px 8px 0;">
      Citation importante ou témoignage
    </blockquote>
 
 9. ENCADRÉ IMPORTANT:
-   <div style="background:linear-gradient(135deg,#e8f0fe,#f0f5ff);border:1px solid #1a73e8;border-radius:12px;padding:16px;margin:16px 0;">
+   <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:12px;padding:16px;margin:16px 0;">
      <strong>💡 Point clé:</strong> Information importante mise en valeur
    </div>
 
 10. CALL-TO-ACTION FINAL:
-    <div style="margin-top:24px;padding:16px;background:linear-gradient(135deg,#1a73e8,#4285f4);border-radius:12px;text-align:center;">
-      <p style="color:white;font-weight:600;margin:0;">👉 Action attendue - Question engageante</p>
+     <div style="margin-top:24px;padding:16px;background:#c26e1e;border-radius:12px;text-align:center;">
+       <p style="color:white;font-weight:600;margin:0;">👉 Action attendue - Question engageante</p>
     </div>
 
 📝 RÈGLES DE STYLE:

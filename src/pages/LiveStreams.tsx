@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getStorageUrl } from '@/lib/storage';
 import Header from '@/components/Header';
 import MobileNav from '@/components/MobileNav';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,28 @@ const LiveStreams = () => {
   const currentStreamIdRef = useRef<string | null>(null);
   const [replayUrl, setReplayUrl] = useState<string | null>(null);
   const [uploadingReplay, setUploadingReplay] = useState(false);
+  const [openingStreamId, setOpeningStreamId] = useState<string | null>(null);
+
+  const ensureProfileReady = async () => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
+    const { error: rpcError } = await supabase.rpc('ensure_my_profile');
+    if (!rpcError) return;
+
+    const fallbackUsername = (user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`)
+      .replace(/[^a-zA-Z0-9_'.-]/g, '_')
+      .slice(0, 32);
+
+    const { error: upsertError } = await supabase.from('profiles').upsert({
+      id: user.id,
+      username: fallbackUsername,
+      full_name: user.user_metadata?.full_name || fallbackUsername || 'Utilisateur',
+      avatar_url: user.user_metadata?.avatar_url || null,
+      updated_at: new Date().toISOString(),
+    } as any, { onConflict: 'id' });
+
+    if (upsertError) throw upsertError;
+  };
 
   useEffect(() => {
     fetchAllStreams();
@@ -82,6 +105,13 @@ const LiveStreams = () => {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  useEffect(() => {
+    if (isStreaming && localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+      localVideoRef.current.play().catch(() => undefined);
+    }
+  }, [isStreaming]);
 
   const fetchAllStreams = async () => {
     try {
@@ -118,6 +148,10 @@ const LiveStreams = () => {
 
   const createStream = async () => {
     if (!user || !title.trim()) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error('Caméra non supportée par ce navigateur. Utilisez Chrome, Edge ou Safari à jour en HTTPS.');
+      return;
+    }
     setCreating(true);
     setCameraError(null);
     try {
@@ -128,7 +162,7 @@ const LiveStreams = () => {
       });
       localStreamRef.current = stream;
 
-      await supabase.rpc('ensure_my_profile');
+      await ensureProfileReady();
 
       const { data: created, error } = await supabase.from('live_streams').insert({
         host_id: user.id,
@@ -178,6 +212,8 @@ const LiveStreams = () => {
         ? 'Accès caméra refusé. Vérifiez les permissions.'
         : error.name === 'NotFoundError'
         ? 'Aucune caméra détectée.'
+        : error.message?.includes('live_streams_host_id_fkey')
+        ? 'Profil utilisateur introuvable. Rechargez la page puis réessayez.'
         : (error.message || 'Erreur');
       setCameraError(msg);
       toast.error(msg);
@@ -197,6 +233,7 @@ const LiveStreams = () => {
   };
 
   const openStream = async (stream: LiveStream) => {
+    setOpeningStreamId(stream.id);
     setSelectedStream(stream);
     setReplayUrl(null);
     fetchComments(stream.id);
@@ -209,10 +246,9 @@ const LiveStreams = () => {
     // Replay: create a signed URL for the recording
     if (stream.status === 'ended' && stream.recording_url) {
       try {
-        const { data } = await supabase.storage
-          .from('recordings')
-          .createSignedUrl(stream.recording_url, 3600);
-        if (data?.signedUrl) setReplayUrl(data.signedUrl);
+        const signedReplayUrl = await getStorageUrl('recordings', stream.recording_url);
+        if (signedReplayUrl) setReplayUrl(signedReplayUrl);
+        else toast.error('Replay indisponible ou non autorisé');
       } catch (e) {
         console.warn('[Replay] Signed URL error', e);
       }
@@ -224,6 +260,7 @@ const LiveStreams = () => {
         fetchComments(stream.id);
       })
       .subscribe();
+    setOpeningStreamId(null);
   };
 
   const fetchComments = async (streamId: string) => {
@@ -262,7 +299,7 @@ const LiveStreams = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         recordedChunksRef.current = [];
         if (blob.size > 0 && user) {
-          const path = `${streamId}/replay.webm`;
+          const path = `${streamId}/replay-${Date.now()}.webm`;
           const { error: upErr } = await supabase.storage
             .from('recordings')
             .upload(path, blob, { upsert: true, contentType: 'video/webm' });
@@ -354,12 +391,12 @@ const LiveStreams = () => {
       </div>
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={stream.profiles?.avatar_url} />
             <AvatarFallback>{stream.profiles?.full_name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold truncate">{stream.title}</h3>
+              <h3 className="font-semibold truncate">{stream.title}</h3>
             <p className="text-sm text-muted-foreground truncate">
               {stream.profiles?.full_name} · {isReplay ? getTimeAgo(stream.ended_at || stream.started_at) : getTimeAgo(stream.started_at)}
             </p>
@@ -372,9 +409,9 @@ const LiveStreams = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
-      <main className="container py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
+      <main className="container px-3 sm:px-4 py-4 md:py-6">
+        <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
               <Radio className="h-6 w-6 text-destructive" />
@@ -382,25 +419,25 @@ const LiveStreams = () => {
               </h1>
               <p className="text-muted-foreground">Diffusions en direct et replays</p>
             </div>
-            <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <Button onClick={() => setShowCreate(true)} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Démarrer un Live
             </Button>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="live" className="gap-2">
+            <TabsList className="grid h-auto w-full grid-cols-3">
+              <TabsTrigger value="live" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <Radio className="h-4 w-4" />
-                En direct {liveStreams.length > 0 && `(${liveStreams.length})`}
+                <span className="truncate">En direct {liveStreams.length > 0 && `(${liveStreams.length})`}</span>
               </TabsTrigger>
-              <TabsTrigger value="scheduled" className="gap-2">
+              <TabsTrigger value="scheduled" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <Clock className="h-4 w-4" />
-                Programmés
+                <span className="truncate">Programmés</span>
               </TabsTrigger>
-              <TabsTrigger value="replay" className="gap-2">
+              <TabsTrigger value="replay" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <History className="h-4 w-4" />
-                Replays
+                <span className="truncate">Replays</span>
               </TabsTrigger>
             </TabsList>
 
@@ -410,7 +447,7 @@ const LiveStreams = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : liveStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <Radio className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">Aucun live en cours</p>
                   <Button onClick={() => setShowCreate(true)} className="gap-2">
@@ -427,7 +464,7 @@ const LiveStreams = () => {
 
             <TabsContent value="scheduled" className="mt-4">
               {scheduledStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Aucun live programmé</p>
                 </Card>
@@ -440,7 +477,7 @@ const LiveStreams = () => {
 
             <TabsContent value="replay" className="mt-4">
               {endedStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Aucun replay disponible</p>
                 </Card>
@@ -456,7 +493,7 @@ const LiveStreams = () => {
 
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Radio className="h-5 w-5 text-destructive" />
@@ -490,8 +527,8 @@ const LiveStreams = () => {
       <Dialog open={!!selectedStream || isStreaming} onOpenChange={(open) => {
         if (!open && isStreaming && !selectedStream) {
           // Closing own streaming view
-          const ownStream = liveStreams.find(s => s.host_id === user?.id && s.status === 'live');
-          if (ownStream) endStream(ownStream.id);
+          const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
+          if (ownStreamId) endStream(ownStreamId);
           else stopStreaming();
           return;
         }
@@ -500,7 +537,7 @@ const LiveStreams = () => {
         }
         setSelectedStream(null);
       }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+        <DialogContent className="max-w-3xl max-h-[92vh] w-[calc(100vw-1rem)] p-0 sm:w-full">
           {/* Own camera streaming view */}
           {isStreaming && (!selectedStream || selectedStream.host_id === user?.id) && (
             <div className="flex flex-col h-[80vh]">
@@ -518,7 +555,7 @@ const LiveStreams = () => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2"
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2 whitespace-nowrap"
                   onClick={() => {
                     const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
                     if (ownStreamId) endStream(ownStreamId);
@@ -548,14 +585,19 @@ const LiveStreams = () => {
                     ) : (
                       <Play className="h-16 w-16 mx-auto mb-4 text-primary" />
                     )}
-                    <h3 className="text-lg font-semibold text-background">{selectedStream.title}</h3>
+                    <h3 className="text-lg font-semibold text-background break-words">{selectedStream.title}</h3>
                     <p className="text-background/70 text-sm mt-1">
                       {selectedStream.profiles?.full_name}
                     </p>
                     {selectedStream.description && (
-                      <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto">
+                      <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto break-words">
                         {selectedStream.description}
                       </p>
+                    )}
+                    {selectedStream.status === 'ended' && selectedStream.recording_url && !replayUrl && (
+                      <div className="mt-3 flex items-center justify-center gap-2 text-background/70 text-xs">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Chargement du replay…
+                      </div>
                     )}
                     {selectedStream.status === 'ended' && !selectedStream.recording_url && (
                       <p className="text-background/60 text-xs mt-3">Aucun replay disponible</p>
@@ -580,7 +622,7 @@ const LiveStreams = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="absolute top-3 right-3 gap-1"
+                    className="absolute top-3 right-3 gap-1 whitespace-nowrap"
                     onClick={() => endStream(selectedStream.id)}
                   >
                     <WifiOff className="h-4 w-4" /> Terminer
@@ -601,9 +643,9 @@ const LiveStreams = () => {
                       <AvatarImage src={comment.profiles?.avatar_url} />
                       <AvatarFallback className="text-[10px]">{comment.profiles?.full_name?.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div className="bg-muted rounded-lg px-3 py-1.5 max-w-[80%]">
-                      <p className="text-xs font-semibold">{comment.profiles?.full_name}</p>
-                      <p className="text-sm">{comment.content}</p>
+                    <div className="bg-muted rounded-lg px-3 py-1.5 max-w-[80%] overflow-hidden">
+                      <p className="text-xs font-semibold truncate">{comment.profiles?.full_name}</p>
+                      <p className="text-sm break-words">{comment.content}</p>
                     </div>
                     {comment.is_pinned && <Pin className="h-3 w-3 text-primary shrink-0 mt-1" />}
                   </div>
@@ -627,6 +669,12 @@ const LiveStreams = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {openingStreamId && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-card px-4 py-2 text-sm shadow-lg border">
+          Ouverture du flux…
+        </div>
+      )}
 
       <MobileNav />
     </div>

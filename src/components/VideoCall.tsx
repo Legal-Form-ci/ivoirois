@@ -240,7 +240,7 @@ const VideoCall = ({
 
           {/* Controls */}
           {callStatus === 'connected' && (
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-background/90 backdrop-blur-sm">
               <div className="flex items-center justify-center gap-4">
                 <Button
                   variant={isMuted ? "destructive" : "secondary"}

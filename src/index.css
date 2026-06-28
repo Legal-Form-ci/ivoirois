@@ -40,9 +40,9 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
     
-    --gradient-primary: linear-gradient(135deg, hsl(32 89% 55%), hsl(38 92% 62%));
-    --gradient-hero: linear-gradient(135deg, hsl(32 89% 55%) 0%, hsl(80 55% 45%) 50%, hsl(150 51% 25%) 100%);
-    --gradient-brand: linear-gradient(135deg, hsl(32 89% 55%), hsl(150 51% 25%));
+    --gradient-primary: hsl(32 89% 55%);
+    --gradient-hero: hsl(150 45% 12%);
+    --gradient-brand: hsl(32 89% 55%);
     --shadow-card: 0 1px 3px 0 hsl(150 30% 12% / 0.06), 0 1px 2px -1px hsl(150 30% 12% / 0.06);
     --shadow-hover: 0 8px 24px -6px hsl(32 89% 55% / 0.18);
 
@@ -85,9 +85,9 @@ All colors MUST be HSL.
     --input: 150 15% 18%;
     --ring: 32 92% 60%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(32 92% 60%), hsl(38 95% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(32 92% 60%) 0%, hsl(80 50% 50%) 50%, hsl(150 45% 38%) 100%);
-    --gradient-brand: linear-gradient(135deg, hsl(32 92% 60%), hsl(150 45% 38%));
+    --gradient-primary: hsl(32 92% 60%);
+    --gradient-hero: hsl(150 22% 10%);
+    --gradient-brand: hsl(32 92% 60%);
     --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
     --shadow-hover: 0 8px 24px -6px hsl(32 92% 60% / 0.25);
     --sidebar-background: 150 22% 10%;
@@ -109,22 +109,35 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-wrap: anywhere;
+  }
+
+  html,
+  body,
+  #root {
+    min-width: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }
 
 /* Brand utilities inspired by Facebook/IG/LinkedIn/YouTube/TikTok */
 @layer utilities {
   .bg-gradient-brand {
-    background-image: var(--gradient-brand);
+    background: var(--gradient-brand);
   }
   .bg-gradient-hero {
-    background-image: var(--gradient-hero);
+    background: var(--gradient-hero);
   }
   .text-gradient-brand {
-    background-image: var(--gradient-brand);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: hsl(var(--primary));
   }
   .shadow-card {
     box-shadow: var(--shadow-card);
@@ -139,5 +152,64 @@ All colors MUST be HSL.
   .snap-start-always {
     scroll-snap-align: start;
     scroll-snap-stop: always;
+  }
+
+  .post-content,
+  .message-content {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .post-content *,
+  .message-content * {
+    max-width: 100%;
+  }
+
+  .post-content a,
+  .message-content a {
+    word-break: break-all;
+  }
+
+  .post-content table,
+  .message-content table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+  }
+
+  .post-content th,
+  .post-content td,
+  .message-content th,
+  .message-content td {
+    border: 1px solid hsl(var(--border));
+    padding: 0.65rem 0.8rem;
+    vertical-align: top;
+  }
+
+  .post-content th,
+  .message-content th {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    font-weight: 700;
+  }
+
+  .post-content blockquote,
+  .message-content blockquote {
+    border-left-color: hsl(var(--primary));
+    background: hsl(var(--muted) / 0.55);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.75rem 1rem;
+  }
+
+  .post-content audio,
+  .message-content audio,
+  .post-content video,
+  .message-content video {
+    width: 100%;
+    max-width: 100%;
   }
 }
