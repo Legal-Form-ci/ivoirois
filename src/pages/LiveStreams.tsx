@@ -74,6 +74,7 @@ const LiveStreams = () => {
   const currentStreamIdRef = useRef<string | null>(null);
   const [replayUrl, setReplayUrl] = useState<string | null>(null);
   const [uploadingReplay, setUploadingReplay] = useState(false);
+  const [openingStreamId, setOpeningStreamId] = useState<string | null>(null);
 
   const ensureProfileReady = async () => {
     if (!user) throw new Error('Utilisateur non connecté');
@@ -147,6 +148,10 @@ const LiveStreams = () => {
 
   const createStream = async () => {
     if (!user || !title.trim()) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error('Caméra non supportée par ce navigateur. Utilisez Chrome, Edge ou Safari à jour en HTTPS.');
+      return;
+    }
     setCreating(true);
     setCameraError(null);
     try {
@@ -228,6 +233,7 @@ const LiveStreams = () => {
   };
 
   const openStream = async (stream: LiveStream) => {
+    setOpeningStreamId(stream.id);
     setSelectedStream(stream);
     setReplayUrl(null);
     fetchComments(stream.id);
@@ -254,6 +260,7 @@ const LiveStreams = () => {
         fetchComments(stream.id);
       })
       .subscribe();
+    setOpeningStreamId(null);
   };
 
   const fetchComments = async (streamId: string) => {
@@ -384,12 +391,12 @@ const LiveStreams = () => {
       </div>
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={stream.profiles?.avatar_url} />
             <AvatarFallback>{stream.profiles?.full_name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold truncate">{stream.title}</h3>
+              <h3 className="font-semibold truncate">{stream.title}</h3>
             <p className="text-sm text-muted-foreground truncate">
               {stream.profiles?.full_name} · {isReplay ? getTimeAgo(stream.ended_at || stream.started_at) : getTimeAgo(stream.started_at)}
             </p>
@@ -402,8 +409,8 @@ const LiveStreams = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
-      <main className="container py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <main className="container px-3 sm:px-4 py-4 md:py-6">
+        <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -440,7 +447,7 @@ const LiveStreams = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : liveStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <Radio className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">Aucun live en cours</p>
                   <Button onClick={() => setShowCreate(true)} className="gap-2">
@@ -457,7 +464,7 @@ const LiveStreams = () => {
 
             <TabsContent value="scheduled" className="mt-4">
               {scheduledStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Aucun live programmé</p>
                 </Card>
@@ -470,7 +477,7 @@ const LiveStreams = () => {
 
             <TabsContent value="replay" className="mt-4">
               {endedStreams.length === 0 ? (
-                <Card className="p-12 text-center">
+                  <Card className="p-6 sm:p-12 text-center">
                   <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Aucun replay disponible</p>
                 </Card>
@@ -486,7 +493,7 @@ const LiveStreams = () => {
 
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Radio className="h-5 w-5 text-destructive" />
@@ -548,7 +555,7 @@ const LiveStreams = () => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2"
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2 whitespace-nowrap"
                   onClick={() => {
                     const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
                     if (ownStreamId) endStream(ownStreamId);
@@ -578,7 +585,7 @@ const LiveStreams = () => {
                     ) : (
                       <Play className="h-16 w-16 mx-auto mb-4 text-primary" />
                     )}
-                    <h3 className="text-lg font-semibold text-background">{selectedStream.title}</h3>
+                    <h3 className="text-lg font-semibold text-background break-words">{selectedStream.title}</h3>
                     <p className="text-background/70 text-sm mt-1">
                       {selectedStream.profiles?.full_name}
                     </p>
@@ -615,7 +622,7 @@ const LiveStreams = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="absolute top-3 right-3 gap-1"
+                    className="absolute top-3 right-3 gap-1 whitespace-nowrap"
                     onClick={() => endStream(selectedStream.id)}
                   >
                     <WifiOff className="h-4 w-4" /> Terminer
@@ -637,7 +644,7 @@ const LiveStreams = () => {
                       <AvatarFallback className="text-[10px]">{comment.profiles?.full_name?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="bg-muted rounded-lg px-3 py-1.5 max-w-[80%] overflow-hidden">
-                      <p className="text-xs font-semibold">{comment.profiles?.full_name}</p>
+                      <p className="text-xs font-semibold truncate">{comment.profiles?.full_name}</p>
                       <p className="text-sm break-words">{comment.content}</p>
                     </div>
                     {comment.is_pinned && <Pin className="h-3 w-3 text-primary shrink-0 mt-1" />}
@@ -662,6 +669,12 @@ const LiveStreams = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {openingStreamId && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-card px-4 py-2 text-sm shadow-lg border">
+          Ouverture du flux…
+        </div>
+      )}
 
       <MobileNav />
     </div>
