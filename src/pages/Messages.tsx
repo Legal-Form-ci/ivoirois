@@ -91,7 +91,11 @@ const Messages = () => {
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
-            setMessages((prev) => [...prev, payload.new as Message]);
+            const incoming = payload.new as Message;
+            setMessages((prev) => [...prev, incoming]);
+            if (incoming.content?.includes('voice-message') || incoming.content?.includes('data-voice-path')) {
+              window.setTimeout(() => fetchMessages(), 900);
+            }
             scrollToBottom();
           }
         )
@@ -418,10 +422,10 @@ const Messages = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       
-      <main className="container py-4 md:py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto h-[calc(100vh-180px)] md:h-[calc(100vh-150px)]">
+      <main className="container px-2 sm:px-4 py-3 md:py-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 max-w-6xl mx-auto h-[calc(100dvh-150px)] md:h-[calc(100vh-150px)] min-h-0">
           {/* Conversations list - hidden on mobile when in conversation */}
-          <Card className={`md:col-span-1 flex flex-col ${conversationId ? 'hidden md:flex' : 'flex'}`}>
+          <Card className={`md:col-span-1 min-w-0 overflow-hidden flex-col ${conversationId ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 border-b space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Messages</h2>
@@ -453,11 +457,11 @@ const Messages = () => {
                               className="w-full justify-start gap-3"
                               onClick={() => startConversation(result.id)}
                             >
-                              <Avatar className="h-8 w-8">
+                              <Avatar className="h-8 w-8 shrink-0">
                                 <AvatarImage src={result.avatar_url} />
                                 <AvatarFallback>{result.full_name.charAt(0)}</AvatarFallback>
                               </Avatar>
-                              <span>{result.full_name}</span>
+                              <span className="truncate">{result.full_name}</span>
                             </Button>
                           ))}
                         </div>
@@ -468,7 +472,7 @@ const Messages = () => {
               </div>
             </div>
             
-            <ScrollArea className="flex-1">
+            <ScrollArea className="min-h-0 flex-1">
               {conversations.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8 px-4">
                   Aucune conversation. Commencez à discuter !
@@ -482,7 +486,7 @@ const Messages = () => {
                       className="w-full justify-start gap-3 h-auto py-3 px-3"
                       onClick={() => navigate(`/messages/${conv.id}`)}
                     >
-                      <div className="relative">
+                        <div className="relative shrink-0">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={conv.other_user.avatar_url} />
                           <AvatarFallback>
@@ -512,7 +516,7 @@ const Messages = () => {
           </Card>
 
           {/* Chat area */}
-          <Card className={`md:col-span-2 flex flex-col ${!conversationId ? 'hidden md:flex' : 'flex'}`}>
+          <Card className={`md:col-span-2 min-w-0 overflow-hidden flex-col ${!conversationId ? 'hidden md:flex' : 'flex'}`}>
             {conversationId ? (
               <>
                 <div className="p-3 md:p-4 border-b flex items-center gap-3">
@@ -526,7 +530,7 @@ const Messages = () => {
                   </Button>
                   {otherUser && (
                     <>
-                      <div className="relative">
+                      <div className="relative shrink-0">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={otherUser.avatar_url} />
                           <AvatarFallback>
@@ -541,7 +545,7 @@ const Messages = () => {
                         <p className="font-semibold truncate">{otherUser.full_name}</p>
                         <OnlineStatus userId={otherUser.id} showText />
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex shrink-0 gap-1">
                         <Button variant="ghost" size="icon" onClick={() => startCall('audio')}>
                           <Phone className="h-5 w-5" />
                         </Button>
@@ -553,8 +557,8 @@ const Messages = () => {
                   )}
                 </div>
 
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
+                <ScrollArea className="min-h-0 flex-1 p-2 sm:p-4">
+                  <div className="space-y-4 overflow-hidden">
                     {messages.map((msg) => {
                       const voiceMeta = getVoiceMeta(msg);
                       const resolvedVoiceUrl = voiceMeta ? voiceUrls[msg.id] : null;
@@ -569,14 +573,14 @@ const Messages = () => {
                         }`}
                       >
                         <div
-                          className={`group relative max-w-[88%] md:max-w-[70%] rounded-2xl px-4 py-2 overflow-hidden ${
+                          className={`group relative max-w-[92%] sm:max-w-[88%] md:max-w-[70%] rounded-2xl px-3 sm:px-4 py-2 overflow-hidden ${
                             msg.sender_id === user?.id
                               ? "bg-primary text-primary-foreground rounded-br-md"
                               : "bg-muted rounded-bl-md"
                           }`}
                         >
                           {voiceMeta ? (
-                            <div className="min-w-[220px] max-w-full space-y-1">
+                            <div className="w-[min(72vw,320px)] max-w-full space-y-1">
                               {resolvedVoiceUrl ? (
                                 <audio src={resolvedVoiceUrl} controls preload="metadata" className="w-full max-w-full" />
                               ) : (
@@ -642,7 +646,7 @@ const Messages = () => {
                   onSelectReply={(reply) => setNewMessage(reply)}
                 />
 
-                <form onSubmit={sendMessage} className="p-3 md:p-4 border-t space-y-2">
+                <form onSubmit={sendMessage} className="p-2 sm:p-3 md:p-4 border-t space-y-2">
                   <RichTextEditor
                     content={newMessage}
                     onChange={(value) => {
@@ -652,8 +656,8 @@ const Messages = () => {
                     placeholder="Écrivez un message..."
                     minHeight="60px"
                   />
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                       <ScheduledMessaging 
                         conversationId={conversationId} 
                         onMessageScheduled={() => {}}
@@ -699,7 +703,7 @@ const Messages = () => {
                         }}
                       />
                     </div>
-                    <Button type="submit" disabled={!newMessage.trim()}>
+                    <Button type="submit" disabled={!newMessage.trim()} className="w-full sm:w-auto">
                       <Send className="h-4 w-4 mr-2" />
                       Envoyer
                     </Button>
