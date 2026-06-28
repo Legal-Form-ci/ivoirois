@@ -200,6 +200,8 @@ const LiveStreams = () => {
         ? 'Accès caméra refusé. Vérifiez les permissions.'
         : error.name === 'NotFoundError'
         ? 'Aucune caméra détectée.'
+        : error.message?.includes('live_streams_host_id_fkey')
+        ? 'Profil utilisateur introuvable. Rechargez la page puis réessayez.'
         : (error.message || 'Erreur');
       setCameraError(msg);
       toast.error(msg);
@@ -395,7 +397,7 @@ const LiveStreams = () => {
       <Header />
       <main className="container py-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
               <Radio className="h-6 w-6 text-destructive" />
@@ -403,25 +405,25 @@ const LiveStreams = () => {
               </h1>
               <p className="text-muted-foreground">Diffusions en direct et replays</p>
             </div>
-            <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <Button onClick={() => setShowCreate(true)} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Démarrer un Live
             </Button>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="live" className="gap-2">
+            <TabsList className="grid h-auto w-full grid-cols-3">
+              <TabsTrigger value="live" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <Radio className="h-4 w-4" />
-                En direct {liveStreams.length > 0 && `(${liveStreams.length})`}
+                <span className="truncate">En direct {liveStreams.length > 0 && `(${liveStreams.length})`}</span>
               </TabsTrigger>
-              <TabsTrigger value="scheduled" className="gap-2">
+              <TabsTrigger value="scheduled" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <Clock className="h-4 w-4" />
-                Programmés
+                <span className="truncate">Programmés</span>
               </TabsTrigger>
-              <TabsTrigger value="replay" className="gap-2">
+              <TabsTrigger value="replay" className="gap-1 px-2 text-xs sm:gap-2 sm:text-sm">
                 <History className="h-4 w-4" />
-                Replays
+                <span className="truncate">Replays</span>
               </TabsTrigger>
             </TabsList>
 
@@ -521,7 +523,7 @@ const LiveStreams = () => {
         }
         setSelectedStream(null);
       }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+        <DialogContent className="max-w-3xl max-h-[92vh] w-[calc(100vw-1rem)] p-0 sm:w-full">
           {/* Own camera streaming view */}
           {isStreaming && (!selectedStream || selectedStream.host_id === user?.id) && (
             <div className="flex flex-col h-[80vh]">
@@ -574,9 +576,14 @@ const LiveStreams = () => {
                       {selectedStream.profiles?.full_name}
                     </p>
                     {selectedStream.description && (
-                      <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto">
+                      <p className="text-background/50 text-xs mt-2 max-w-sm mx-auto break-words">
                         {selectedStream.description}
                       </p>
+                    )}
+                    {selectedStream.status === 'ended' && selectedStream.recording_url && !replayUrl && (
+                      <div className="mt-3 flex items-center justify-center gap-2 text-background/70 text-xs">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Chargement du replay…
+                      </div>
                     )}
                     {selectedStream.status === 'ended' && !selectedStream.recording_url && (
                       <p className="text-background/60 text-xs mt-3">Aucun replay disponible</p>
@@ -622,9 +629,9 @@ const LiveStreams = () => {
                       <AvatarImage src={comment.profiles?.avatar_url} />
                       <AvatarFallback className="text-[10px]">{comment.profiles?.full_name?.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div className="bg-muted rounded-lg px-3 py-1.5 max-w-[80%]">
+                    <div className="bg-muted rounded-lg px-3 py-1.5 max-w-[80%] overflow-hidden">
                       <p className="text-xs font-semibold">{comment.profiles?.full_name}</p>
-                      <p className="text-sm">{comment.content}</p>
+                      <p className="text-sm break-words">{comment.content}</p>
                     </div>
                     {comment.is_pinned && <Pin className="h-3 w-3 text-primary shrink-0 mt-1" />}
                   </div>
