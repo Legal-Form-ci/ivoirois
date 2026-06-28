@@ -672,28 +672,28 @@ const Messages = () => {
                             return;
                           }
                           
-                          const signedUrl = await getStorageUrl('messages', filePath);
-                          if (!signedUrl) {
-                            toast.error("Erreur lors de la récupération du fichier");
-                            return;
-                          }
-                          
                           const messageContent = `
-                            <div class="voice-message">
-                              <audio controls src="${signedUrl}" class="w-full"></audio>
-                              <p class="text-xs mt-1 text-muted-foreground">🎤 ${Math.round(duration)}s</p>
+                            <div class="voice-message" data-voice-path="${filePath}">
+                              <p>🎤 Message vocal · ${Math.round(duration)}s</p>
                             </div>
                           `;
                           
-                          const { error } = await supabase.from("messages").insert({
+                          const { data: inserted, error } = await supabase.from("messages").insert({
                             conversation_id: conversationId,
                             sender_id: user!.id,
                             content: messageContent.trim(),
-                          });
+                          }).select('id').single();
                           
                           if (error) {
                             toast.error("Erreur lors de l'envoi");
                           } else {
+                            await supabase.from('voice_messages').insert({
+                              message_id: inserted.id,
+                              audio_url: filePath,
+                              duration: Math.round(duration),
+                            });
+                            const signedUrl = await getStorageUrl('messages', filePath);
+                            if (signedUrl) setVoiceUrls(prev => ({ ...prev, [inserted.id]: signedUrl }));
                             toast.success("Message vocal envoyé");
                           }
                         }}
