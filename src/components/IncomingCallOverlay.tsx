@@ -67,7 +67,7 @@ const IncomingCallOverlay = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-gradient-to-b from-primary/90 to-primary flex flex-col items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-primary flex flex-col items-center justify-center animate-fade-in">
       {/* Pulsing ring effect */}
       <div className="relative mb-8">
         <div className="absolute inset-0 animate-ping rounded-full bg-white/30 scale-150" />

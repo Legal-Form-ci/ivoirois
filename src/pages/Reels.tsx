@@ -188,8 +188,8 @@ const Reels = () => {
                   }}
                 />
 
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 pointer-events-none" />
+                {/* Readability overlay */}
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-black/45 pointer-events-none" />
 
                 {/* Right side actions */}
                 <div className="absolute right-4 bottom-32 flex flex-col items-center gap-6">
