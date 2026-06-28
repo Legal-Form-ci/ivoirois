@@ -555,7 +555,11 @@ const Messages = () => {
 
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
-                    {messages.map((msg) => (
+                    {messages.map((msg) => {
+                      const voiceMeta = getVoiceMeta(msg);
+                      const resolvedVoiceUrl = voiceMeta ? voiceUrls[msg.id] : null;
+
+                      return (
                       <div
                         key={msg.id}
                         className={`flex ${
@@ -565,16 +569,32 @@ const Messages = () => {
                         }`}
                       >
                         <div
-                          className={`group relative max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-2 ${
+                          className={`group relative max-w-[88%] md:max-w-[70%] rounded-2xl px-4 py-2 overflow-hidden ${
                             msg.sender_id === user?.id
                               ? "bg-primary text-primary-foreground rounded-br-md"
                               : "bg-muted rounded-bl-md"
                           }`}
                         >
-                          <div 
-                            className="prose prose-sm max-w-none break-words [&_p]:m-0" 
-                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(msg.content) }} 
-                          />
+                          {voiceMeta ? (
+                            <div className="min-w-[220px] max-w-full space-y-1">
+                              {resolvedVoiceUrl ? (
+                                <audio src={resolvedVoiceUrl} controls preload="metadata" className="w-full max-w-full" />
+                              ) : (
+                                <div className="flex items-center gap-2 text-sm opacity-80">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Chargement du vocal…
+                                </div>
+                              )}
+                              <p className="text-xs opacity-75 break-words">
+                                🎤 Message vocal{voiceMeta.duration ? ` · ${Math.round(voiceMeta.duration)}s` : ''}
+                              </p>
+                            </div>
+                          ) : (
+                            <div 
+                              className="message-content prose prose-sm max-w-none break-words overflow-x-auto [&_p]:m-0" 
+                              dangerouslySetInnerHTML={{ __html: sanitizeHtml(msg.content) }} 
+                            />
+                          )}
                           <div className={`flex items-center justify-between gap-2 text-xs mt-1 ${
                             msg.sender_id === user?.id 
                               ? "text-primary-foreground/70" 
@@ -604,7 +624,7 @@ const Messages = () => {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );})}
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
