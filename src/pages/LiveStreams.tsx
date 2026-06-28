@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getStorageUrl } from '@/lib/storage';
 import Header from '@/components/Header';
 import MobileNav from '@/components/MobileNav';
 import { Button } from '@/components/ui/button';
@@ -74,6 +75,27 @@ const LiveStreams = () => {
   const [replayUrl, setReplayUrl] = useState<string | null>(null);
   const [uploadingReplay, setUploadingReplay] = useState(false);
 
+  const ensureProfileReady = async () => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
+    const { error: rpcError } = await supabase.rpc('ensure_my_profile');
+    if (!rpcError) return;
+
+    const fallbackUsername = (user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`)
+      .replace(/[^a-zA-Z0-9_'.-]/g, '_')
+      .slice(0, 32);
+
+    const { error: upsertError } = await supabase.from('profiles').upsert({
+      id: user.id,
+      username: fallbackUsername,
+      full_name: user.user_metadata?.full_name || fallbackUsername || 'Utilisateur',
+      avatar_url: user.user_metadata?.avatar_url || null,
+      updated_at: new Date().toISOString(),
+    } as any, { onConflict: 'id' });
+
+    if (upsertError) throw upsertError;
+  };
+
   useEffect(() => {
     fetchAllStreams();
     const channel = supabase
@@ -128,7 +150,7 @@ const LiveStreams = () => {
       });
       localStreamRef.current = stream;
 
-      await supabase.rpc('ensure_my_profile');
+      await ensureProfileReady();
 
       const { data: created, error } = await supabase.from('live_streams').insert({
         host_id: user.id,
@@ -209,10 +231,9 @@ const LiveStreams = () => {
     // Replay: create a signed URL for the recording
     if (stream.status === 'ended' && stream.recording_url) {
       try {
-        const { data } = await supabase.storage
-          .from('recordings')
-          .createSignedUrl(stream.recording_url, 3600);
-        if (data?.signedUrl) setReplayUrl(data.signedUrl);
+        const signedReplayUrl = await getStorageUrl('recordings', stream.recording_url);
+        if (signedReplayUrl) setReplayUrl(signedReplayUrl);
+        else toast.error('Replay indisponible ou non autorisé');
       } catch (e) {
         console.warn('[Replay] Signed URL error', e);
       }
@@ -262,7 +283,7 @@ const LiveStreams = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         recordedChunksRef.current = [];
         if (blob.size > 0 && user) {
-          const path = `${streamId}/replay.webm`;
+          const path = `${streamId}/replay-${Date.now()}.webm`;
           const { error: upErr } = await supabase.storage
             .from('recordings')
             .upload(path, blob, { upsert: true, contentType: 'video/webm' });
