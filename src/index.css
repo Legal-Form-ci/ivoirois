@@ -123,10 +123,10 @@ All colors MUST be HSL.
 /* Brand utilities inspired by Facebook/IG/LinkedIn/YouTube/TikTok */
 @layer utilities {
   .bg-gradient-brand {
-    background-image: var(--gradient-brand);
+    background: var(--gradient-brand);
   }
   .bg-gradient-hero {
-    background-image: var(--gradient-hero);
+    background: var(--gradient-hero);
   }
   .text-gradient-brand {
     color: hsl(var(--primary));
