@@ -71,6 +71,12 @@ const EnhancedPostCard = ({
   const safeHashtags = hashtags ?? [];
   const isOwner = user?.id === authorId;
 
+  const getReadableExcerpt = (html: string, maxLength: number) => {
+    if (!html) return '';
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+  };
+
   useEffect(() => {
     if (user) checkIfSaved();
   }, [user, id]);
@@ -189,11 +195,11 @@ const EnhancedPostCard = ({
 
   // Truncate long content
   const MAX_LENGTH = 400;
-  const shouldTruncate = content && content.length > MAX_LENGTH && !isExpanded;
-  const displayContent = shouldTruncate ? content.substring(0, MAX_LENGTH) + '...' : content;
+  const shouldTruncate = content && content.replace(/<[^>]+>/g, '').length > MAX_LENGTH && !isExpanded;
+  const displayContent = shouldTruncate ? getReadableExcerpt(content, MAX_LENGTH) : content;
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 overflow-hidden shadow-card">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <Link to={`/profile/${authorId}`} className="flex items-center gap-3">
@@ -247,7 +253,7 @@ const EnhancedPostCard = ({
         {hook && <p className="text-lg italic text-muted-foreground border-l-4 border-primary pl-3">{hook}</p>}
 
         {displayContent && (
-          <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayContent) }} />
+          <div className="post-content prose prose-sm max-w-none overflow-x-auto break-words dark:prose-invert" dangerouslySetInnerHTML={{ __html: shouldTruncate ? displayContent : sanitizeHtml(displayContent) }} />
         )}
         {shouldTruncate && (
           <button onClick={() => setIsExpanded(true)} className="text-primary text-sm font-medium hover:underline">
