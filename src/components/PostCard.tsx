@@ -90,7 +90,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
   };
 
   return (
-    <Card className="overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-all duration-300">
+    <Card className="overflow-hidden shadow-card transition-all duration-300">
       <CardHeader className="flex flex-row items-center gap-3 pb-3">
         <Link to={`/profile/${userId}`}>
           <Avatar className="cursor-pointer hover:ring-2 ring-primary transition-all">
@@ -112,7 +112,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
       
       <CardContent className="pb-3 space-y-3">
         <div
-          className="prose prose-sm max-w-none text-foreground leading-relaxed"
+          className="post-content prose prose-sm max-w-none overflow-x-auto break-words text-foreground leading-relaxed"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
         />
         {image && (
