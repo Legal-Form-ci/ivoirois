@@ -105,6 +105,13 @@ const LiveStreams = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  useEffect(() => {
+    if (isStreaming && localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+      localVideoRef.current.play().catch(() => undefined);
+    }
+  }, [isStreaming]);
+
   const fetchAllStreams = async () => {
     try {
       // Live streams
@@ -513,8 +520,8 @@ const LiveStreams = () => {
       <Dialog open={!!selectedStream || isStreaming} onOpenChange={(open) => {
         if (!open && isStreaming && !selectedStream) {
           // Closing own streaming view
-          const ownStream = liveStreams.find(s => s.host_id === user?.id && s.status === 'live');
-          if (ownStream) endStream(ownStream.id);
+          const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
+          if (ownStreamId) endStream(ownStreamId);
           else stopStreaming();
           return;
         }
