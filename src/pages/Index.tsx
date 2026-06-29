@@ -16,7 +16,7 @@ const Index = () => {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-primary/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-secondary/70 to-accent/75" />
         <div className="container relative z-10 text-center text-white px-4">
           <div className="flex justify-center mb-6">
             <img src={appLogo} alt="Ivoi'Rois" className="h-24 w-24 rounded-2xl shadow-2xl" />

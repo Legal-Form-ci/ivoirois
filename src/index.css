@@ -110,6 +110,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-wrap: anywhere;
+    width: 100%;
   }
 
   html,
@@ -123,8 +124,13 @@ All colors MUST be HSL.
   img,
   video,
   canvas,
-  svg {
+  svg,
+  audio {
     max-width: 100%;
+  }
+
+  audio {
+    min-width: 0;
   }
 }
 
@@ -211,5 +217,16 @@ All colors MUST be HSL.
   .message-content video {
     width: 100%;
     max-width: 100%;
+  }
+
+  .mobile-audio-control audio::-webkit-media-controls-panel {
+    min-width: 0;
+  }
+
+  .responsive-shell {
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+    overflow-x: hidden;
   }
 }

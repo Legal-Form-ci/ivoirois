@@ -81,6 +81,30 @@ export const messageSchema = z.object({
     .max(2000, 'Le message ne peut pas dépasser 2000 caractères'),
 });
 
+export const conversationPrivacySchema = z.object({
+  is_locked: z.boolean(),
+  ephemeral_enabled: z.boolean(),
+  ephemeral_ttl_seconds: z
+    .number()
+    .int()
+    .min(60, 'La durée minimale est de 1 minute')
+    .max(604800, 'La durée maximale est de 7 jours'),
+});
+
+export const liveStreamSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, 'Le titre du live doit avoir au moins 3 caractères')
+    .max(120, 'Le titre du live ne peut pas dépasser 120 caractères'),
+  description: z
+    .string()
+    .trim()
+    .max(1000, 'La description ne peut pas dépasser 1000 caractères')
+    .optional()
+    .nullable(),
+});
+
 // Event validation
 export const eventSchema = z.object({
   title: z

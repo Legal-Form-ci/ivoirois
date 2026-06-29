@@ -80,12 +80,65 @@ export type Database = {
         }
         Relationships: []
       }
+      call_ratings: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          note: string | null
+          rated_by: string
+          rated_user: string | null
+          rating: number
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          rated_by: string
+          rated_user?: string | null
+          rating: number
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          rated_by?: string
+          rated_user?: string | null
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_ratings_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_ratings_rated_by_fkey"
+            columns: ["rated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_ratings_rated_user_fkey"
+            columns: ["rated_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_signals: {
         Row: {
           callee_id: string
           caller_id: string
           conversation_id: string | null
           created_at: string
+          expires_at: string
           id: string
           signal_data: Json | null
           signal_type: string
@@ -95,6 +148,7 @@ export type Database = {
           caller_id: string
           conversation_id?: string | null
           created_at?: string
+          expires_at?: string
           id?: string
           signal_data?: Json | null
           signal_type: string
@@ -104,6 +158,7 @@ export type Database = {
           caller_id?: string
           conversation_id?: string | null
           created_at?: string
+          expires_at?: string
           id?: string
           signal_data?: Json | null
           signal_type?: string
@@ -367,23 +422,35 @@ export type Database = {
       conversation_participants: {
         Row: {
           conversation_id: string
+          ephemeral_enabled: boolean
+          ephemeral_ttl_seconds: number
           id: string
+          is_locked: boolean
           joined_at: string
           last_read_at: string | null
+          locked_at: string | null
           user_id: string
         }
         Insert: {
           conversation_id: string
+          ephemeral_enabled?: boolean
+          ephemeral_ttl_seconds?: number
           id?: string
+          is_locked?: boolean
           joined_at?: string
           last_read_at?: string | null
+          locked_at?: string | null
           user_id: string
         }
         Update: {
           conversation_id?: string
+          ephemeral_enabled?: boolean
+          ephemeral_ttl_seconds?: number
           id?: string
+          is_locked?: boolean
           joined_at?: string
           last_read_at?: string | null
+          locked_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1186,6 +1253,8 @@ export type Database = {
           conversation_id: string
           created_at: string
           delivered_at: string | null
+          edited_at: string | null
+          expires_at: string | null
           id: string
           read: boolean
           read_at: string | null
@@ -1196,6 +1265,8 @@ export type Database = {
           conversation_id: string
           created_at?: string
           delivered_at?: string | null
+          edited_at?: string | null
+          expires_at?: string | null
           id?: string
           read?: boolean
           read_at?: string | null
@@ -1206,6 +1277,8 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           delivered_at?: string | null
+          edited_at?: string | null
+          expires_at?: string | null
           id?: string
           read?: boolean
           read_at?: string | null
@@ -2459,6 +2532,8 @@ export type Database = {
           id: string
           message_id: string
           transcription: string | null
+          transcription_error: string | null
+          transcription_status: string
         }
         Insert: {
           audio_url: string
@@ -2467,6 +2542,8 @@ export type Database = {
           id?: string
           message_id: string
           transcription?: string | null
+          transcription_error?: string | null
+          transcription_status?: string
         }
         Update: {
           audio_url?: string
@@ -2475,6 +2552,8 @@ export type Database = {
           id?: string
           message_id?: string
           transcription?: string | null
+          transcription_error?: string | null
+          transcription_status?: string
         }
         Relationships: [
           {
