@@ -30,7 +30,7 @@ test.describe("smoke E2E responsive", () => {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(2);
       await page.goto("/auth");
-      await expect(page.getByRole("button", { name: /se connecter|s'inscrire|envoyer/i })).toBeVisible();
+      await expect(page.getByRole("button", { name: /^se connecter$/i })).toBeVisible();
     });
   }
 });
