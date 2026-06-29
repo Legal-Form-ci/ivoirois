@@ -33,6 +33,13 @@ export type WebRTCDiagnosticStep = {
   at: number;
 };
 
+export type CallChatMessage = {
+  id: string;
+  senderId: string;
+  content: string;
+  createdAt: number;
+};
+
 export const useWebRTC = ({
   conversationId,
   remoteUserId,
@@ -48,6 +55,11 @@ export const useWebRTC = ({
   const [diagnostics, setDiagnostics] = useState<WebRTCDiagnosticStep[]>([]);
   const [iceState, setIceState] = useState<RTCIceConnectionState | "idle">("idle");
   const [connState, setConnState] = useState<RTCPeerConnectionState | "idle">("idle");
+  const [isRemoteMuted, setIsRemoteMuted] = useState(false);
+  const [isRemoteVideoEnabled, setIsRemoteVideoEnabled] = useState(!isAudioOnly);
+  const [callMessages, setCallMessages] = useState<CallChatMessage[]>([]);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -113,6 +125,26 @@ export const useWebRTC = ({
       case "call-reject":
         handleCallEnd();
         break;
+      case "remote-control":
+        await handleRemoteControl(signal.signal_data);
+        break;
+      case "media-state":
+        setIsRemoteMuted(Boolean(signal.signal_data?.audioMuted));
+        if (!isAudioOnly) setIsRemoteVideoEnabled(Boolean(signal.signal_data?.videoEnabled));
+        break;
+      case "call-chat":
+        if (signal.signal_data?.content) {
+          setCallMessages((prev) => [
+            ...prev,
+            {
+              id: signal.id,
+              senderId: signal.caller_id,
+              content: String(signal.signal_data.content).slice(0, 500),
+              createdAt: Date.now(),
+            },
+          ]);
+        }
+        break;
     }
   };
 
@@ -140,6 +172,7 @@ export const useWebRTC = ({
     pc.ontrack = (event) => {
       log("ontrack", "ok", `${event.track.kind}`);
       remoteStreamRef.current = event.streams[0];
+      setRemoteStream(event.streams[0]);
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
@@ -226,6 +259,7 @@ export const useWebRTC = ({
       }
 
       localStreamRef.current = stream;
+      setLocalStream(stream);
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
@@ -270,6 +304,7 @@ export const useWebRTC = ({
       log("getUserMedia", "ok");
 
       localStreamRef.current = stream;
+      setLocalStream(stream);
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
@@ -314,6 +349,29 @@ export const useWebRTC = ({
     }
   };
 
+  const publishMediaState = async (nextAudioMuted = isLocalMuted, nextVideoEnabled = isVideoEnabled) => {
+    await sendSignal("media-state", {
+      audioMuted: nextAudioMuted,
+      videoEnabled: isAudioOnly ? false : nextVideoEnabled,
+    });
+  };
+
+  const handleRemoteControl = async (data: any) => {
+    const action = data?.action;
+    if (action === "mute-audio" && localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => { track.enabled = false; });
+      setIsLocalMuted(true);
+      await publishMediaState(true, isVideoEnabled);
+      toast.info("Votre micro a été coupé par l'autre participant");
+    }
+    if (action === "disable-video" && localStreamRef.current) {
+      localStreamRef.current.getVideoTracks().forEach((track) => { track.enabled = false; });
+      setIsVideoEnabled(false);
+      await publishMediaState(isLocalMuted, false);
+      toast.info("Votre caméra a été coupée par l'autre participant");
+    }
+  };
+
   const acceptCall = async () => {
     // Answer was already sent in handleOffer; confirm UI state
     if (callStatus === "receiving") {
@@ -348,6 +406,8 @@ export const useWebRTC = ({
     localStreamRef.current = null;
     remoteStreamRef.current = null;
     peerConnectionRef.current = null;
+    setLocalStream(null);
+    setRemoteStream(null);
 
     setCallStatus("ended");
     log("handleCallEnd", "info");
@@ -357,27 +417,59 @@ export const useWebRTC = ({
   const toggleMute = () => {
     if (localStreamRef.current) {
       const audioTracks = localStreamRef.current.getAudioTracks();
+      const nextMuted = !isLocalMuted;
       audioTracks.forEach((track) => {
-        track.enabled = isLocalMuted;
+        track.enabled = !nextMuted;
       });
-      setIsLocalMuted(!isLocalMuted);
+      setIsLocalMuted(nextMuted);
+      publishMediaState(nextMuted, isVideoEnabled);
     }
   };
 
   const toggleVideo = () => {
     if (localStreamRef.current) {
       const videoTracks = localStreamRef.current.getVideoTracks();
+      const nextVideoEnabled = !isVideoEnabled;
       videoTracks.forEach((track) => {
-        track.enabled = !isVideoEnabled;
+        track.enabled = nextVideoEnabled;
       });
-      setIsVideoEnabled(!isVideoEnabled);
+      setIsVideoEnabled(nextVideoEnabled);
+      publishMediaState(isLocalMuted, nextVideoEnabled);
     }
+  };
+
+  const requestRemoteMute = async () => {
+    await sendSignal("remote-control", { action: "mute-audio" });
+    toast.info("Demande envoyée : micro distant coupé");
+  };
+
+  const requestRemoteVideoOff = async () => {
+    await sendSignal("remote-control", { action: "disable-video" });
+    toast.info("Demande envoyée : caméra distante coupée");
+  };
+
+  const sendCallMessage = async (content: string) => {
+    const clean = content.trim().slice(0, 500);
+    if (!clean || !user?.id) return;
+    const msg: CallChatMessage = {
+      id: crypto.randomUUID(),
+      senderId: user.id,
+      content: clean,
+      createdAt: Date.now(),
+    };
+    setCallMessages((prev) => [...prev, msg]);
+    await sendSignal("call-chat", { content: clean });
   };
 
   return {
     callStatus,
     isLocalMuted,
     isVideoEnabled,
+    isRemoteMuted,
+    isRemoteVideoEnabled,
+    callMessages,
+    localStream,
+    remoteStream,
     diagnostics,
     iceState,
     connState,
@@ -389,5 +481,8 @@ export const useWebRTC = ({
     endCall,
     toggleMute,
     toggleVideo,
+    requestRemoteMute,
+    requestRemoteVideoOff,
+    sendCallMessage,
   };
 };

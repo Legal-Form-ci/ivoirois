@@ -13,9 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { liveStreamSchema } from '@/lib/validation';
 import { 
   Radio, Eye, MessageCircle, Users, Play, Plus, 
-  Loader2, Send, Pin, Wifi, WifiOff, Clock, History, Video
+  Loader2, Send, Pin, Wifi, WifiOff, Clock, History, Video,
+  AlertCircle, RefreshCw, Trash2, Edit3, ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -73,8 +75,43 @@ const LiveStreams = () => {
   const recordedChunksRef = useRef<Blob[]>([]);
   const currentStreamIdRef = useRef<string | null>(null);
   const [replayUrl, setReplayUrl] = useState<string | null>(null);
+  const [replayError, setReplayError] = useState<string | null>(null);
+  const [replayRetryCount, setReplayRetryCount] = useState(0);
   const [uploadingReplay, setUploadingReplay] = useState(false);
   const [openingStreamId, setOpeningStreamId] = useState<string | null>(null);
+  const [editingStream, setEditingStream] = useState<LiveStream | null>(null);
+  const [deletingStreamId, setDeletingStreamId] = useState<string | null>(null);
+  const [endingStreamId, setEndingStreamId] = useState<string | null>(null);
+
+  const withRetry = async <T,>(operation: () => Promise<T>, attempts = 3, delay = 650): Promise<T> => {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        if (attempt < attempts) await new Promise((resolve) => window.setTimeout(resolve, delay * attempt));
+      }
+    }
+    throw lastError;
+  };
+
+  const getLiveMedia = async () => {
+    const constraints: MediaStreamConstraints[] = [
+      { video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 }, facingMode: 'user' }, audio: { echoCancellation: true, noiseSuppression: true } },
+      { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }, audio: true },
+      { video: true, audio: true },
+    ];
+    let lastError: any;
+    for (const constraint of constraints) {
+      try {
+        return await navigator.mediaDevices.getUserMedia(constraint);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
+  };
 
   const ensureProfileReady = async () => {
     if (!user) throw new Error('Utilisateur non connecté');
@@ -147,7 +184,12 @@ const LiveStreams = () => {
   };
 
   const createStream = async () => {
-    if (!user || !title.trim()) return;
+    if (!user) return;
+    const validation = liveStreamSchema.safeParse({ title, description });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0]?.message || 'Informations du live invalides');
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       toast.error('Caméra non supportée par ce navigateur. Utilisez Chrome, Edge ou Safari à jour en HTTPS.');
       return;
@@ -156,23 +198,21 @@ const LiveStreams = () => {
     setCameraError(null);
     try {
       // Request camera access first (must be in user gesture chain)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-        audio: true,
-      });
+      const stream = await withRetry(getLiveMedia, 2, 500);
       localStreamRef.current = stream;
 
       await ensureProfileReady();
 
-      const { data: created, error } = await supabase.from('live_streams').insert({
-        host_id: user.id,
-        title: title.trim(),
-        description: description.trim() || null,
-        status: 'live',
-        privacy: 'public',
-        started_at: new Date().toISOString(),
-        stream_key: crypto.randomUUID(),
-      }).select().single();
+      const { data: created, error } = await withRetry(async () => supabase.from('live_streams').insert({
+          host_id: user.id,
+          title: validation.data.title,
+          description: validation.data.description?.trim() || null,
+          status: 'live',
+          privacy: 'public',
+          started_at: new Date().toISOString(),
+          stream_key: crypto.randomUUID(),
+        }).select().single()
+      );
 
       if (error) throw error;
       currentStreamIdRef.current = created?.id ?? null;
@@ -232,10 +272,32 @@ const LiveStreams = () => {
     setIsStreaming(false);
   };
 
+  const loadReplayUrl = async (stream: LiveStream, forceRetry = false) => {
+    if (!stream.recording_url) {
+      setReplayUrl(null);
+      setReplayError('Aucun fichier replay disponible pour ce live.');
+      return;
+    }
+    setReplayError(null);
+    if (forceRetry) setReplayRetryCount((count) => count + 1);
+    try {
+      const signedReplayUrl = await withRetry(async () => {
+        const url = await getStorageUrl('recordings', stream.recording_url);
+        if (!url) throw new Error('Replay indisponible ou non autorisé');
+        return url;
+      }, 3, 900);
+      setReplayUrl(signedReplayUrl);
+    } catch (e: any) {
+      setReplayError(e?.message || 'Replay indisponible ou non autorisé');
+      toast.error('Replay indisponible, nouvelle tentative possible');
+    }
+  };
+
   const openStream = async (stream: LiveStream) => {
     setOpeningStreamId(stream.id);
     setSelectedStream(stream);
     setReplayUrl(null);
+    setReplayError(null);
     fetchComments(stream.id);
 
     // Update viewer count
@@ -244,14 +306,8 @@ const LiveStreams = () => {
     }
 
     // Replay: create a signed URL for the recording
-    if (stream.status === 'ended' && stream.recording_url) {
-      try {
-        const signedReplayUrl = await getStorageUrl('recordings', stream.recording_url);
-        if (signedReplayUrl) setReplayUrl(signedReplayUrl);
-        else toast.error('Replay indisponible ou non autorisé');
-      } catch (e) {
-        console.warn('[Replay] Signed URL error', e);
-      }
+    if (stream.status === 'ended') {
+      await loadReplayUrl(stream);
     }
 
     supabase
@@ -283,7 +339,52 @@ const LiveStreams = () => {
     if (!error) setNewComment('');
   };
 
+  const updateStream = async () => {
+    if (!editingStream || !user) return;
+    const validation = liveStreamSchema.safeParse({ title, description });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0]?.message || 'Informations invalides');
+      return;
+    }
+    const { error } = await supabase.from('live_streams').update({
+      title: validation.data.title,
+      description: validation.data.description?.trim() || null,
+    }).eq('id', editingStream.id);
+    if (error) {
+      toast.error('Modification impossible');
+      return;
+    }
+    toast.success('Live mis à jour');
+    setEditingStream(null);
+    setTitle('');
+    setDescription('');
+    fetchAllStreams();
+    if (selectedStream?.id === editingStream.id) {
+      setSelectedStream({ ...selectedStream, title: validation.data.title, description: validation.data.description?.trim() || '' });
+    }
+  };
+
+  const deleteStream = async (stream: LiveStream) => {
+    if (!user) return;
+    setDeletingStreamId(stream.id);
+    try {
+      if (stream.recording_url) {
+        await supabase.storage.from('recordings').remove([stream.recording_url]);
+      }
+      const { error } = await supabase.from('live_streams').delete().eq('id', stream.id);
+      if (error) throw error;
+      toast.success(stream.status === 'ended' ? 'Replay supprimé' : 'Live supprimé');
+      if (selectedStream?.id === stream.id) setSelectedStream(null);
+      fetchAllStreams();
+    } catch (error: any) {
+      toast.error(error?.message || 'Suppression impossible');
+    } finally {
+      setDeletingStreamId(null);
+    }
+  };
+
   const endStream = async (streamId: string) => {
+    setEndingStreamId(streamId);
     // Stop recorder & wait for final chunk before stopping tracks
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== 'inactive') {
@@ -300,19 +401,20 @@ const LiveStreams = () => {
         recordedChunksRef.current = [];
         if (blob.size > 0 && user) {
           const path = `${streamId}/replay-${Date.now()}.webm`;
-          const { error: upErr } = await supabase.storage
+          const { error: upErr } = await withRetry(() => supabase.storage
             .from('recordings')
-            .upload(path, blob, { upsert: true, contentType: 'video/webm' });
+            .upload(path, blob, { upsert: true, contentType: 'video/webm' }), 3, 1200);
           if (upErr) {
             console.error('[Replay] Upload failed', upErr);
             toast.error('Replay non sauvegardé');
           } else {
-            await supabase.from('live_streams').update({
+            await withRetry(async () => await supabase.from('live_streams').update({
               status: 'ended',
               ended_at: new Date().toISOString(),
               recording_url: path,
-            }).eq('id', streamId);
+            }).eq('id', streamId), 3, 900);
             setUploadingReplay(false);
+            setEndingStreamId(null);
             localStreamRef.current?.getTracks().forEach(t => t.stop());
             localStreamRef.current = null;
             setIsStreaming(false);
@@ -330,12 +432,13 @@ const LiveStreams = () => {
     }
 
     stopStreaming();
-    await supabase.from('live_streams').update({
+    await withRetry(async () => await supabase.from('live_streams').update({
       status: 'ended',
       ended_at: new Date().toISOString(),
-    }).eq('id', streamId);
+    }).eq('id', streamId), 3, 900);
     setSelectedStream(null);
     currentStreamIdRef.current = null;
+    setEndingStreamId(null);
     toast.success('Live terminé.');
     fetchAllStreams();
   };
@@ -346,6 +449,12 @@ const LiveStreams = () => {
     if (diff < 3600) return `${Math.floor(diff / 60)} min`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
     return `${Math.floor(diff / 86400)}j`;
+  };
+
+  const beginEditStream = (stream: LiveStream) => {
+    setEditingStream(stream);
+    setTitle(stream.title || '');
+    setDescription(stream.description || '');
   };
 
   const renderStreamCard = (stream: LiveStream, isReplay = false) => (
@@ -388,6 +497,35 @@ const LiveStreams = () => {
           <Eye className="h-3 w-3" />
           {stream.status === 'ended' ? (stream.peak_viewers || 0) : (stream.viewers_count || 0)}
         </Badge>
+        {stream.host_id === user?.id && (
+          <div className="absolute bottom-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(event) => {
+                event.stopPropagation();
+                beginEditStream(stream);
+              }}
+              title="Modifier"
+            >
+              <Edit3 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8"
+              disabled={deletingStreamId === stream.id}
+              onClick={(event) => {
+                event.stopPropagation();
+                deleteStream(stream);
+              }}
+              title="Supprimer"
+            >
+              {deletingStreamId === stream.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+        )}
       </div>
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
@@ -409,8 +547,8 @@ const LiveStreams = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
-      <main className="container px-3 sm:px-4 py-4 md:py-6">
-        <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
+      <main className="w-full px-2 sm:px-3 lg:px-4 py-3 md:py-5">
+        <div className="w-full space-y-5 md:space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -423,6 +561,11 @@ const LiveStreams = () => {
               <Plus className="h-4 w-4" />
               Démarrer un Live
             </Button>
+          </div>
+
+          <div className="flex items-start gap-2 rounded-xl border bg-card p-3 text-sm text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+            <p className="min-w-0 break-words">Lives et replays utilisent des permissions RLS et des URLs signées ; les actions créer/modifier/supprimer restent limitées à l’hôte.</p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -456,7 +599,7 @@ const LiveStreams = () => {
                   </Button>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
                   {liveStreams.map(s => renderStreamCard(s))}
                 </div>
               )}
@@ -469,7 +612,7 @@ const LiveStreams = () => {
                   <p className="text-muted-foreground">Aucun live programmé</p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
                   {scheduledStreams.map(s => renderStreamCard(s))}
                 </div>
               )}
@@ -482,7 +625,7 @@ const LiveStreams = () => {
                   <p className="text-muted-foreground">Aucun replay disponible</p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
                   {endedStreams.map(s => renderStreamCard(s, true))}
                 </div>
               )}
@@ -492,7 +635,14 @@ const LiveStreams = () => {
       </main>
 
       {/* Create Dialog */}
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+      <Dialog open={showCreate} onOpenChange={(open) => {
+        setShowCreate(open);
+        if (!open) {
+          setCameraError(null);
+          setTitle('');
+          setDescription('');
+        }
+      }}>
         <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -523,6 +673,50 @@ const LiveStreams = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Dialog */}
+      <Dialog open={!!editingStream} onOpenChange={(open) => {
+        if (!open) {
+          setEditingStream(null);
+          setTitle('');
+          setDescription('');
+        }
+      }}>
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit3 className="h-5 w-5 text-primary" />
+              Modifier le live/replay
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Titre du live"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+            <Textarea
+              placeholder="Description (optionnel)"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="resize-none"
+            />
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <Button variant="outline" onClick={() => {
+                setEditingStream(null);
+                setTitle('');
+                setDescription('');
+              }}>
+                Annuler
+              </Button>
+              <Button onClick={updateStream} disabled={!title.trim()} className="gap-2">
+                <Edit3 className="h-4 w-4" />
+                Enregistrer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Stream Viewer */}
       <Dialog open={!!selectedStream || isStreaming} onOpenChange={(open) => {
         if (!open && isStreaming && !selectedStream) {
@@ -537,10 +731,10 @@ const LiveStreams = () => {
         }
         setSelectedStream(null);
       }}>
-        <DialogContent className="max-w-3xl max-h-[92vh] w-[calc(100vw-1rem)] p-0 sm:w-full">
+        <DialogContent className="max-w-5xl max-h-[94vh] w-[calc(100vw-0.5rem)] p-0 sm:w-full">
           {/* Own camera streaming view */}
           {isStreaming && (!selectedStream || selectedStream.host_id === user?.id) && (
-            <div className="flex flex-col h-[80vh]">
+            <div className="flex flex-col h-[82dvh]">
               <div className="relative flex-1 bg-foreground/95 rounded-t-lg overflow-hidden flex items-center justify-center">
                 <video
                   ref={localVideoRef}
@@ -556,19 +750,20 @@ const LiveStreams = () => {
                   variant="destructive"
                   size="sm"
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 gap-2 whitespace-nowrap"
+                  disabled={endingStreamId === (currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id)}
                   onClick={() => {
                     const ownStreamId = currentStreamIdRef.current || liveStreams.find(s => s.host_id === user?.id && s.status === 'live')?.id;
                     if (ownStreamId) endStream(ownStreamId);
                     else stopStreaming();
                   }}
                 >
-                  <WifiOff className="h-4 w-4" /> Terminer le Live
+                  {endingStreamId ? <Loader2 className="h-4 w-4 animate-spin" /> : <WifiOff className="h-4 w-4" />} Terminer le Live
                 </Button>
               </div>
             </div>
           )}
           {selectedStream && (!isStreaming || selectedStream.host_id !== user?.id) && (
-            <div className="flex flex-col h-[80vh]">
+            <div className="flex flex-col h-[82dvh]">
               {/* Video area */}
               <div className="relative aspect-video bg-foreground/95 flex items-center justify-center shrink-0 rounded-t-lg overflow-hidden">
                 {selectedStream.status === 'ended' && replayUrl ? (
@@ -576,6 +771,10 @@ const LiveStreams = () => {
                     src={replayUrl}
                     controls
                     autoPlay
+                    onError={() => {
+                      setReplayError('Erreur de lecture vidéo. Réessayez avec une nouvelle URL signée.');
+                      setReplayUrl(null);
+                    }}
                     className="w-full h-full object-contain bg-black"
                   />
                 ) : (
@@ -594,9 +793,20 @@ const LiveStreams = () => {
                         {selectedStream.description}
                       </p>
                     )}
-                    {selectedStream.status === 'ended' && selectedStream.recording_url && !replayUrl && (
+                    {selectedStream.status === 'ended' && selectedStream.recording_url && !replayUrl && !replayError && (
                       <div className="mt-3 flex items-center justify-center gap-2 text-background/70 text-xs">
                         <Loader2 className="h-3 w-3 animate-spin" /> Chargement du replay…
+                      </div>
+                    )}
+                    {selectedStream.status === 'ended' && replayError && (
+                      <div className="mt-3 flex flex-col items-center gap-2 text-background/80 text-xs">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-destructive" />
+                          <span className="break-words">{replayError}</span>
+                        </div>
+                        <Button size="sm" variant="secondary" className="gap-2" onClick={() => loadReplayUrl(selectedStream, true)}>
+                          <RefreshCw className="h-3.5 w-3.5" /> Réessayer {replayRetryCount > 0 ? `(${replayRetryCount})` : ''}
+                        </Button>
                       </div>
                     )}
                     {selectedStream.status === 'ended' && !selectedStream.recording_url && (
@@ -619,14 +829,46 @@ const LiveStreams = () => {
                   </Badge>
                 </div>
                 {selectedStream.host_id === user?.id && selectedStream.status === 'live' && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-3 right-3 gap-1 whitespace-nowrap"
-                    onClick={() => endStream(selectedStream.id)}
-                  >
-                    <WifiOff className="h-4 w-4" /> Terminer
-                  </Button>
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="gap-1 whitespace-nowrap"
+                      onClick={() => beginEditStream(selectedStream)}
+                    >
+                      <Edit3 className="h-4 w-4" /> Modifier
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="gap-1 whitespace-nowrap"
+                      disabled={endingStreamId === selectedStream.id}
+                      onClick={() => endStream(selectedStream.id)}
+                    >
+                      {endingStreamId === selectedStream.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <WifiOff className="h-4 w-4" />} Terminer
+                    </Button>
+                  </div>
+                )}
+                {selectedStream.host_id === user?.id && selectedStream.status === 'ended' && (
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="gap-1 whitespace-nowrap"
+                      onClick={() => beginEditStream(selectedStream)}
+                    >
+                      <Edit3 className="h-4 w-4" /> Modifier
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="gap-1 whitespace-nowrap"
+                      disabled={deletingStreamId === selectedStream.id}
+                      onClick={() => deleteStream(selectedStream)}
+                    >
+                      {deletingStreamId === selectedStream.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Supprimer
+                    </Button>
+                  </div>
                 )}
               </div>
 
