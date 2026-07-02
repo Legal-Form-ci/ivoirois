@@ -742,7 +742,7 @@ const LiveStreams = () => {
                   autoPlay
                   playsInline
                   muted
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain bg-muted"
                 />
                 <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground gap-1 animate-pulse">
                   <Wifi className="h-3 w-3" /> EN DIRECT
@@ -776,7 +776,7 @@ const LiveStreams = () => {
                       setReplayError('Erreur de lecture vidéo. Réessayez avec une nouvelle URL signée.');
                       setReplayUrl(null);
                     }}
-                    className="w-full h-full object-contain bg-black"
+                    className="w-full h-full object-contain bg-muted"
                   />
                 ) : (
                   <div className="text-center text-background px-4">
