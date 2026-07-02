@@ -133,7 +133,7 @@ const CreateReel = () => {
           Retour aux Reels
         </Button>
 
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-[1600px] mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Video className="w-6 h-6" />

@@ -283,7 +283,7 @@ const Profile = () => {
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-[1600px] mx-auto space-y-6">
           <Card className="shadow-[var(--shadow-card)] overflow-hidden">
             <div className="h-40 md:h-56 bg-muted">
               {profile.cover_url ? (
