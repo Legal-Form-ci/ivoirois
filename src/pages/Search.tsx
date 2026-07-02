@@ -154,7 +154,7 @@ const Search = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-6">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="max-w-screen-xl mx-auto space-y-6">
           {/* Search Input */}
           <div className="relative">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

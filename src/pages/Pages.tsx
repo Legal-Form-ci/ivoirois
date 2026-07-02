@@ -129,7 +129,7 @@ const Pages = () => {
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="max-w-screen-xl mx-auto space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-2xl md:text-3xl font-bold">Pages</h1>
             <Button onClick={() => navigate('/pages/create')} className="gap-2">

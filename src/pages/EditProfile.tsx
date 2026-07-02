@@ -241,7 +241,7 @@ const EditProfile = () => {
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto">
+        <div className="max-w-screen-xl mx-auto">
           <Button
             variant="ghost"
             className="mb-4 gap-2"

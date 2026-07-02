@@ -154,7 +154,7 @@ const Marketplace = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="max-w-screen-xl mx-auto space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">

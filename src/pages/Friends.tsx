@@ -187,7 +187,7 @@ const Friends = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto">
+        <div className="max-w-screen-xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Amis</h1>
 
           <Tabs defaultValue="friends" className="w-full">
