@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ArrowLeft, MapPin, Calendar, Clock, Users, Globe, Lock, Video, Trash2, Pencil, Loader2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -90,8 +91,8 @@ const EventDetail = () => {
 
           <Card className="overflow-hidden">
             {event.cover_image && (
-              <div className="aspect-[16/6] bg-muted">
-                <img src={event.cover_image} alt={event.title} className="w-full h-full object-cover" />
+              <div className="aspect-[16/6] min-h-40 bg-muted">
+                <AdaptiveImage src={event.cover_image} alt={event.title} className="h-full rounded-none" rounded="none" />
               </div>
             )}
             <CardContent className="p-6 space-y-4">

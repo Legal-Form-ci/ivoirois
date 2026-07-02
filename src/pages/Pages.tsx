@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Plus, Users } from 'lucide-react';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 
 interface Page {
   id: string;
@@ -152,16 +153,12 @@ const Pages = () => {
               <p className="text-muted-foreground">Aucune page trouvée</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="auto-grid">
               {filteredPages.map((page) => (
                 <Card key={page.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                   {page.cover_image && (
                     <div className="h-24 overflow-hidden">
-                      <img
-                        src={page.cover_image}
-                        alt={page.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <AdaptiveImage src={page.cover_image} alt={page.name} className="h-full rounded-none" rounded="none" />
                     </div>
                   )}
                   <CardHeader className="pb-2">

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { ArrowLeft, Heart, MapPin, Truck, MessageCircle, Trash2, Pencil, Loader2, ShoppingBag, Eye } from "lucide-react";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 const CONDITIONS: Record<string, string> = {
   new: "Neuf", like_new: "Comme neuf", good: "Bon état", fair: "État correct", for_parts: "Pour pièces",
@@ -120,11 +121,11 @@ const ListingDetail = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />Retour
           </Button>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="auto-grid-wide">
             <Card className="overflow-hidden">
               <div className="aspect-square bg-muted">
                 {images[imgIdx] ? (
-                  <img src={images[imgIdx]} alt={listing.title} className="w-full h-full object-cover" />
+                  <AdaptiveImage src={images[imgIdx]} alt={listing.title} className="h-full rounded-none" rounded="none" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-16 w-16 text-muted-foreground" /></div>
                 )}
@@ -133,7 +134,7 @@ const ListingDetail = () => {
                 <div className="flex gap-2 p-3 overflow-x-auto">
                   {images.map((src, i) => (
                     <button key={i} onClick={() => setImgIdx(i)} className={`shrink-0 w-16 h-16 rounded overflow-hidden border-2 ${i === imgIdx ? "border-primary" : "border-transparent"}`}>
-                      <img src={src} className="w-full h-full object-cover" alt="" />
+                      <AdaptiveImage src={src} className="h-full rounded-none" rounded="none" alt={`Miniature ${i + 1}`} />
                     </button>
                   ))}
                 </div>

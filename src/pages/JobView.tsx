@@ -13,6 +13,7 @@ import { ArrowLeft, Briefcase, MapPin, Building2, Clock, DollarSign, Globe, Mail
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface JobPost {
   id: string;
@@ -174,11 +175,7 @@ const JobView = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="h-20 w-20 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                   {job.companies.logo_url ? (
-                    <img
-                      src={job.companies.logo_url}
-                      alt={job.companies.name}
-                      className="h-full w-full object-cover rounded-lg"
-                    />
+                    <AdaptiveImage src={job.companies.logo_url} alt={job.companies.name} className="h-full rounded-lg" />
                   ) : (
                     <Building2 className="h-10 w-10 text-muted-foreground" />
                   )}

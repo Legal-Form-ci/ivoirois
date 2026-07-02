@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Page {
   id: string;
@@ -161,15 +162,10 @@ const PageView = () => {
         <div className="max-w-screen-xl mx-auto space-y-4 md:space-y-6">
           {/* Cover & Profile */}
           <Card className="overflow-hidden">
-            <div className="relative">
-              <div 
-                className="h-32 md:h-48 bg-muted"
-                style={page.cover_image ? { 
-                  backgroundImage: `url(${page.cover_image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                } : {}}
-              />
+              <div className="relative">
+              <div className="h-32 md:h-48 bg-muted">
+                <AdaptiveImage src={page.cover_image} alt={`${page.name} couverture`} className="h-full rounded-none" rounded="none" />
+              </div>
               <div className="absolute -bottom-12 left-4 md:left-6">
                 <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
                   <AvatarImage src={page.profile_image || undefined} />

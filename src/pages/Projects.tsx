@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FolderKanban, Plus, Search, MapPin, Building2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Project {
   id: string;
@@ -102,10 +103,10 @@ const Projects = () => {
               <Button onClick={() => navigate("/projects/create")}>Créer le premier projet</Button>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="auto-grid">
               {filtered.map((project) => (
                 <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  {project.cover_image && <img src={project.cover_image} alt={project.title} className="h-40 w-full object-cover" />}
+                  {project.cover_image && <AdaptiveImage src={project.cover_image} alt={project.title} className="h-40 rounded-none" rounded="none" />}
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-3">
                       <CardTitle className="text-lg line-clamp-2">{project.title}</CardTitle>

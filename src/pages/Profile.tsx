@@ -12,6 +12,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import QRCodeProfile from "@/components/QRCodeProfile";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Profile {
   id: string;
@@ -287,7 +288,7 @@ const Profile = () => {
           <Card className="shadow-[var(--shadow-card)] overflow-hidden">
             <div className="h-40 md:h-56 bg-muted">
               {profile.cover_url ? (
-                <img src={profile.cover_url} alt="Couverture" className="h-full w-full object-cover" />
+                <AdaptiveImage src={profile.cover_url} alt="Couverture" className="h-full rounded-none" rounded="none" />
               ) : (
                 <div className="h-full w-full bg-primary/5" />
               )}
@@ -479,20 +480,22 @@ const Profile = () => {
                 Aucune publication pour le moment
               </Card>
             ) : (
-              posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  userId={profile.id}
-                  author={profile.full_name}
-                  authorAvatar={profile.avatar_url}
-                  content={post.content}
-                  image={post.image_url}
-                  likes={post.likes[0]?.count || 0}
-                  comments={post.comments[0]?.count || 0}
-                  timeAgo={new Date(post.created_at).toLocaleDateString("fr-FR")}
-                />
-              ))
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,42rem)]">
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    postId={post.id}
+                    userId={profile.id}
+                    author={profile.full_name}
+                    authorAvatar={profile.avatar_url}
+                    content={post.content}
+                    image={post.image_url}
+                    likes={post.likes[0]?.count || 0}
+                    comments={post.comments[0]?.count || 0}
+                    timeAgo={new Date(post.created_at).toLocaleDateString("fr-FR")}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>

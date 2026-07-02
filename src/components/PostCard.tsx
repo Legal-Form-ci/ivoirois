@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { sanitizeHtml } from "@/lib/sanitize";
 import ReactionPicker from "./ReactionPicker";
 import ShareButton from "./ShareButton";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface PostCardProps {
   postId?: string;
@@ -121,11 +122,7 @@ const PostCard = ({ postId, userId, author, authorAvatar, content, image, likes:
           ) : image.match(/\.(mp3|wav|m4a|ogg)$/i) ? (
             <audio src={image} controls className="w-full" />
           ) : (
-            <img 
-              src={image} 
-              alt="Post media" 
-              className="w-full rounded-lg object-cover max-h-96"
-            />
+            <AdaptiveImage src={image} alt="Post media" className="min-h-64 max-h-96 aspect-video" />
           )
         )}
       </CardContent>

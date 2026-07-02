@@ -19,6 +19,7 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import ReactionPicker from './ReactionPicker';
 import ShareButton from './ShareButton';
 import { toast } from 'sonner';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 
 interface EnhancedPostCardProps {
   id: string;
@@ -172,7 +173,7 @@ const EnhancedPostCard = ({
     const types = safeMediaTypes;
 
     if (urls.length === 0 && imageUrl) {
-      return <img src={imageUrl} alt="Post" className="w-full rounded-lg object-cover max-h-96" />;
+      return <AdaptiveImage src={imageUrl} alt="Post" className="min-h-64 max-h-96 aspect-video" />;
     }
     if (urls.length === 0) return null;
 
@@ -180,7 +181,7 @@ const EnhancedPostCard = ({
       <div className={`grid gap-2 ${urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
         {urls.map((url, index) => {
           const type = types[index] || '';
-          if (type.startsWith('image/')) return <img key={index} src={url} alt={`Media ${index + 1}`} className="w-full rounded-lg object-cover max-h-64" />;
+          if (type.startsWith('image/')) return <AdaptiveImage key={index} src={url} alt={`Media ${index + 1}`} className="min-h-48 max-h-64 aspect-video" />;
           if (type.startsWith('video/')) return <video key={index} src={url} controls className="w-full rounded-lg max-h-64" />;
           if (type.startsWith('audio/')) return <audio key={index} src={url} controls className="w-full" />;
           return (
