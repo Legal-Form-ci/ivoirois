@@ -180,7 +180,7 @@ const CreateListing = () => {
                   <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                     {imagePreviews.map((preview, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                        <img src={preview} alt="" className="w-full h-full object-cover" />
+                        <img src={preview} alt="" className="w-full h-full object-contain bg-muted" />
                         <Button
                           type="button"
                           variant="destructive"

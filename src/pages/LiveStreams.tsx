@@ -20,6 +20,7 @@ import {
   AlertCircle, RefreshCw, Trash2, Edit3, ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 
 interface LiveStream {
   id: string;
@@ -465,7 +466,7 @@ const LiveStreams = () => {
     >
     <div className="relative aspect-video bg-muted flex items-center justify-center overflow-hidden">
         {stream.thumbnail_url ? (
-          <img src={stream.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+          <AdaptiveImage src={stream.thumbnail_url} alt={stream.title} className="h-full rounded-none transition-transform group-hover:scale-[1.02]" rounded="none" />
         ) : (
           <div className="flex flex-col items-center gap-2">
             {isReplay ? (
@@ -599,7 +600,7 @@ const LiveStreams = () => {
                   </Button>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+                <div className="auto-grid">
                   {liveStreams.map(s => renderStreamCard(s))}
                 </div>
               )}
@@ -612,7 +613,7 @@ const LiveStreams = () => {
                   <p className="text-muted-foreground">Aucun live programmé</p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+                <div className="auto-grid">
                   {scheduledStreams.map(s => renderStreamCard(s))}
                 </div>
               )}
@@ -625,7 +626,7 @@ const LiveStreams = () => {
                   <p className="text-muted-foreground">Aucun replay disponible</p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+                <div className="auto-grid">
                   {endedStreams.map(s => renderStreamCard(s, true))}
                 </div>
               )}

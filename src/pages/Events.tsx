@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 
 interface Event {
   id: string;
@@ -139,11 +140,7 @@ const Events = () => {
     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/events/${event.id}`)}>
       {event.cover_image && (
         <div className="h-40 overflow-hidden">
-          <img
-            src={event.cover_image}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
+          <AdaptiveImage src={event.cover_image} alt={event.title} className="h-full rounded-none" rounded="none" />
         </div>
       )}
       <CardContent className="p-4 space-y-3">
@@ -278,7 +275,7 @@ const Events = () => {
                   </Button>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="auto-grid">
                   {filteredEvents.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
@@ -294,7 +291,7 @@ const Events = () => {
                   </p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="auto-grid">
                   {myEvents.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}

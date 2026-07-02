@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 import { 
   REGIONS_COTE_IVOIRE, 
   SECTORS, 
@@ -262,7 +263,7 @@ const EditProfile = () => {
                     <Label htmlFor="cover_file">Photo de couverture</Label>
                     <div className="h-32 md:h-44 rounded-lg overflow-hidden bg-muted border">
                       {formData.cover_url ? (
-                        <img src={formData.cover_url} alt="Couverture" className="h-full w-full object-cover" />
+                        <AdaptiveImage src={formData.cover_url} alt="Couverture" className="h-full" />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
                           Aucune couverture

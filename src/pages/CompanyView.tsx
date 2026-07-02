@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building2, MapPin, Globe, Phone, Mail, Calendar, Users, Briefcase, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Company {
   id: string;
@@ -123,22 +124,14 @@ const CompanyView = () => {
           <Card className="overflow-hidden">
             {company.cover_image && (
               <div className="h-48 bg-muted">
-                <img
-                  src={company.cover_image}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                />
+                <AdaptiveImage src={company.cover_image} alt={`${company.name} couverture`} className="h-full rounded-none" rounded="none" />
               </div>
             )}
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="h-24 w-24 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 border-4 border-background -mt-16 md:-mt-12">
                   {company.logo_url ? (
-                    <img
-                      src={company.logo_url}
-                      alt={company.name}
-                      className="h-full w-full object-cover rounded-xl"
-                    />
+                    <AdaptiveImage src={company.logo_url} alt={company.name} className="h-full rounded-xl" rounded="xl" />
                   ) : (
                     <Building2 className="h-12 w-12 text-muted-foreground" />
                   )}

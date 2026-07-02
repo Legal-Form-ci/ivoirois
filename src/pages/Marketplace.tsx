@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 import { 
   Plus, Search, MapPin, Heart, MessageCircle, 
   ShoppingBag, Filter, Truck, Tag
@@ -224,7 +225,7 @@ const Marketplace = () => {
               </Button>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="auto-grid-tight">
               {filteredListings.map((listing) => (
                 <Card 
                   key={listing.id} 
@@ -233,11 +234,7 @@ const Marketplace = () => {
                 >
                   <div className="relative aspect-square overflow-hidden">
                     {listing.images?.[0] ? (
-                      <img
-                        src={listing.images[0]}
-                        alt={listing.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <AdaptiveImage src={listing.images[0]} alt={listing.title} className="h-full rounded-none transition-transform duration-300 group-hover:scale-[1.02]" rounded="none" />
                     ) : (
                       <div className="w-full h-full bg-muted flex items-center justify-center">
                         <ShoppingBag className="h-12 w-12 text-muted-foreground" />

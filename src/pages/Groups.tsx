@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Plus, Users, Lock, Globe } from 'lucide-react';
+import { AdaptiveImage } from '@/components/ui/adaptive-media';
 
 interface Group {
   id: string;
@@ -138,16 +139,12 @@ const Groups = () => {
               <p className="text-muted-foreground">Aucun groupe trouvé</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="auto-grid">
               {filteredGroups.map((group) => (
                 <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   {group.cover_image && (
                     <div className="h-32 overflow-hidden">
-                      <img
-                        src={group.cover_image}
-                        alt={group.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <AdaptiveImage src={group.cover_image} alt={group.name} className="h-full rounded-none" rounded="none" />
                     </div>
                   )}
                   <CardHeader className="pb-2">

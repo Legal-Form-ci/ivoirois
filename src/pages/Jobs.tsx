@@ -11,6 +11,7 @@ import { Briefcase, Search, MapPin, Building2, Clock, Plus } from "lucide-react"
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface JobPost {
   id: string;
@@ -130,11 +131,7 @@ const Jobs = () => {
                     <div className="flex items-start gap-4">
                       <div className="h-14 w-14 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                         {job.companies.logo_url ? (
-                          <img
-                            src={job.companies.logo_url}
-                            alt={job.companies.name}
-                            className="h-full w-full object-cover rounded-lg"
-                          />
+                          <AdaptiveImage src={job.companies.logo_url} alt={job.companies.name} className="h-full rounded-lg" />
                         ) : (
                           <Building2 className="h-6 w-6 text-muted-foreground" />
                         )}
