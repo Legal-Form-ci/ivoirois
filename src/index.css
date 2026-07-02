@@ -229,4 +229,44 @@ All colors MUST be HSL.
     min-width: 0;
     overflow-x: hidden;
   }
+
+  /* Adaptive images: fill container without cropping visible detail.
+     Uses a blurred copy of the same image as backdrop so small or oversized
+     images fill the frame without letterboxing or hard crops. */
+  .img-adaptive-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: hsl(var(--muted));
+  }
+  .img-adaptive-frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--adaptive-src);
+    background-size: cover;
+    background-position: center;
+    filter: blur(24px) saturate(1.1);
+    transform: scale(1.15);
+    opacity: 0.55;
+  }
+  .img-adaptive-frame > img,
+  .img-adaptive-frame > video {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+
+  /* Avatars and cover photos: fill the frame cleanly. */
+  .img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
 }

@@ -110,7 +110,7 @@ const CreateProject = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-4 md:py-6">
-        <div className="max-w-2xl mx-auto space-y-4">
+        <div className="max-w-[1600px] mx-auto space-y-4">
           <Button variant="ghost" className="gap-2" onClick={() => navigate("/projects")}><ArrowLeft className="h-4 w-4" />Retour aux projets</Button>
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2"><FolderKanban className="h-5 w-5" />{projectId ? "Modifier le projet" : "Créer un projet"}</CardTitle></CardHeader>

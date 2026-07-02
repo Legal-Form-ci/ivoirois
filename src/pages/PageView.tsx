@@ -158,7 +158,7 @@ const PageView = () => {
       <Header />
       
       <main className="container py-4 md:py-6">
-        <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+        <div className="max-w-[1600px] mx-auto space-y-4 md:space-y-6">
           {/* Cover & Profile */}
           <Card className="overflow-hidden">
             <div className="relative">
