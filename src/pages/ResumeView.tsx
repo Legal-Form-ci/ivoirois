@@ -158,7 +158,7 @@ const ResumeView = () => {
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="max-w-screen-xl mx-auto space-y-6">
           {/* Actions Bar - Hidden in print */}
           <div className="flex items-center justify-between print:hidden">
             <Button variant="ghost" onClick={() => navigate("/resume")} className="gap-2">

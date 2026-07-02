@@ -166,7 +166,7 @@ const GroupChat = () => {
     <div className="min-h-screen bg-muted/30">
       <Header />
       <main className="container py-6">
-        <Card className="max-w-[1600px] mx-auto flex flex-col h-[calc(100vh-12rem)]">
+        <Card className="max-w-screen-xl mx-auto flex flex-col h-[calc(100vh-12rem)]">
           <div className="p-4 border-b flex items-center gap-3">
             <Button
               variant="ghost"

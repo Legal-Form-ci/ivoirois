@@ -169,7 +169,7 @@ const Notifications = () => {
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
       <main className="container py-4 md:py-6">
-        <div className="max-w-[1600px] mx-auto space-y-4">
+        <div className="max-w-screen-xl mx-auto space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Notifications</h1>
