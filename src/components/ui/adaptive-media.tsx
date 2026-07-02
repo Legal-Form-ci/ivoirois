@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type AdaptiveImageProps = {
@@ -6,7 +6,7 @@ type AdaptiveImageProps = {
   alt: string;
   className?: string;
   imgClassName?: string;
-  fallback?: React.ReactNode;
+  fallback?: ReactNode;
   rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 };
 
@@ -40,7 +40,7 @@ export function AdaptiveImage({
   return (
     <div
       className={cn("img-adaptive-frame", roundedClass[rounded], className)}
-      style={{ "--adaptive-src": `url(${src})` } as React.CSSProperties}
+      style={{ "--adaptive-src": `url(${src})` } as CSSProperties}
     >
       <img
         src={src}
