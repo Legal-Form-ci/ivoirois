@@ -114,7 +114,7 @@ const Index = () => {
               <img src={appLogo} alt="E'nvlé Space" className="h-8 w-8 rounded-lg" />
               <span className="font-bold text-lg">E'nvlé Space</span>
             </div>
-            <p className="text-muted-foreground text-sm">© 2026 E'nvlé Space - Notre peuple. Notre espace. 👑</p>
+            <p className="text-muted-foreground text-sm">© 2026 E'nvlé Space - Notre peuple. Notre espace.</p>
             <div className="flex gap-4 text-sm text-muted-foreground">
               <Link to="/auth" className="hover:text-foreground">Connexion</Link>
               <Link to="/auth?mode=signup" className="hover:text-foreground">Inscription</Link>

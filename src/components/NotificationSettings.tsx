@@ -31,7 +31,7 @@ const NotificationSettings = () => {
   };
 
   const testNotification = () => {
-    showNotification("Test E'nvlé Space 👑", {
+    showNotification("Test E'nvlé Space", {
       body: "Vos notifications fonctionnent correctement !",
       tag: "test-notification",
     });

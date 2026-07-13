@@ -127,7 +127,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Ivoi\'Rois 👑', options)
+    self.registration.showNotification('E'nvlé Space', options)
   );
 });
 
