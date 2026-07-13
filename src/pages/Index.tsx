@@ -16,7 +16,7 @@ const Index = () => {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-secondary/70 to-accent/75" />
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary/95 via-secondary/80 to-primary/70" />
         <div className="container relative z-10 text-center text-white px-4">
           <div className="flex justify-center mb-6">
             <img src={appLogo} alt="E'nvlé Space" className="h-24 w-24 rounded-2xl shadow-2xl" />
@@ -25,10 +25,10 @@ const Index = () => {
             E'nvlé Space
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 max-w-2xl mx-auto drop-shadow-md">
-            Notre peuple. Notre espace. 👑
+            Notre peuple. Notre espace.
           </p>
           <p className="text-base sm:text-lg mb-6 md:mb-8 max-w-xl mx-auto text-white/80">
-            Le réseau social & professionnel 100% ivoirien. Connectez-vous, partagez, évoluez.
+            Le réseau social & professionnel africain. Connectez-vous, partagez, évoluez.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-card)]" asChild>
@@ -48,7 +48,7 @@ const Index = () => {
             C'est quoi <span className="text-primary">E'nvlé Space</span> ?
           </h2>
           <p className="text-base sm:text-lg text-center max-w-4xl mx-auto mb-10 md:mb-16 text-muted-foreground">
-            E'nvlé Space est la première plateforme de connexion 100 % ivoirienne, qui réunit chat et réseau social dans un même espace convivial. Ici, chaque utilisateur est roi — libre de s'exprimer, de partager et de briller à l'ivoirienne.
+            E'nvlé Space est la plateforme qui réunit chat, réseau social et outils professionnels dans un même espace élégant. Notre peuple. Notre espace.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <FeatureCard icon={<MapPin className="h-12 w-12" />} title="100% Ivoirien" description="Conçue pour et par les Ivoiriens, adaptée à nos réalités" />
