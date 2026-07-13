@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "Ivoi'Rois",
+    "name": "E'nvlé Space",
     "tagline": "Where we speak royally!",
-    "description": "Ivoi'Rois — the Ivorian pride that connects, unites and makes every voice shine. Here, the royalty is the people."
+    "description": "E'nvlé Space — the Ivorian pride that connects, unites and makes every voice shine. Here, the royalty is the people."
   },
   "common": {
     "loading": "Loading...",
@@ -111,7 +111,7 @@
   },
   "admin": {
     "title": "Super Admin Area",
-    "subtitle": "Complete management of the Ivoi'Rois platform",
+    "subtitle": "Complete management of the E'nvlé Space platform",
     "dashboard": "Dashboard",
     "users": "Users",
     "companies": "Companies",
@@ -242,7 +242,7 @@
   },
   "landing": {
     "slogan": "Here, we speak royally!",
-    "description": "Ivoi'Rois — the Ivorian pride that connects, brings together and makes every voice shine. Here, royalty is the people.",
+    "description": "E'nvlé Space — the Ivorian pride that connects, brings together and makes every voice shine. Here, royalty is the people.",
     "joinCommunity": "Join the community",
     "connectWithIvorians": "100% Ivorian Connection",
     "features": {
@@ -265,7 +265,7 @@
       "companies": "Companies",
       "jobs": "Job offers"
     },
-    "copyright": "© 2025 Ivoi'Rois - All rights reserved"
+    "copyright": "© 2025 E'nvlé Space - All rights reserved"
   },
   "errors": {
     "generic": "An error occurred",

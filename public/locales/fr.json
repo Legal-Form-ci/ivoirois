@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "Ivoi'Rois",
-    "tagline": "Ici, on cause royalement !",
-    "description": "Ivoi'Rois — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple."
+    "name": "E'nvlé Space",
+    "tagline": "Notre peuple. Notre espace.",
+    "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple."
   },
   "common": {
     "loading": "Chargement...",
@@ -111,7 +111,7 @@
   },
   "admin": {
     "title": "Espace Super Admin",
-    "subtitle": "Gestion complète de la plateforme Ivoi'Rois",
+    "subtitle": "Gestion complète de la plateforme E'nvlé Space",
     "dashboard": "Tableau de bord",
     "users": "Utilisateurs",
     "companies": "Entreprises",
@@ -241,8 +241,8 @@
     "deleteAccount": "Supprimer le compte"
   },
   "landing": {
-    "slogan": "Ici, on cause royalement !",
-    "description": "Ivoi'Rois — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
+    "slogan": "Notre peuple. Notre espace.",
+    "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
     "joinCommunity": "Rejoindre la communauté",
     "connectWithIvorians": "Connexion 100% Ivoirienne",
     "features": {
@@ -265,7 +265,7 @@
       "companies": "Entreprises",
       "jobs": "Offres d'emploi"
     },
-    "copyright": "© 2025 Ivoi'Rois - Tous droits réservés"
+    "copyright": "© 2025 E'nvlé Space - Tous droits réservés"
   },
   "errors": {
     "generic": "Une erreur s'est produite",

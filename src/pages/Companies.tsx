@@ -67,7 +67,7 @@ const Companies = () => {
                 Entreprises
               </h1>
               <p className="text-muted-foreground mt-1">
-                Découvrez les entreprises vérifiées sur Ivoi'Rois
+                Découvrez les entreprises vérifiées sur E'nvlé Space
               </p>
             </div>
             <Button onClick={() => navigate("/companies/create")} className="gap-2">
@@ -95,7 +95,7 @@ const Companies = () => {
               <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-lg font-medium mb-2">Aucune entreprise trouvée</p>
               <p className="text-muted-foreground mb-4">
-                Soyez le premier à créer votre entreprise sur Ivoi'Rois !
+                Soyez le premier à créer votre entreprise sur E'nvlé Space !
               </p>
               <Button onClick={() => navigate("/companies/create")}>
                 Créer une entreprise

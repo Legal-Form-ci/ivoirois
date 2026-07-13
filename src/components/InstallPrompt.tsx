@@ -84,13 +84,13 @@ const InstallPrompt = () => {
           <div className="flex flex-col items-center text-center space-y-4">
             <img 
               src={appLogo} 
-              alt="Ivoi'Rois" 
+              alt="E'nvlé Space" 
               className="h-20 w-20 rounded-2xl shadow-lg"
             />
             
             <div>
               <h2 className="text-2xl font-bold mb-2 text-primary">
-                Installer Ivoi'Rois
+                Installer E'nvlé Space
               </h2>
               <p className="text-muted-foreground">
                 Installez l'application sur votre appareil pour un accès rapide et une meilleure expérience !

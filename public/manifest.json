@@ -1,11 +1,11 @@
 {
-  "name": "Ivoi'Rois - Ici, on cause royalement !",
-  "short_name": "Ivoi'Rois",
-  "description": "Ivoi'Rois — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
+  "name": "E'nvlé Space - Notre peuple. Notre espace.",
+  "short_name": "E'nvlé Space",
+  "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FF8C00",
-  "theme_color": "#FF8C00",
+  "background_color": "#0d3a26",
+  "theme_color": "#0d3a26",
   "orientation": "portrait-primary",
   "icons": [
     {

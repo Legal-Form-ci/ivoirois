@@ -104,7 +104,7 @@ self.addEventListener('fetch', (event) => {
 // Push notification event
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data ? event.data.text() : 'Nouvelle notification Ivoi\'Rois',
+    body: event.data ? event.data.text() : 'Nouvelle notification E'nvlé Space',
     icon: '/logo.png',
     badge: '/favicon.png',
     vibrate: [100, 50, 100],
@@ -127,7 +127,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Ivoi\'Rois 👑', options)
+    self.registration.showNotification('E'nvlé Space', options)
   );
 });
 

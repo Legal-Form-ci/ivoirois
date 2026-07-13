@@ -123,8 +123,8 @@ const Auth = () => {
             })
             .eq("id", data.user.id);
           
-          // Auto-assign super_admin role for admin@ivoirois.com
-          if (email.toLowerCase() === 'admin@ivoirois.com') {
+          // Auto-assign super_admin role for admin@envlespace.com
+          if (email.toLowerCase() === 'admin@envlespace.com') {
             await supabase
               .from("user_roles")
               .upsert({
@@ -134,7 +134,7 @@ const Auth = () => {
           }
         }
         
-        toast.success("Compte créé ! Bienvenue sur Ivoi'Rois 🇨🇮");
+        toast.success("Compte créé ! Bienvenue sur E'nvlé Space 🇨🇮");
         navigate(redirectTo);
       }
     } catch (error: unknown) {
@@ -163,10 +163,10 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <img src={appLogo} alt="Ivoi'Rois" className="h-16 w-16 rounded-xl" />
+            <img src={appLogo} alt="E'nvlé Space" className="h-16 w-16 rounded-xl" />
           </div>
           <CardTitle className="text-3xl text-primary">
-            {isForgotPassword ? "Mot de passe oublié" : "Ivoi'Rois"}
+            {isForgotPassword ? "Mot de passe oublié" : "E'nvlé Space"}
           </CardTitle>
           <CardDescription>
             {isForgotPassword
@@ -235,7 +235,7 @@ const Auth = () => {
               <Input
                 id="email"
                 type={isLogin ? "text" : "email"}
-                placeholder={isLogin ? "Ivoi'Rois ou exemple@gmail.com" : "exemple@gmail.com"}
+                placeholder={isLogin ? "E'nvlé Space ou exemple@gmail.com" : "exemple@gmail.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
