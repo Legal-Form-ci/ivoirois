@@ -184,6 +184,7 @@ const App = () => (
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      </GeoGate>
     </TooltipProvider>
   </QueryClientProvider>
 );
