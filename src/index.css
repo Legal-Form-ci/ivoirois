@@ -8,96 +8,98 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 150 45% 12%;
+    /* E'nvlé Space — light theme (ivory, deep emerald, gold) */
+    --background: 45 30% 98%;
+    --foreground: 155 55% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 150 45% 12%;
+    --card-foreground: 155 55% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 45% 12%;
+    --popover-foreground: 155 55% 8%;
 
-    /* Brand orange from logo */
-    --primary: 32 89% 55%;
-    --primary-foreground: 0 0% 100%;
+    /* Gold accent from logo */
+    --primary: 43 78% 48%;
+    --primary-foreground: 155 55% 8%;
 
-    /* Brand deep green from logo */
-    --secondary: 150 51% 25%;
-    --secondary-foreground: 0 0% 100%;
+    /* Deep emerald from logo */
+    --secondary: 155 65% 14%;
+    --secondary-foreground: 45 60% 92%;
 
-    --muted: 150 20% 96%;
-    --muted-foreground: 150 10% 40%;
+    --muted: 150 15% 95%;
+    --muted-foreground: 155 15% 38%;
 
-    --accent: 150 51% 25%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 78% 48%;
+    --accent-foreground: 155 55% 8%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 15% 90%;
-    --input: 150 15% 90%;
-    --ring: 32 89% 55%;
+    --border: 150 15% 88%;
+    --input: 150 15% 88%;
+    --ring: 43 78% 48%;
 
     --radius: 0.75rem;
-    
-    --gradient-primary: hsl(32 89% 55%);
-    --gradient-hero: hsl(150 45% 12%);
-    --gradient-brand: hsl(32 89% 55%);
-    --shadow-card: 0 1px 3px 0 hsl(150 30% 12% / 0.06), 0 1px 2px -1px hsl(150 30% 12% / 0.06);
-    --shadow-hover: 0 8px 24px -6px hsl(32 89% 55% / 0.18);
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 150 25% 22%;
-    --sidebar-primary: 150 51% 25%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 150 20% 96%;
-    --sidebar-accent-foreground: 150 51% 25%;
-    --sidebar-border: 150 15% 90%;
-    --sidebar-ring: 32 89% 55%;
+    --gradient-primary: linear-gradient(135deg, hsl(43 82% 55%), hsl(38 78% 42%));
+    --gradient-hero: linear-gradient(140deg, hsl(155 65% 10%) 0%, hsl(155 55% 16%) 55%, hsl(43 78% 48%) 100%);
+    --gradient-brand: linear-gradient(135deg, hsl(155 65% 14%), hsl(43 78% 48%));
+    --shadow-card: 0 1px 3px 0 hsl(155 45% 8% / 0.08), 0 1px 2px -1px hsl(155 45% 8% / 0.06);
+    --shadow-hover: 0 12px 28px -10px hsl(43 78% 48% / 0.35);
+
+    --sidebar-background: 155 55% 8%;
+    --sidebar-foreground: 45 40% 92%;
+    --sidebar-primary: 43 78% 48%;
+    --sidebar-primary-foreground: 155 55% 8%;
+    --sidebar-accent: 155 45% 14%;
+    --sidebar-accent-foreground: 45 60% 92%;
+    --sidebar-border: 155 35% 18%;
+    --sidebar-ring: 43 78% 48%;
   }
 
   .dark {
-    --background: 150 25% 7%;
-    --foreground: 0 0% 98%;
+    /* E'nvlé Space — dark theme (near-black emerald, gold) */
+    --background: 155 35% 5%;
+    --foreground: 45 40% 96%;
 
-    --card: 150 22% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 155 30% 8%;
+    --card-foreground: 45 40% 96%;
 
-    --popover: 150 22% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 155 30% 8%;
+    --popover-foreground: 45 40% 96%;
 
-    --primary: 32 92% 60%;
-    --primary-foreground: 150 30% 10%;
+    --primary: 43 82% 58%;
+    --primary-foreground: 155 55% 6%;
 
-    --secondary: 150 45% 38%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 155 45% 20%;
+    --secondary-foreground: 45 40% 96%;
 
-    --muted: 150 18% 15%;
-    --muted-foreground: 150 10% 65%;
+    --muted: 155 25% 12%;
+    --muted-foreground: 45 15% 70%;
 
-    --accent: 150 45% 38%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 82% 58%;
+    --accent-foreground: 155 55% 6%;
 
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 15% 18%;
-    --input: 150 15% 18%;
-    --ring: 32 92% 60%;
-    
-    --gradient-primary: hsl(32 92% 60%);
-    --gradient-hero: hsl(150 22% 10%);
-    --gradient-brand: hsl(32 92% 60%);
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
-    --shadow-hover: 0 8px 24px -6px hsl(32 92% 60% / 0.25);
-    --sidebar-background: 150 22% 10%;
-    --sidebar-foreground: 150 10% 92%;
-    --sidebar-primary: 32 92% 60%;
-    --sidebar-primary-foreground: 150 30% 10%;
-    --sidebar-accent: 150 18% 16%;
-    --sidebar-accent-foreground: 150 10% 92%;
-    --sidebar-border: 150 15% 18%;
-    --sidebar-ring: 32 92% 60%;
+    --border: 155 25% 15%;
+    --input: 155 25% 15%;
+    --ring: 43 82% 58%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(43 85% 60%), hsl(38 78% 45%));
+    --gradient-hero: linear-gradient(140deg, hsl(155 45% 6%) 0%, hsl(155 45% 12%) 55%, hsl(43 82% 45%) 100%);
+    --gradient-brand: linear-gradient(135deg, hsl(155 55% 12%), hsl(43 82% 55%));
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.4);
+    --shadow-hover: 0 12px 28px -10px hsl(43 82% 58% / 0.35);
+    --sidebar-background: 155 45% 4%;
+    --sidebar-foreground: 45 40% 92%;
+    --sidebar-primary: 43 82% 58%;
+    --sidebar-primary-foreground: 155 55% 6%;
+    --sidebar-accent: 155 35% 10%;
+    --sidebar-accent-foreground: 45 40% 92%;
+    --sidebar-border: 155 30% 14%;
+    --sidebar-ring: 43 82% 58%;
   }
 }
 

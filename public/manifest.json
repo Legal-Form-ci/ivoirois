@@ -4,8 +4,8 @@
   "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FF8C00",
-  "theme_color": "#FF8C00",
+  "background_color": "#0d3a26",
+  "theme_color": "#0d3a26",
   "orientation": "portrait-primary",
   "icons": [
     {
