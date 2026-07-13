@@ -46,12 +46,14 @@ import Projects from "./pages/Projects";
 import CreateProject from "./pages/CreateProject";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
+import GeoGate from "@/components/GeoGate";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <GeoGate>
       <Toaster />
       <Sonner />
       <InstallPrompt />
@@ -182,6 +184,7 @@ const App = () => (
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      </GeoGate>
     </TooltipProvider>
   </QueryClientProvider>
 );
