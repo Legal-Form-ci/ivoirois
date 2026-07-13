@@ -19,13 +19,13 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-secondary/70 to-accent/75" />
         <div className="container relative z-10 text-center text-white px-4">
           <div className="flex justify-center mb-6">
-            <img src={appLogo} alt="Ivoi'Rois" className="h-24 w-24 rounded-2xl shadow-2xl" />
+            <img src={appLogo} alt="E'nvlé Space" className="h-24 w-24 rounded-2xl shadow-2xl" />
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 drop-shadow-lg">
-            Ivoi'Rois
+            E'nvlé Space
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 max-w-2xl mx-auto drop-shadow-md">
-            Ici, on cause royalement ! 👑
+            Notre peuple. Notre espace. 👑
           </p>
           <p className="text-base sm:text-lg mb-6 md:mb-8 max-w-xl mx-auto text-white/80">
             Le réseau social & professionnel 100% ivoirien. Connectez-vous, partagez, évoluez.
@@ -45,10 +45,10 @@ const Index = () => {
       <section className="py-20 bg-background">
         <div className="container px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
-            C'est quoi <span className="text-primary">Ivoi'Rois</span> ?
+            C'est quoi <span className="text-primary">E'nvlé Space</span> ?
           </h2>
           <p className="text-base sm:text-lg text-center max-w-4xl mx-auto mb-10 md:mb-16 text-muted-foreground">
-            Ivoi'Rois est la première plateforme de connexion 100 % ivoirienne, qui réunit chat et réseau social dans un même espace convivial. Ici, chaque utilisateur est roi — libre de s'exprimer, de partager et de briller à l'ivoirienne.
+            E'nvlé Space est la première plateforme de connexion 100 % ivoirienne, qui réunit chat et réseau social dans un même espace convivial. Ici, chaque utilisateur est roi — libre de s'exprimer, de partager et de briller à l'ivoirienne.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <FeatureCard icon={<MapPin className="h-12 w-12" />} title="100% Ivoirien" description="Conçue pour et par les Ivoiriens, adaptée à nos réalités" />
@@ -98,7 +98,7 @@ const Index = () => {
         <div className="container text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Prêt à rejoindre la communauté ?</h2>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Créez votre compte gratuitement et commencez à connecter, partager et évoluer avec la communauté Ivoi'Rois.
+            Créez votre compte gratuitement et commencez à connecter, partager et évoluer avec la communauté E'nvlé Space.
           </p>
           <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-card)]" asChild>
             <Link to="/auth?mode=signup">Créer mon compte gratuitement</Link>
@@ -111,10 +111,10 @@ const Index = () => {
         <div className="container px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={appLogo} alt="Ivoi'Rois" className="h-8 w-8 rounded-lg" />
-              <span className="font-bold text-lg">Ivoi'Rois</span>
+              <img src={appLogo} alt="E'nvlé Space" className="h-8 w-8 rounded-lg" />
+              <span className="font-bold text-lg">E'nvlé Space</span>
             </div>
-            <p className="text-muted-foreground text-sm">© 2026 Ivoi'Rois - Ici, on cause royalement ! 👑</p>
+            <p className="text-muted-foreground text-sm">© 2026 E'nvlé Space - Notre peuple. Notre espace. 👑</p>
             <div className="flex gap-4 text-sm text-muted-foreground">
               <Link to="/auth" className="hover:text-foreground">Connexion</Link>
               <Link to="/auth?mode=signup" className="hover:text-foreground">Inscription</Link>

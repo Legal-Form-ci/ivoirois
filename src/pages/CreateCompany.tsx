@@ -235,7 +235,7 @@ const CreateCompany = () => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ex: Ivoi'Rois SARL"
+                    placeholder="Ex: E'nvlé Space SARL"
                   />
                 </div>
 

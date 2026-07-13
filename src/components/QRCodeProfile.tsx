@@ -24,8 +24,8 @@ const QRCodeProfile = ({ profileId, fullName, avatarUrl }: QRCodeProfileProps) =
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Profil de ${fullName} - Ivoi'Rois`,
-          text: `Découvrez le profil de ${fullName} sur Ivoi'Rois`,
+          title: `Profil de ${fullName} - E'nvlé Space`,
+          text: `Découvrez le profil de ${fullName} sur E'nvlé Space`,
           url: profileUrl,
         });
       } catch {}

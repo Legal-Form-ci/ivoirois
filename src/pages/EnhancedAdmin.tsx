@@ -781,7 +781,7 @@ const EnhancedAdmin = () => {
                 <CardContent className="space-y-4">
                   <div className="grid gap-2">
                     <Label>Nom de la plateforme</Label>
-                    <Input defaultValue="Ivoi'Rois" />
+                    <Input defaultValue="E'nvlé Space" />
                   </div>
                   <div className="grid gap-2">
                     <Label>Description</Label>

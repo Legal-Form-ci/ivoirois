@@ -153,7 +153,7 @@ const AIStreamingChat = ({ onClose, isFullscreen, onToggleFullscreen }: AIStream
             <Bot className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Assistant IA Ivoi'Rois</h3>
+            <h3 className="font-semibold">Assistant IA E'nvlé Space</h3>
             <p className="text-xs text-muted-foreground">Propulsé par Gemini</p>
           </div>
         </div>
