@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Users, Shield, MapPin, TrendingUp, MessageCircle, Briefcase, Film, Radio, ShoppingBag, Sparkles, Globe, Heart } from "lucide-react";
+import { Users, Shield, Globe2, Home, MessageCircle, Briefcase, Film, Radio, ShoppingBag, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-abidjan.jpg";
 import appLogo from "@/assets/app-logo.png";
 
@@ -24,11 +24,11 @@ const Index = () => {
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 drop-shadow-lg">
             E'nvlé Space
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 max-w-2xl mx-auto drop-shadow-md">
+          <p className="text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 max-w-2xl mx-auto drop-shadow-md font-medium">
             Notre peuple. Notre espace.
           </p>
-          <p className="text-base sm:text-lg mb-6 md:mb-8 max-w-xl mx-auto text-white/80">
-            Le réseau social & professionnel africain. Connectez-vous, partagez, évoluez.
+          <p className="text-base sm:text-lg mb-6 md:mb-8 max-w-xl mx-auto text-white/85">
+            La super-app africaine. Tout ce dont tu as besoin, en un seul endroit.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-card)]" asChild>
@@ -48,13 +48,13 @@ const Index = () => {
             C'est quoi <span className="text-primary">E'nvlé Space</span> ?
           </h2>
           <p className="text-base sm:text-lg text-center max-w-4xl mx-auto mb-10 md:mb-16 text-muted-foreground">
-            E'nvlé Space est la plateforme qui réunit chat, réseau social et outils professionnels dans un même espace élégant. Notre peuple. Notre espace.
+            E'nvlé Space est la première super-app conçue pour l'Afrique. Partage, crée, travaille, vends, connecte-toi et collabore — sans jamais changer d'application.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-            <FeatureCard icon={<MapPin className="h-12 w-12" />} title="100% Ivoirien" description="Conçue pour et par les Ivoiriens, adaptée à nos réalités" />
-            <FeatureCard icon={<Shield className="h-12 w-12" />} title="Sécurisé" description="Vos données sont protégées et restent privées" />
-            <FeatureCard icon={<Users className="h-12 w-12" />} title="Communauté" description="Connectez-vous avec des millions d'Ivoiriens" />
-            <FeatureCard icon={<TrendingUp className="h-12 w-12" />} title="Local First" description="Contenu et actualités locales en priorité" />
+            <FeatureCard icon={<Globe2 className="h-12 w-12" />} title="100% Afrique" description="Conçu pour les Africains" />
+            <FeatureCard icon={<Shield className="h-12 w-12" />} title="Sécurisé" description="Vos données restent chez vous" />
+            <FeatureCard icon={<Users className="h-12 w-12" />} title="Communauté" description="Des millions d'utilisateurs connectés" />
+            <FeatureCard icon={<Home className="h-12 w-12" />} title="Local First" description="Contenus et langues locales en priorité" />
           </div>
         </div>
       </section>
@@ -67,15 +67,12 @@ const Index = () => {
             Une plateforme complète qui combine le meilleur des réseaux sociaux et professionnels.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-5xl mx-auto">
-            <MiniFeature icon={<MessageCircle />} title="Messagerie instantanée" desc="Chat en temps réel, appels audio & vidéo" />
-            <MiniFeature icon={<Film />} title="Reels & Stories" desc="Vidéos courtes et stories éphémères 24h" />
-            <MiniFeature icon={<Radio />} title="Live streaming" desc="Diffusez en direct et interagissez" />
-            <MiniFeature icon={<Briefcase />} title="Emplois & CV" desc="Trouvez un emploi et partagez votre CV" />
+            <MiniFeature icon={<MessageCircle />} title="Publications & Communautés" desc="Partagez, réagissez, créez des groupes et des pages" />
+            <MiniFeature icon={<Film />} title="Vidéos & Reels" desc="Publiez des vidéos courtes, longues, des stories éphémères" />
+            <MiniFeature icon={<Radio />} title="Live & Appels" desc="Diffusez en direct, appelez et organisez des réunions vidéo" />
+            <MiniFeature icon={<Briefcase />} title="Réseau Professionnel" desc="Construisez votre profil, trouvez des opportunités d'emploi" />
             <MiniFeature icon={<ShoppingBag />} title="Marketplace" desc="Achetez et vendez dans votre région" />
-            <MiniFeature icon={<Sparkles />} title="IA intégrée" desc="Rédaction assistée, images IA et suggestions" />
-            <MiniFeature icon={<Globe />} title="Pages & Groupes" desc="Créez des communautés et pages pros" />
-            <MiniFeature icon={<Heart />} title="Réactions & Partages" desc="Réagissez et partagez sur WhatsApp, Facebook..." />
-            <MiniFeature icon={<Users />} title="Réseau professionnel" desc="Connectez-vous avec des professionnels ivoiriens" />
+            <MiniFeature icon={<Sparkles />} title="IA Intégrée" desc="Rédaction assistée, création d'images, suggestions intelligentes" />
           </div>
         </div>
       </section>
@@ -114,7 +111,7 @@ const Index = () => {
               <img src={appLogo} alt="E'nvlé Space" className="h-8 w-8 rounded-lg" />
               <span className="font-bold text-lg">E'nvlé Space</span>
             </div>
-            <p className="text-muted-foreground text-sm">© 2026 E'nvlé Space - Notre peuple. Notre espace.</p>
+            <p className="text-muted-foreground text-sm">© 2026 E'nvlé Space — Notre peuple. Notre espace.</p>
             <div className="flex gap-4 text-sm text-muted-foreground">
               <Link to="/auth" className="hover:text-foreground">Connexion</Link>
               <Link to="/auth?mode=signup" className="hover:text-foreground">Inscription</Link>
