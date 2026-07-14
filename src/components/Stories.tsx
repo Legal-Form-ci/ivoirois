@@ -70,8 +70,29 @@ const Stories = () => {
 
       if (error) { console.error("[Stories] Fetch error:", error); return; }
       if (data) {
-        setAllUserStories(data as Story[]);
-        const grouped = data.reduce((acc: Story[], story: any) => {
+        // Re-sign storage URLs so expired signed URLs (1h TTL) don't break rendering
+        const withFresh = await Promise.all(
+          (data as any[]).map(async (s) => {
+            let url = s.media_url as string;
+            try {
+              const marker = "/stories/";
+              if (url && url.startsWith("http")) {
+                const idx = url.indexOf(marker);
+                if (idx !== -1) {
+                  const path = url.slice(idx + marker.length).split("?")[0];
+                  const fresh = await getStorageUrl("stories", decodeURIComponent(path));
+                  if (fresh) url = fresh;
+                }
+              } else if (url) {
+                const fresh = await getStorageUrl("stories", url);
+                if (fresh) url = fresh;
+              }
+            } catch { /* keep original */ }
+            return { ...s, media_url: url };
+          })
+        );
+        setAllUserStories(withFresh as Story[]);
+        const grouped = withFresh.reduce((acc: Story[], story: any) => {
           if (!acc.find((s) => s.user_id === story.user_id)) acc.push(story);
           return acc;
         }, []);

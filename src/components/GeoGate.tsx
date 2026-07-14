@@ -40,6 +40,13 @@ async function checkAccess(): Promise<{ verdict: Verdict; country?: string }> {
   return { verdict: "ok", country };
 }
 
+function logGeoEvent(verdict: Verdict, country?: string) {
+  // Non-sensitive analytics: only the verdict + country code (no IP, no org).
+  try {
+    console.info("[geo-gate]", { verdict, country: country || null, ts: new Date().toISOString() });
+  } catch { /* noop */ }
+}
+
 const GeoGate = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<Verdict>(() => {
     try {
@@ -60,6 +67,7 @@ const GeoGate = ({ children }: { children: React.ReactNode }) => {
       try {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ verdict: res.verdict, ts: Date.now(), country: res.country }));
       } catch {}
+      logGeoEvent(res.verdict, res.country);
       setState(res.verdict);
     });
     return () => { cancelled = true; };
