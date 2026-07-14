@@ -2,7 +2,7 @@
   "app": {
     "name": "E'nvlé Space",
     "tagline": "Notre peuple. Notre espace.",
-    "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple."
+    "description": "E'nvlé Space — la super-app africaine tout-en-un pour connecter, créer, travailler et grandir."
   },
   "common": {
     "loading": "Chargement...",
@@ -242,9 +242,9 @@
   },
   "landing": {
     "slogan": "Notre peuple. Notre espace.",
-    "description": "E'nvlé Space — la fierté ivoirienne qui connecte, rassemble et fait briller chaque voix. Ici, la royauté, c'est le peuple.",
+    "description": "E'nvlé Space — la super-app africaine tout-en-un pour connecter, créer, travailler et grandir.",
     "joinCommunity": "Rejoindre la communauté",
-    "connectWithIvorians": "Connexion 100% Ivoirienne",
+    "connectWithIvorians": "Connexion 100% Africaine",
     "features": {
       "connect": {
         "title": "Connectez-vous",

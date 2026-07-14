@@ -29,9 +29,9 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Tu es un expert en rédaction d'annonces pour un marketplace ivoirien. Génère une description professionnelle, détaillée et attrayante pour un produit. La description doit:
+            content: `Tu es un expert en rédaction d'annonces pour un marketplace africain. Génère une description professionnelle, détaillée et attrayante pour un produit. La description doit:
 - Être en français
-- Être adaptée au marché ivoirien/africain
+- Être adaptée au marché africain
 - Mentionner les points forts du produit
 - Inclure un appel à l'action
 - Faire 3-5 phrases maximum

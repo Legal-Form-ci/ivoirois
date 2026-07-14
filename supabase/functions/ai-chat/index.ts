@@ -20,7 +20,7 @@ serve(async (req) => {
 
     console.log("[AI Chat] Starting streaming chat, messages:", messages.length);
 
-    const systemPrompt = `Tu es l'Assistant IA d'E'nvlé Space, une plateforme sociale et professionnelle ivoirienne. Tu es intelligent, amical et professionnel.
+    const systemPrompt = `Tu es l'Assistant IA d'E'nvlé Space, une plateforme sociale et professionnelle africaine. Tu es intelligent, amical et professionnel.
 
 Contexte utilisateur:
 - Nom: ${context?.userName || 'Utilisateur'}

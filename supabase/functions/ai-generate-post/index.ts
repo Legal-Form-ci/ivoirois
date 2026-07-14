@@ -119,7 +119,7 @@ Tu génères une publication professionnelle complète à partir du sujet donné
 - Professionnel mais accessible et humain
 - Dynamique et engageant - pas de ton robotique
 - Orienté valeur pour le lecteur
-- Adapté au contexte ivoirien et africain
+- Adapté au contexte africain
 - Paragraphes courts et aérés (max 4 lignes)
 - Emojis pertinents mais pas excessifs
 - JAMAIS de blocs de texte compacts illisibles

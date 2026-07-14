@@ -208,7 +208,7 @@ const CreateReel = () => {
                   id="hashtags"
                   value={hashtags}
                   onChange={(e) => setHashtags(e.target.value)}
-                  placeholder="#tendance #viral #ivoirois"
+                  placeholder="#tendance #viral #afrique"
                 />
                 <p className="text-xs text-muted-foreground">
                   Séparez les hashtags par des espaces ou des virgules
