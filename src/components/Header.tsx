@@ -20,8 +20,8 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[var(--shadow-card)]">
       <div className="container flex h-14 md:h-16 items-center justify-between px-2 sm:px-4">
         <Link to="/feed" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <img src={appLogo} alt="E'nvlé Space" className="h-8 w-8 md:h-10 md:w-10 rounded-lg" />
-          <span className="text-lg md:text-2xl font-bold text-primary hidden sm:inline">
+          <img src={appLogo} alt="E'nvlé Space" className="h-11 w-11 md:h-14 md:w-14 object-contain drop-shadow-sm" />
+          <span className="text-lg md:text-2xl font-bold text-primary hidden sm:inline tracking-tight">
             E'nvlé Space
           </span>
         </Link>
