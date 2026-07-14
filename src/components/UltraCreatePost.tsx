@@ -278,7 +278,7 @@ const UltraCreatePost = ({ onPostCreated }: UltraCreatePostProps) => {
               id="hashtags"
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
-              placeholder="#tendance #ivoirois #emploi"
+              placeholder="#tendance #afrique #emploi"
             />
           </div>
 

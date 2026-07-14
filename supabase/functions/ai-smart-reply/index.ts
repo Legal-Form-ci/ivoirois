@@ -31,7 +31,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Tu es un assistant de messagerie intelligent pour un réseau social professionnel ivoirien. Génère exactement 3 réponses rapides et pertinentes au dernier message de la conversation. Les réponses doivent être courtes (max 15 mots), naturelles, et adaptées au contexte professionnel africain. Retourne UNIQUEMENT un JSON array de 3 strings, sans markdown, sans explication. Exemple: ["Merci beaucoup !", "D'accord, je m'en occupe", "Pouvez-vous préciser ?"]`,
+            content: `Tu es un assistant de messagerie intelligent pour un réseau social professionnel africain. Génère exactement 3 réponses rapides et pertinentes au dernier message de la conversation. Les réponses doivent être courtes (max 15 mots), naturelles, et adaptées au contexte professionnel africain. Retourne UNIQUEMENT un JSON array de 3 strings, sans markdown, sans explication. Exemple: ["Merci beaucoup !", "D'accord, je m'en occupe", "Pouvez-vous préciser ?"]`,
           },
           {
             role: "user",

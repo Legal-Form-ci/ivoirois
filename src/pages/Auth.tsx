@@ -173,7 +173,7 @@ const Auth = () => {
               ? "Entrez votre email pour réinitialiser"
               : isLogin
               ? "Connectez-vous à votre compte"
-              : "Créez votre compte ivoirien"}
+              : "Créez votre compte E'nvlé Space"}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'ivoirois-v2';
-const STATIC_CACHE = 'ivoirois-static-v2';
-const DYNAMIC_CACHE = 'ivoirois-dynamic-v2';
+const CACHE_NAME = 'envle-space-v3';
+const STATIC_CACHE = 'envle-space-static-v3';
+const DYNAMIC_CACHE = 'envle-space-dynamic-v3';
 
 const urlsToCache = [
   '/',
