@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Story {
   id: string;
@@ -30,6 +31,19 @@ interface Story {
 }
 
 const STORY_DURATION = 6000;
+
+const getStoryStoragePath = (value?: string | null) => {
+  if (!value) return null;
+  if (!value.startsWith("http")) return value;
+  const marker = "/stories/";
+  const idx = value.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(value.slice(idx + marker.length).split("?")[0]);
+};
+
+const isImageStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "image" || story?.media_type?.startsWith("image/");
+const isVideoStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "video" || story?.media_type?.startsWith("video/");
+const isAudioStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "audio" || story?.media_type?.startsWith("audio/");
 
 const Stories = () => {
   const { user } = useAuth();
@@ -70,21 +84,15 @@ const Stories = () => {
 
       if (error) { console.error("[Stories] Fetch error:", error); return; }
       if (data) {
-        // Re-sign storage URLs so expired signed URLs (1h TTL) don't break rendering
+        // Re-sign storage URLs so expired signed URLs (1h TTL) don't break rendering.
+        // New rows store the raw bucket path; older rows may still contain a signed URL.
         const withFresh = await Promise.all(
           (data as any[]).map(async (s) => {
             let url = s.media_url as string;
             try {
-              const marker = "/stories/";
-              if (url && url.startsWith("http")) {
-                const idx = url.indexOf(marker);
-                if (idx !== -1) {
-                  const path = url.slice(idx + marker.length).split("?")[0];
-                  const fresh = await getStorageUrl("stories", decodeURIComponent(path));
-                  if (fresh) url = fresh;
-                }
-              } else if (url) {
-                const fresh = await getStorageUrl("stories", url);
+              const path = getStoryStoragePath(url);
+              if (path) {
+                const fresh = await getStorageUrl("stories", path);
                 if (fresh) url = fresh;
               }
             } catch { /* keep original */ }
@@ -178,12 +186,9 @@ const Stories = () => {
       const { error: uploadError } = await supabase.storage.from("stories").upload(fileName, selectedFile);
       if (uploadError) throw uploadError;
 
-      const signedUrl = await getStorageUrl("stories", fileName);
-      if (!signedUrl) throw new Error("Failed to get URL");
-
       const { error: insertError } = await supabase.from("stories").insert({
         user_id: user.id,
-        media_url: signedUrl,
+        media_url: fileName,
         media_type: mediaType,
         content: caption || null,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -287,19 +292,25 @@ const Stories = () => {
     : [];
 
   const hasMyStory = stories.some(s => s.user_id === user?.id);
+  const myStory = stories.find(s => s.user_id === user?.id);
 
   return (
     <>
       <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
         {/* Add Story */}
         <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
-          <div className="relative">
-            <Avatar className={`h-16 w-16 border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer`}>
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="bg-muted">
-                <Plus className="h-5 w-5 text-muted-foreground" />
-              </AvatarFallback>
-            </Avatar>
+          <div className="relative" onClick={() => myStory && viewStory(myStory)}>
+            <div className={`h-16 w-16 overflow-hidden rounded-full border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer bg-muted`}>
+              {myStory && isImageStory(myStory) ? (
+                <AdaptiveImage src={myStory.media_url} alt="Votre story" variant="story" className="h-full rounded-full" rounded="full" />
+              ) : myStory && isVideoStory(myStory) ? (
+                <video src={myStory.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
             <input
               ref={fileInputRef}
               type="file"
@@ -310,7 +321,10 @@ const Stories = () => {
             <button 
               className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50 shadow-md"
               disabled={uploading}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={(event) => {
+                event.stopPropagation();
+                fileInputRef.current?.click();
+              }}
             >
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
             </button>
@@ -330,11 +344,22 @@ const Stories = () => {
             >
               <div className="relative">
                 <div className="p-[2px] rounded-full bg-primary group-hover:scale-105 transition-transform">
-                  <Avatar className="h-16 w-16 border-2 border-background">
-                    <AvatarImage src={story.profiles?.avatar_url} />
-                    <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
-                  </Avatar>
+                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-background bg-muted">
+                    {isImageStory(story) ? (
+                      <AdaptiveImage src={story.media_url} alt="Story" variant="story" className="h-full rounded-full" rounded="full" />
+                    ) : isVideoStory(story) ? (
+                      <video src={story.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-secondary text-secondary-foreground">
+                        <Music className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
                 </div>
+                <Avatar className="absolute -bottom-1 -right-1 h-6 w-6 border-2 border-background shadow-sm">
+                  <AvatarImage src={story.profiles?.avatar_url} />
+                  <AvatarFallback className="text-[10px]">{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
+                </Avatar>
                 {userStoryCount > 1 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold shadow">
                     {userStoryCount}
@@ -363,7 +388,7 @@ const Stories = () => {
             {/* Preview */}
             <div className="flex-1 flex items-center justify-center p-4">
               {filePreview && selectedFile?.type.startsWith("image") && (
-                <img src={filePreview} alt="Preview" className="max-h-[50vh] rounded-lg object-contain" />
+                <AdaptiveImage src={filePreview} alt="Aperçu story" variant="story" className="h-[52vh] min-h-80 rounded-lg" rounded="lg" loading="eager" />
               )}
               {filePreview && selectedFile?.type.startsWith("video") && (
                 <video src={filePreview} className="max-h-[50vh] rounded-lg" controls />
@@ -458,9 +483,9 @@ const Stories = () => {
 
               {/* Media content */}
               <div className="flex-1 flex items-center justify-center pt-20 pb-16">
-                {selectedStory.media_type === "video" ? (
+                {isVideoStory(selectedStory) ? (
                   <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted playsInline />
-                ) : selectedStory.media_type === "audio" ? (
+                ) : isAudioStory(selectedStory) ? (
                   <div className="flex flex-col items-center gap-4 p-8">
                     <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center animate-pulse">
                       <Music className="h-16 w-16 text-primary-foreground" />
@@ -468,7 +493,7 @@ const Stories = () => {
                     <audio src={selectedStory.media_url} className="w-full max-w-xs" controls autoPlay />
                   </div>
                 ) : (
-                  <img src={selectedStory.media_url} alt="Story" className="w-full max-h-[70vh] object-contain" />
+                  <AdaptiveImage src={selectedStory.media_url} alt="Story" variant="story" className="h-[70vh] max-h-[70vh] rounded-none" rounded="none" loading="eager" />
                 )}
               </div>
 
