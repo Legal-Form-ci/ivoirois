@@ -292,6 +292,7 @@ const Stories = () => {
     : [];
 
   const hasMyStory = stories.some(s => s.user_id === user?.id);
+  const myStory = stories.find(s => s.user_id === user?.id);
 
   return (
     <>
@@ -299,12 +300,17 @@ const Stories = () => {
         {/* Add Story */}
         <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
           <div className="relative">
-            <Avatar className={`h-16 w-16 border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer`}>
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="bg-muted">
-                <Plus className="h-5 w-5 text-muted-foreground" />
-              </AvatarFallback>
-            </Avatar>
+            <div className={`h-16 w-16 overflow-hidden rounded-full border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer bg-muted`}>
+              {myStory && isImageStory(myStory) ? (
+                <AdaptiveImage src={myStory.media_url} alt="Votre story" variant="story" className="h-full rounded-full" rounded="full" />
+              ) : myStory && isVideoStory(myStory) ? (
+                <video src={myStory.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
             <input
               ref={fileInputRef}
               type="file"
