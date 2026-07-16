@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AdaptiveImage } from "@/components/ui/adaptive-media";
 
 interface Story {
   id: string;
@@ -30,6 +31,19 @@ interface Story {
 }
 
 const STORY_DURATION = 6000;
+
+const getStoryStoragePath = (value?: string | null) => {
+  if (!value) return null;
+  if (!value.startsWith("http")) return value;
+  const marker = "/stories/";
+  const idx = value.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(value.slice(idx + marker.length).split("?")[0]);
+};
+
+const isImageStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "image" || story?.media_type?.startsWith("image/");
+const isVideoStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "video" || story?.media_type?.startsWith("video/");
+const isAudioStory = (story?: Pick<Story, "media_type"> | null) => story?.media_type === "audio" || story?.media_type?.startsWith("audio/");
 
 const Stories = () => {
   const { user } = useAuth();
