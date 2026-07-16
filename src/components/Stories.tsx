@@ -335,11 +335,22 @@ const Stories = () => {
             >
               <div className="relative">
                 <div className="p-[2px] rounded-full bg-primary group-hover:scale-105 transition-transform">
-                  <Avatar className="h-16 w-16 border-2 border-background">
-                    <AvatarImage src={story.profiles?.avatar_url} />
-                    <AvatarFallback>{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
-                  </Avatar>
+                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-background bg-muted">
+                    {isImageStory(story) ? (
+                      <AdaptiveImage src={story.media_url} alt="Story" variant="story" className="h-full rounded-full" rounded="full" />
+                    ) : isVideoStory(story) ? (
+                      <video src={story.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-secondary text-secondary-foreground">
+                        <Music className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
                 </div>
+                <Avatar className="absolute -bottom-1 -right-1 h-6 w-6 border-2 border-background shadow-sm">
+                  <AvatarImage src={story.profiles?.avatar_url} />
+                  <AvatarFallback className="text-[10px]">{story.profiles?.full_name?.charAt(0) || "?"}</AvatarFallback>
+                </Avatar>
                 {userStoryCount > 1 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold shadow">
                     {userStoryCount}
