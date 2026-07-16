@@ -186,12 +186,9 @@ const Stories = () => {
       const { error: uploadError } = await supabase.storage.from("stories").upload(fileName, selectedFile);
       if (uploadError) throw uploadError;
 
-      const signedUrl = await getStorageUrl("stories", fileName);
-      if (!signedUrl) throw new Error("Failed to get URL");
-
       const { error: insertError } = await supabase.from("stories").insert({
         user_id: user.id,
-        media_url: signedUrl,
+        media_url: fileName,
         media_type: mediaType,
         content: caption || null,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
