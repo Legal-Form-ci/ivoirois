@@ -1,49 +1,101 @@
 import { useEffect, useState } from "react";
 import appLogo from "@/assets/app-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const ALLOWED = new Set(["CI","SN","ML","BF","GN","GW","NE","TG","BJ","LR","SL","MR","GH","NG","GM","CV"]);
 const STORAGE_KEY = "envle-geo-check-v1";
 const TTL_MS = 1000 * 60 * 60; // 1h
 
-type Verdict = "loading" | "ok" | "country" | "vpn";
+type Verdict = "loading" | "ok" | "country" | "vpn" | "fallback";
+type FinalVerdict = Exclude<Verdict, "loading">;
+type FalsePositiveRisk = "none" | "possible" | "likely";
 
-interface Cached { verdict: Verdict; ts: number; country?: string; }
-
-async function checkAccess(): Promise<{ verdict: Verdict; country?: string }> {
-  // 1) Country via ipapi.co (free, no key)
-  let country: string | undefined;
-  let vpn = false;
-  try {
-    const r = await fetch("https://ipapi.co/json/");
-    if (r.ok) {
-      const d = await r.json();
-      country = (d.country_code || d.country || "").toString().toUpperCase();
-    }
-  } catch {}
-
-  // 2) VPN / proxy / hosting via ipwho.is (free, includes connection.type + security fields)
-  try {
-    const r2 = await fetch("https://ipwho.is/");
-    if (r2.ok) {
-      const d2 = await r2.json();
-      if (!country && d2.country_code) country = String(d2.country_code).toUpperCase();
-      const conn = (d2.connection?.type || "").toString().toLowerCase();
-      const org = (d2.connection?.org || d2.connection?.isp || "").toString().toLowerCase();
-      if (conn === "hosting" || conn === "vpn" || conn === "proxy" || conn === "tor") vpn = true;
-      if (/vpn|proxy|tor|hosting|datacenter|cloud|aws|azure|ovh|digitalocean|linode|hetzner|google cloud/.test(org)) vpn = true;
-    }
-  } catch {}
-
-  if (vpn) return { verdict: "vpn", country };
-  if (!country) return { verdict: "ok" }; // fail-open if geolocation unavailable
-  if (!ALLOWED.has(country)) return { verdict: "country", country };
-  return { verdict: "ok", country };
+interface GeoSignal {
+  verdict: FinalVerdict;
+  country?: string;
+  proxySignal: boolean;
+  vpnSignal: boolean;
+  blocked: boolean;
+  falsePositiveRisk: FalsePositiveRisk;
 }
 
-function logGeoEvent(verdict: Verdict, country?: string) {
-  // Non-sensitive analytics: only the verdict + country code (no IP, no org).
+interface Cached extends GeoSignal { ts: number; }
+
+const normalizeCountry = (value: unknown) => {
+  const code = String(value || "").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : undefined;
+};
+
+const getUserAgentFamily = () => {
+  if (typeof navigator === "undefined") return "unknown";
+  const ua = navigator.userAgent.toLowerCase();
+  if (/ipad|tablet/.test(ua)) return "tablet";
+  if (/mobile|android|iphone|ipod/.test(ua)) return "mobile";
+  return "desktop";
+};
+
+async function fetchJsonWithTimeout(url: string, timeoutMs = 2800) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    console.info("[geo-gate]", { verdict, country: country || null, ts: new Date().toISOString() });
+    const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+export async function checkGeoAccess(): Promise<GeoSignal> {
+  const [ipapi, ipwho] = await Promise.all([
+    fetchJsonWithTimeout("https://ipapi.co/json/"),
+    fetchJsonWithTimeout("https://ipwho.is/"),
+  ]);
+
+  let country = normalizeCountry(ipapi?.country_code || ipapi?.country) || normalizeCountry(ipwho?.country_code);
+  let proxySignal = false;
+  let vpnSignal = false;
+
+  if (ipwho) {
+    const conn = String(ipwho.connection?.type || "").toLowerCase();
+    const security = ipwho.security || {};
+    proxySignal = Boolean(security.proxy || security.tor || conn === "proxy" || conn === "tor");
+    vpnSignal = Boolean(security.vpn || conn === "vpn" || conn === "hosting");
+  }
+
+  const anonymousNetwork = proxySignal || vpnSignal;
+  const countryAllowed = Boolean(country && ALLOWED.has(country));
+  const falsePositiveRisk: FalsePositiveRisk = anonymousNetwork && countryAllowed ? "possible" : "none";
+
+  if (anonymousNetwork) {
+    return { verdict: "vpn", country, proxySignal, vpnSignal, blocked: true, falsePositiveRisk };
+  }
+  if (!country) {
+    return { verdict: "fallback", proxySignal, vpnSignal, blocked: false, falsePositiveRisk: "possible" };
+  }
+  if (!countryAllowed) {
+    return { verdict: "country", country, proxySignal, vpnSignal, blocked: true, falsePositiveRisk: "none" };
+  }
+  return { verdict: "ok", country, proxySignal, vpnSignal, blocked: false, falsePositiveRisk: "none" };
+}
+
+function logGeoEvent(signal: GeoSignal) {
+  // Non-sensitive analytics only: no IP, no ISP/org, no user id, no query string.
+  try {
+    const payload = {
+      verdict: signal.verdict,
+      country_code: signal.country || null,
+      proxy_signal: signal.proxySignal,
+      vpn_signal: signal.vpnSignal,
+      blocked: signal.blocked,
+      false_positive_risk: signal.falsePositiveRisk,
+      route_path: window.location.pathname.slice(0, 160),
+      user_agent_family: getUserAgentFamily(),
+    };
+    void supabase.from("geogate_events" as any).insert(payload);
+    console.info("[geo-gate]", { verdict: signal.verdict, country: signal.country || null, blocked: signal.blocked });
   } catch { /* noop */ }
 }
 
@@ -62,18 +114,18 @@ const GeoGate = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (state !== "loading") return;
     let cancelled = false;
-    checkAccess().then((res) => {
+    checkGeoAccess().then((res) => {
       if (cancelled) return;
       try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ verdict: res.verdict, ts: Date.now(), country: res.country }));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...res, ts: Date.now() } satisfies Cached));
       } catch {}
-      logGeoEvent(res.verdict, res.country);
+      logGeoEvent(res);
       setState(res.verdict);
     });
     return () => { cancelled = true; };
   }, [state]);
 
-  if (state === "ok") return <>{children}</>;
+  if (state === "ok" || state === "fallback") return <>{children}</>;
 
   const isVpn = state === "vpn";
   const isCountry = state === "country";
