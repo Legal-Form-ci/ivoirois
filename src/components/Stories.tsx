@@ -302,7 +302,7 @@ const Stories = () => {
           <div className="relative" onClick={() => myStory && viewStory(myStory)}>
             <div className={`h-16 w-16 overflow-hidden rounded-full border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer bg-muted`}>
               {myStory && isImageStory(myStory) ? (
-                <AdaptiveImage src={myStory.media_url} alt="Votre story" variant="story" className="h-full rounded-full" rounded="full" />
+                <AdaptiveImage src={myStory.media_url} alt="Votre story" variant="story" fit="safe-cover" className="h-full rounded-full" rounded="full" />
               ) : myStory && isVideoStory(myStory) ? (
                 <video src={myStory.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
               ) : (
@@ -346,7 +346,7 @@ const Stories = () => {
                 <div className="p-[2px] rounded-full bg-primary group-hover:scale-105 transition-transform">
                   <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-background bg-muted">
                     {isImageStory(story) ? (
-                      <AdaptiveImage src={story.media_url} alt="Story" variant="story" className="h-full rounded-full" rounded="full" />
+                      <AdaptiveImage src={story.media_url} alt="Story" variant="story" fit="safe-cover" className="h-full rounded-full" rounded="full" />
                     ) : isVideoStory(story) ? (
                       <video src={story.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
                     ) : (

@@ -9,6 +9,7 @@ import MobileNav from "@/components/MobileNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { refreshMediaUrls } from "@/lib/storage";
 interface Post {
   id: string;
   content: string;
@@ -86,9 +87,20 @@ const Feed = () => {
 
       if (error) throw error;
 
+      // Re-sign private-bucket media URLs (posts bucket signed URLs expire after 1h).
+      const withFresh = await Promise.all(
+        (data || []).map(async (p: any) => {
+          const media_urls = await refreshMediaUrls("posts", p.media_urls);
+          const image_url = p.image_url
+            ? (await refreshMediaUrls("posts", [p.image_url]))[0] || p.image_url
+            : p.image_url;
+          return { ...p, media_urls, image_url };
+        })
+      );
+
       // Prioritize posts from same region
-      if (myRegion && data) {
-        const sorted = data.sort((a, b) => {
+      if (myRegion && withFresh.length) {
+        const sorted = withFresh.sort((a: any, b: any) => {
           const aFromRegion = a.profiles?.region === myRegion;
           const bFromRegion = b.profiles?.region === myRegion;
           if (aFromRegion && !bFromRegion) return -1;
@@ -97,7 +109,7 @@ const Feed = () => {
         });
         setPosts(sorted);
       } else {
-        setPosts(data || []);
+        setPosts(withFresh);
       }
     } catch (error: any) {
       toast.error("Erreur lors du chargement des posts");

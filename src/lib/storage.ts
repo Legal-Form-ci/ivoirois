@@ -55,3 +55,38 @@ export async function uploadAndGetUrl(
 
   return { url, path: filePath };
 }
+
+/**
+ * Extract a bucket-relative storage path from either a raw path
+ * or a full (possibly expired) signed URL like:
+ *   https://xxx.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=...
+ */
+export function extractStoragePath(bucket: string, value?: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("http")) return value;
+  const marker = `/${bucket}/`;
+  const idx = value.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(value.slice(idx + marker.length).split("?")[0]);
+}
+
+/**
+ * Re-sign an array of media URLs stored for a bucket. Keeps external URLs
+ * untouched, drops entries we can neither resolve nor re-sign.
+ */
+export async function refreshMediaUrls(
+  bucket: string,
+  urls: (string | null | undefined)[] | null | undefined
+): Promise<string[]> {
+  if (!urls || urls.length === 0) return [];
+  const out = await Promise.all(
+    urls.map(async (u) => {
+      if (!u) return null;
+      const path = extractStoragePath(bucket, u);
+      if (!path) return u; // external URL, keep as-is
+      const fresh = await getStorageUrl(bucket, path);
+      return fresh ?? u;
+    })
+  );
+  return out.filter((v): v is string => !!v);
+}
