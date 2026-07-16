@@ -84,21 +84,15 @@ const Stories = () => {
 
       if (error) { console.error("[Stories] Fetch error:", error); return; }
       if (data) {
-        // Re-sign storage URLs so expired signed URLs (1h TTL) don't break rendering
+        // Re-sign storage URLs so expired signed URLs (1h TTL) don't break rendering.
+        // New rows store the raw bucket path; older rows may still contain a signed URL.
         const withFresh = await Promise.all(
           (data as any[]).map(async (s) => {
             let url = s.media_url as string;
             try {
-              const marker = "/stories/";
-              if (url && url.startsWith("http")) {
-                const idx = url.indexOf(marker);
-                if (idx !== -1) {
-                  const path = url.slice(idx + marker.length).split("?")[0];
-                  const fresh = await getStorageUrl("stories", decodeURIComponent(path));
-                  if (fresh) url = fresh;
-                }
-              } else if (url) {
-                const fresh = await getStorageUrl("stories", url);
+              const path = getStoryStoragePath(url);
+              if (path) {
+                const fresh = await getStorageUrl("stories", path);
                 if (fresh) url = fresh;
               }
             } catch { /* keep original */ }
