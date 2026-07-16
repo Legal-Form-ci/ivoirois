@@ -379,7 +379,7 @@ const Stories = () => {
             {/* Preview */}
             <div className="flex-1 flex items-center justify-center p-4">
               {filePreview && selectedFile?.type.startsWith("image") && (
-                <img src={filePreview} alt="Preview" className="max-h-[50vh] rounded-lg object-contain" />
+                <AdaptiveImage src={filePreview} alt="Aperçu story" variant="story" className="h-[52vh] min-h-80 rounded-lg" rounded="lg" loading="eager" />
               )}
               {filePreview && selectedFile?.type.startsWith("video") && (
                 <video src={filePreview} className="max-h-[50vh] rounded-lg" controls />
@@ -474,9 +474,9 @@ const Stories = () => {
 
               {/* Media content */}
               <div className="flex-1 flex items-center justify-center pt-20 pb-16">
-                {selectedStory.media_type === "video" ? (
+                {isVideoStory(selectedStory) ? (
                   <video src={selectedStory.media_url} className="w-full max-h-[70vh] object-contain" autoPlay muted playsInline />
-                ) : selectedStory.media_type === "audio" ? (
+                ) : isAudioStory(selectedStory) ? (
                   <div className="flex flex-col items-center gap-4 p-8">
                     <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center animate-pulse">
                       <Music className="h-16 w-16 text-primary-foreground" />
@@ -484,7 +484,7 @@ const Stories = () => {
                     <audio src={selectedStory.media_url} className="w-full max-w-xs" controls autoPlay />
                   </div>
                 ) : (
-                  <img src={selectedStory.media_url} alt="Story" className="w-full max-h-[70vh] object-contain" />
+                  <AdaptiveImage src={selectedStory.media_url} alt="Story" variant="story" className="h-[70vh] max-h-[70vh] rounded-none" rounded="none" loading="eager" />
                 )}
               </div>
 
