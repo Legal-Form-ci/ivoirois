@@ -299,7 +299,7 @@ const Stories = () => {
       <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
         {/* Add Story */}
         <div className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
-          <div className="relative">
+          <div className="relative" onClick={() => myStory && viewStory(myStory)}>
             <div className={`h-16 w-16 overflow-hidden rounded-full border-2 ${hasMyStory ? 'border-primary ring-2 ring-primary/30' : 'border-dashed border-muted-foreground/50'} cursor-pointer bg-muted`}>
               {myStory && isImageStory(myStory) ? (
                 <AdaptiveImage src={myStory.media_url} alt="Votre story" variant="story" className="h-full rounded-full" rounded="full" />
@@ -321,7 +321,10 @@ const Stories = () => {
             <button 
               className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:opacity-80 disabled:opacity-50 shadow-md"
               disabled={uploading}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={(event) => {
+                event.stopPropagation();
+                fileInputRef.current?.click();
+              }}
             >
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
             </button>
