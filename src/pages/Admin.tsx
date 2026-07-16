@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, Building2, AlertCircle, Award, FileText, TrendingUp, 
   Search, Shield, CheckCircle2, XCircle, Eye, Ban, MessageSquare,
-  Activity, BarChart3, Settings, Flag, Bell, UserPlus, Image
+  Activity, BarChart3, Settings, Flag, Bell, UserPlus, Image, AlertTriangle, Globe2
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -55,6 +55,32 @@ interface Company {
   created_at: string;
 }
 
+interface GeoGateDashboard {
+  totalChecks: number;
+  blockedChecks: number;
+  blockRate: number;
+  vpnBlocks: number;
+  countryBlocks: number;
+  falsePositiveAlerts: number;
+  byCountry: { country: string; total: number; blocked: number }[];
+  byVerdict: { verdict: string; total: number }[];
+  alerts: { country_code: string | null; verdict: string; false_positive_risk: string; total: number; last_seen: string }[];
+  hourly: { hour: string; total: number; blocked: number }[];
+}
+
+const emptyGeoGateDashboard: GeoGateDashboard = {
+  totalChecks: 0,
+  blockedChecks: 0,
+  blockRate: 0,
+  vpnBlocks: 0,
+  countryBlocks: 0,
+  falsePositiveAlerts: 0,
+  byCountry: [],
+  byVerdict: [],
+  alerts: [],
+  hourly: [],
+};
+
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -64,6 +90,7 @@ const Admin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [geoGate, setGeoGate] = useState<GeoGateDashboard>(emptyGeoGateDashboard);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalCompanies: 0,
@@ -100,7 +127,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      await Promise.all([fetchStats(), fetchUsers(), fetchCompanies()]);
+      await Promise.all([fetchStats(), fetchUsers(), fetchCompanies(), fetchGeoGateDashboard()]);
     } catch (error) {
       toast.error("Erreur de vérification des droits");
       navigate("/feed");
@@ -169,6 +196,18 @@ const Admin = () => {
       .order("created_at", { ascending: false })
       .limit(50);
     setCompanies((data as unknown as Company[]) || []);
+  };
+
+  const fetchGeoGateDashboard = async () => {
+    try {
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await (supabase as any).rpc("get_geogate_dashboard", { p_since: since });
+      if (error) throw error;
+      setGeoGate({ ...emptyGeoGateDashboard, ...(data || {}) });
+    } catch (error) {
+      console.error("Error fetching GeoGate dashboard:", error);
+      setGeoGate(emptyGeoGateDashboard);
+    }
   };
 
   const verifyCompany = async (companyId: string) => {
@@ -295,7 +334,7 @@ const Admin = () => {
 
           {/* Management Tabs */}
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid grid-cols-6 w-full">
+            <TabsList className="grid h-auto grid-cols-4 md:grid-cols-7 w-full">
               <TabsTrigger value="users" className="gap-2">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('admin.users')}</span>
@@ -311,6 +350,10 @@ const Admin = () => {
               <TabsTrigger value="reports" className="gap-2">
                 <Flag className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('admin.reports')}</span>
+              </TabsTrigger>
+              <TabsTrigger value="geogate" className="gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">GeoGate</span>
               </TabsTrigger>
               <TabsTrigger value="media" className="gap-2">
                 <Image className="h-4 w-4" />
@@ -500,6 +543,139 @@ const Admin = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="geogate">
+              <div className="space-y-4">
+                <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Contrôles</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{geoGate.totalChecks}</div>
+                      <p className="text-xs text-muted-foreground">7 derniers jours</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Bloqués</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-destructive">{geoGate.blockedChecks}</div>
+                      <p className="text-xs text-muted-foreground">{geoGate.blockRate}% de blocage</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">VPN / Proxy</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{geoGate.vpnBlocks}</div>
+                      <p className="text-xs text-muted-foreground">signaux anonymiseur</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Pays bloqués</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{geoGate.countryBlocks}</div>
+                      <p className="text-xs text-muted-foreground">hors zone autorisée</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Alertes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-primary">{geoGate.falsePositiveAlerts}</div>
+                      <p className="text-xs text-muted-foreground">faux positifs possibles</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe2 className="h-5 w-5" />
+                        Pays et taux de blocage
+                      </CardTitle>
+                      <CardDescription>Agrégé sans IP, opérateur, identifiant utilisateur ni données sensibles.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {geoGate.byCountry.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Aucune donnée GeoGate pour le moment.</p>
+                        ) : geoGate.byCountry.map((row) => {
+                          const rate = row.total ? Math.round((row.blocked / row.total) * 100) : 0;
+                          return (
+                            <div key={row.country} className="space-y-1">
+                              <div className="flex items-center justify-between gap-3 text-sm">
+                                <span className="font-medium">{row.country}</span>
+                                <span className="text-muted-foreground">{row.blocked}/{row.total} — {rate}%</span>
+                              </div>
+                              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(rate, 100)}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        Faux positifs
+                      </CardTitle>
+                      <CardDescription>Signaux VPN/proxy détectés dans un pays autorisé ou géolocalisation indisponible.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {geoGate.alerts.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Aucune alerte active.</p>
+                        ) : geoGate.alerts.map((alert, index) => (
+                          <div key={`${alert.country_code || 'unknown'}-${alert.verdict}-${index}`} className="rounded-lg border p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <Badge variant="outline">{alert.country_code || "??"}</Badge>
+                              <Badge variant={alert.false_positive_risk === "likely" ? "destructive" : "secondary"}>{alert.false_positive_risk}</Badge>
+                            </div>
+                            <div className="mt-2 text-sm font-medium">{alert.total} événement{alert.total > 1 ? "s" : ""} · {alert.verdict}</div>
+                            <p className="text-xs text-muted-foreground">
+                              Dernier signal {formatDistanceToNow(new Date(alert.last_seen), { addSuffix: true, locale: fr })}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Répartition des verdicts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      {geoGate.byVerdict.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Aucun verdict enregistré.</p>
+                      ) : geoGate.byVerdict.map((row) => (
+                        <div key={row.verdict} className="rounded-lg border p-4">
+                          <div className="text-sm text-muted-foreground">{row.verdict}</div>
+                          <div className="text-2xl font-bold">{row.total}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="media">
