@@ -624,6 +624,45 @@ export type Database = {
           },
         ]
       }
+      geogate_events: {
+        Row: {
+          blocked: boolean
+          country_code: string | null
+          created_at: string
+          false_positive_risk: string
+          id: string
+          proxy_signal: boolean
+          route_path: string | null
+          user_agent_family: string | null
+          verdict: string
+          vpn_signal: boolean
+        }
+        Insert: {
+          blocked?: boolean
+          country_code?: string | null
+          created_at?: string
+          false_positive_risk?: string
+          id?: string
+          proxy_signal?: boolean
+          route_path?: string | null
+          user_agent_family?: string | null
+          verdict: string
+          vpn_signal?: boolean
+        }
+        Update: {
+          blocked?: boolean
+          country_code?: string | null
+          created_at?: string
+          false_positive_risk?: string
+          id?: string
+          proxy_signal?: boolean
+          route_path?: string | null
+          user_agent_family?: string | null
+          verdict?: string
+          vpn_signal?: boolean
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
@@ -2587,6 +2626,7 @@ export type Database = {
           username: string
         }[]
       }
+      get_geogate_dashboard: { Args: { p_since?: string }; Returns: Json }
       get_own_sensitive_profile: {
         Args: { p_user_id: string }
         Returns: {
