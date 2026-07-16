@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, X, Send, Loader2, Minimize2, Maximize2 } from 'lucide-react';
+import { Bot, X, Send, Loader2, Minimize2, Maximize2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -121,9 +121,11 @@ const FloatingAIChat = () => {
             <Button
               onClick={() => setIsOpen(true)}
               size="lg"
-              className="h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+              aria-label="Ouvrir l'assistant IA"
+              className="group relative h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white hover:brightness-110 ring-2 ring-white/40 dark:ring-white/10"
             >
               <Bot className="h-6 w-6" />
+              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-amber-300 drop-shadow" />
             </Button>
           </motion.div>
         )}
