@@ -9,8 +9,7 @@ import MobileNav from "@/components/MobileNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { refreshMediaUrls } from "@/lib/storage";
-import { repairMediaRows } from "@/lib/storage";
+import { refreshMediaUrls, repairMediaRows } from "@/lib/storage";
 interface Post {
   id: string;
   content: string;
