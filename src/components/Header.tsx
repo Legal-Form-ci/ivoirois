@@ -1,4 +1,4 @@
-import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe, FolderKanban } from "lucide-react";
+import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe, FolderKanban, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +46,9 @@ const Header = () => {
               </Button>
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/marketplace"><ShoppingBag className="h-5 w-5" /></Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/learning"><GraduationCap className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/friends"><Users className="h-5 w-5" /></Link>
@@ -101,6 +104,9 @@ const Header = () => {
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
                       <Link to="/events"><CalendarDays className="h-5 w-5" /><span>Événements</span></Link>
+                    </Button>
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="/learning"><GraduationCap className="h-5 w-5" /><span>Formations</span></Link>
                     </Button>
                     <Button variant="ghost" className="justify-start gap-3" asChild>
                       <Link to="/resume"><FileText className="h-5 w-5" /><span>Mon CV</span></Link>

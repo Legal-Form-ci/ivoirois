@@ -44,6 +44,11 @@ import EventDetail from "./pages/EventDetail";
 import LiveStreams from "./pages/LiveStreams";
 import Projects from "./pages/Projects";
 import CreateProject from "./pages/CreateProject";
+import Learning from "./pages/Learning";
+import CreateCourse from "./pages/CreateCourse";
+import CourseDetail from "./pages/CourseDetail";
+import MyLearning from "./pages/MyLearning";
+import CertificateView from "./pages/CertificateView";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 import GeoGate from "@/components/GeoGate";
@@ -178,7 +183,19 @@ const App = () => (
             {/* Search */}
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/recherche" element={<ProtectedRoute><Search /></ProtectedRoute>} />
-            
+
+            {/* Learning */}
+            <Route path="/learning" element={<ProtectedRoute><Learning /></ProtectedRoute>} />
+            <Route path="/formations" element={<ProtectedRoute><Learning /></ProtectedRoute>} />
+            <Route path="/learning/mine" element={<ProtectedRoute><MyLearning /></ProtectedRoute>} />
+            <Route path="/formations/mes-cours" element={<ProtectedRoute><MyLearning /></ProtectedRoute>} />
+            <Route path="/learning/create" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
+            <Route path="/formations/creer" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
+            <Route path="/learning/:courseId/edit" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
+            <Route path="/learning/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
+            <Route path="/formations/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
+            <Route path="/certificate/:number" element={<CertificateView />} />
+
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
