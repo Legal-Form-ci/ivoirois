@@ -90,3 +90,53 @@ export async function refreshMediaUrls(
   );
   return out.filter((v): v is string => !!v);
 }
+
+/**
+ * Best-effort repair of a persisted row that stores signed (possibly expired) URLs.
+ * Detects when URLs point at known private buckets, re-signs them, and rewrites the
+ * row in place with the stable bucket-relative path — so future fetches only need
+ * a fresh signature, not a full URL replacement. No-op on external URLs.
+ *
+ * Usage: fire-and-forget after fetching a list of posts / stories / messages.
+ */
+const REPAIR_BUCKETS = ["posts", "stories", "reels", "messages", "avatars", "companies", "groups", "documents", "recordings"];
+
+export async function repairMediaRows(
+  table: string,
+  rows: Array<Record<string, any>>,
+  columns: string[]
+): Promise<void> {
+  for (const row of rows || []) {
+    const patch: Record<string, any> = {};
+    for (const col of columns) {
+      const value = row?.[col];
+      if (!value) continue;
+      if (Array.isArray(value)) {
+        const changed: string[] = [];
+        let any = false;
+        for (const v of value) {
+          const bucket = REPAIR_BUCKETS.find((b) => typeof v === "string" && v.includes(`/${b}/`));
+          if (bucket) {
+            const path = extractStoragePath(bucket, v);
+            if (path && path !== v) { changed.push(path); any = true; continue; }
+          }
+          changed.push(v);
+        }
+        if (any) patch[col] = changed;
+      } else if (typeof value === "string") {
+        const bucket = REPAIR_BUCKETS.find((b) => value.includes(`/${b}/`));
+        if (bucket) {
+          const path = extractStoragePath(bucket, value);
+          if (path && path !== value) patch[col] = path;
+        }
+      }
+    }
+    if (Object.keys(patch).length > 0 && row?.id) {
+      try {
+        await supabase.from(table as any).update(patch).eq("id", row.id);
+      } catch {
+        /* fire-and-forget */
+      }
+    }
+  }
+}

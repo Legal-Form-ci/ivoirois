@@ -49,6 +49,7 @@ import CreateCourse from "./pages/CreateCourse";
 import CourseDetail from "./pages/CourseDetail";
 import MyLearning from "./pages/MyLearning";
 import CertificateView from "./pages/CertificateView";
+import GeoGateDashboard from "./pages/GeoGateDashboard";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 import GeoGate from "@/components/GeoGate";
@@ -195,6 +196,10 @@ const App = () => (
             <Route path="/learning/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
             <Route path="/formations/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
             <Route path="/certificate/:number" element={<CertificateView />} />
+
+            {/* GeoGate admin dashboard */}
+            <Route path="/admin/geogate" element={<ProtectedRoute><GeoGateDashboard /></ProtectedRoute>} />
+            <Route path="/administration/geogate" element={<ProtectedRoute><GeoGateDashboard /></ProtectedRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

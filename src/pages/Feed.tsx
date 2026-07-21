@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { refreshMediaUrls } from "@/lib/storage";
+import { repairMediaRows } from "@/lib/storage";
 interface Post {
   id: string;
   content: string;
@@ -97,6 +98,10 @@ const Feed = () => {
           return { ...p, media_urls, image_url };
         })
       );
+
+      // Fire-and-forget: rewrite any row that still stores expired signed URLs
+      // back to a stable bucket-relative path so future fetches only re-sign.
+      repairMediaRows("posts", data || [], ["media_urls", "image_url"]).catch(() => {});
 
       // Prioritize posts from same region
       if (myRegion && withFresh.length) {
