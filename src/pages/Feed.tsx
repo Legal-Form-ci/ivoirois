@@ -143,7 +143,7 @@ const Feed = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
-      <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-6 py-4 md:py-6">
+      <main id="main-content" className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-6 py-4 md:py-6">
         <div className="flex gap-6 items-start">
           <FeedLeftRail />
           <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:mx-0 space-y-4 md:space-y-5">
