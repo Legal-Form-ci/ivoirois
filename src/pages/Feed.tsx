@@ -4,8 +4,9 @@ import UltraCreatePost from "@/components/UltraCreatePost";
 import EnhancedPostCard from "@/components/EnhancedPostCard";
 import Stories from "@/components/Stories";
 import SearchUsers from "@/components/SearchUsers";
-import SuggestedUsers from "@/components/SuggestedUsers";
 import MobileNav from "@/components/MobileNav";
+import FeedLeftRail from "@/components/FeedLeftRail";
+import FeedRightRail from "@/components/FeedRightRail";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -142,48 +143,51 @@ const Feed = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-0">
       <Header />
-      <main className="container py-6">
-        <div className="max-w-screen-xl mx-auto space-y-4 md:space-y-6">
-          <SearchUsers />
-          <SuggestedUsers />
-          <Stories />
-          <UltraCreatePost onPostCreated={fetchPosts} />
+      <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-6 py-4 md:py-6">
+        <div className="flex gap-6 items-start">
+          <FeedLeftRail />
+          <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:mx-0 space-y-4 md:space-y-5">
+            <SearchUsers />
+            <Stories />
+            <UltraCreatePost onPostCreated={fetchPosts} />
 
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Chargement...</p>
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  Aucune publication pour le moment. Soyez le premier à publier !
-                </p>
-              </div>
-            ) : (
-              posts.map((post) => (
-                <EnhancedPostCard
-                  key={post.id}
-                  id={post.id}
-                  authorId={post.user_id}
-                  authorName={post.profiles.full_name}
-                  authorAvatar={post.profiles.avatar_url || ''}
-                  title={post.title}
-                  hook={post.hook}
-                  content={post.content}
-                  mediaUrls={post.media_urls}
-                  mediaTypes={post.media_types}
-                  links={post.links}
-                  hashtags={post.hashtags}
-                  imageUrl={post.image_url}
-                  createdAt={post.created_at}
-                  likesCount={post.likes[0]?.count || 0}
-                  commentsCount={post.comments[0]?.count || 0}
-                  onDeleted={fetchPosts}
-                />
-              ))
-            )}
+            <div className="space-y-4">
+              {loading ? (
+                <div className="surface-card text-center py-10">
+                  <p className="text-muted-foreground">Chargement du fil…</p>
+                </div>
+              ) : posts.length === 0 ? (
+                <div className="surface-card text-center py-10 px-4">
+                  <p className="text-muted-foreground">
+                    Aucune publication pour le moment. Soyez le premier à publier !
+                  </p>
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <EnhancedPostCard
+                    key={post.id}
+                    id={post.id}
+                    authorId={post.user_id}
+                    authorName={post.profiles.full_name}
+                    authorAvatar={post.profiles.avatar_url || ''}
+                    title={post.title}
+                    hook={post.hook}
+                    content={post.content}
+                    mediaUrls={post.media_urls}
+                    mediaTypes={post.media_types}
+                    links={post.links}
+                    hashtags={post.hashtags}
+                    imageUrl={post.image_url}
+                    createdAt={post.created_at}
+                    likesCount={post.likes[0]?.count || 0}
+                    commentsCount={post.comments[0]?.count || 0}
+                    onDeleted={fetchPosts}
+                  />
+                ))
+              )}
+            </div>
           </div>
+          <FeedRightRail />
         </div>
       </main>
       <MobileNav />
