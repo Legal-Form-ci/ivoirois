@@ -1,10 +1,11 @@
 import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Settings, Briefcase, UserCircle, Building2, FileText, Shield, Radio, Film, ShoppingBag, CalendarDays, Globe, FolderKanban, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import appLogo from "@/assets/app-logo.png";
 import NotificationBell from "./NotificationBell";
 import GlobalSearch from "./GlobalSearch";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -15,52 +16,60 @@ import {
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { pathname } = useLocation();
+  const navBtn = (to: string) =>
+    cn(
+      "relative transition-colors",
+      pathname === to || pathname.startsWith(to + "/")
+        ? "text-primary bg-primary/10 hover:bg-primary/15"
+        : "text-foreground/70 hover:text-foreground"
+    );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-[var(--shadow-card)]">
-      <div className="container flex h-14 md:h-16 items-center justify-between px-2 sm:px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
+      <div className="mx-auto flex h-14 md:h-16 max-w-screen-2xl items-center justify-between gap-3 px-3 sm:px-6">
         <Link to="/feed" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <img src={appLogo} alt="E'nvlé Space" className="h-11 w-11 md:h-14 md:w-14 object-contain drop-shadow-sm" />
-          <span className="text-lg md:text-2xl font-bold text-primary hidden sm:inline tracking-tight">
+          <img src={appLogo} alt="E'nvlé Space" className="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm" />
+          <span className="font-display text-base md:text-xl font-extrabold text-primary hidden sm:inline tracking-tight">
             E'nvlé Space
           </span>
         </Link>
 
         {user && (
           <>
-            <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <div className="hidden md:flex flex-1 max-w-xl mx-2 lg:mx-4">
               <GlobalSearch />
             </div>
             <nav className="hidden md:flex items-center gap-1">
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/feed")}>
                 <Link to="/feed"><Home className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/reels")}>
                 <Link to="/reels"><Film className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/live")}>
                 <Link to="/live"><Radio className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/jobs")}>
                 <Link to="/jobs"><Briefcase className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/marketplace")}>
                 <Link to="/marketplace"><ShoppingBag className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/learning")}>
                 <Link to="/learning"><GraduationCap className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/friends")}>
                 <Link to="/friends"><Users className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/messages")}>
                 <Link to="/messages"><MessageCircle className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn("/groups")}>
                 <Link to="/groups"><UsersRound className="h-5 w-5" /></Link>
               </Button>
               <NotificationBell />
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" asChild className={navBtn(`/profile/${user.id}`)}>
                 <Link to={`/profile/${user.id}`}><User className="h-5 w-5" /></Link>
               </Button>
             </nav>

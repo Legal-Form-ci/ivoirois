@@ -18,8 +18,8 @@ const MobileNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur border-t md:hidden safe-area-pb">
-      <div className="flex items-center justify-around h-14">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/60 md:hidden safe-area-pb">
+      <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || 
             (item.path.startsWith("/profile") && location.pathname.startsWith("/profile"));
@@ -29,12 +29,15 @@ const MobileNav = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground"
+                "group relative flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive && "fill-current")} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />
+              )}
+              <item.icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
+              <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
             </Link>
           );
         })}
