@@ -27,8 +27,11 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-3 focus:py-2 focus:rounded-md focus:shadow-lg">
+        Aller au contenu principal
+      </a>
       <div className="mx-auto flex h-14 md:h-16 max-w-screen-2xl items-center justify-between gap-3 px-3 sm:px-6">
-        <Link to="/feed" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <Link to="/feed" aria-label="E'nvlé Space — Accueil" className="flex items-center gap-1.5 sm:gap-2 shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <img src={appLogo} alt="E'nvlé Space" className="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm" />
           <span className="font-display text-base md:text-xl font-extrabold text-primary hidden sm:inline tracking-tight">
             E'nvlé Space
@@ -40,49 +43,49 @@ const Header = () => {
             <div className="hidden md:flex flex-1 max-w-xl mx-2 lg:mx-4">
               <GlobalSearch />
             </div>
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1" aria-label="Navigation principale">
               <Button variant="ghost" size="icon" asChild className={navBtn("/feed")}>
-                <Link to="/feed"><Home className="h-5 w-5" /></Link>
+                <Link to="/feed" aria-label="Accueil"><Home className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/reels")}>
-                <Link to="/reels"><Film className="h-5 w-5" /></Link>
+                <Link to="/reels" aria-label="Reels"><Film className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/live")}>
-                <Link to="/live"><Radio className="h-5 w-5" /></Link>
+                <Link to="/live" aria-label="Lives"><Radio className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/jobs")}>
-                <Link to="/jobs"><Briefcase className="h-5 w-5" /></Link>
+                <Link to="/jobs" aria-label="Emplois"><Briefcase className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/marketplace")}>
-                <Link to="/marketplace"><ShoppingBag className="h-5 w-5" /></Link>
+                <Link to="/marketplace" aria-label="Marketplace"><ShoppingBag className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/learning")}>
-                <Link to="/learning"><GraduationCap className="h-5 w-5" /></Link>
+                <Link to="/learning" aria-label="Formations"><GraduationCap className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/friends")}>
-                <Link to="/friends"><Users className="h-5 w-5" /></Link>
+                <Link to="/friends" aria-label="Amis"><Users className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/messages")}>
-                <Link to="/messages"><MessageCircle className="h-5 w-5" /></Link>
+                <Link to="/messages" aria-label="Messages"><MessageCircle className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild className={navBtn("/groups")}>
-                <Link to="/groups"><UsersRound className="h-5 w-5" /></Link>
+                <Link to="/groups" aria-label="Groupes"><UsersRound className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
               <NotificationBell />
               <Button variant="ghost" size="icon" asChild className={navBtn(`/profile/${user.id}`)}>
-                <Link to={`/profile/${user.id}`}><User className="h-5 w-5" /></Link>
+                <Link to={`/profile/${user.id}`} aria-label="Mon profil"><User className="h-5 w-5" aria-hidden="true" /></Link>
               </Button>
             </nav>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="hidden md:flex" onClick={signOut}>
-                <LogOut />
+              <Button variant="ghost" size="icon" className="hidden md:flex" onClick={signOut} aria-label="Se déconnecter">
+                <LogOut aria-hidden="true" />
               </Button>
               
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu />
+                  <Button variant="ghost" size="icon" className="md:hidden" aria-label="Ouvrir le menu">
+                    <Menu aria-hidden="true" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] overflow-y-auto">
