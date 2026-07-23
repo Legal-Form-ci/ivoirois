@@ -113,6 +113,16 @@ All colors MUST be HSL.
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-wrap: anywhere;
     width: 100%;
+    font-family: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.005em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 
   html,
