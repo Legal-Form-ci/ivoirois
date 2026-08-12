@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, X, Send, Loader2, Minimize2, Maximize2, Sparkles } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Bot, X, Send, Loader2, Minimize2, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import aiAvatar from '@/assets/ai-assistant-avatar.png';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -120,12 +121,12 @@ const FloatingAIChat = () => {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              size="lg"
+              size="icon"
               aria-label="Ouvrir l'assistant IA"
-              className="group relative h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white hover:brightness-110 ring-2 ring-white/40 dark:ring-white/10"
+              className="relative h-14 w-14 overflow-hidden rounded-full p-0 shadow-premium ring-2 ring-accent/60 bg-card hover:brightness-105"
             >
-              <Bot className="h-6 w-6" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-amber-300 drop-shadow" />
+              <img src={aiAvatar} alt="Assistant IA E'nvlé Space" className="h-full w-full object-cover" />
+              <span className="absolute bottom-1 right-1 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-background" />
             </Button>
           </motion.div>
         )}
@@ -149,7 +150,8 @@ const FloatingAIChat = () => {
               <CardHeader className="pb-2 bg-primary text-primary-foreground rounded-t-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8 bg-primary-foreground/20">
+                    <Avatar className="h-8 w-8 ring-1 ring-primary-foreground/30">
+                      <AvatarImage src={aiAvatar} alt="Assistant IA" className="object-cover" />
                       <AvatarFallback className="bg-transparent">
                         <Bot className="h-4 w-4" />
                       </AvatarFallback>
