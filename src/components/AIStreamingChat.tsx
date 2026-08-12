@@ -57,7 +57,7 @@ const AIStreamingChat = ({ onClose, isFullscreen, onToggleFullscreen }: AIStream
           messages: [...messages, userMsg],
           context: {
             userName: profile?.full_name || 'Utilisateur',
-            platform: 'Ivoi\'Rois'
+            platform: 'E'nvlé Space'
           }
         }),
       });
