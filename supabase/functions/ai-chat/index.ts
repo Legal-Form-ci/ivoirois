@@ -24,7 +24,7 @@ serve(async (req) => {
 
 Contexte utilisateur:
 - Nom: ${context?.userName || 'Utilisateur'}
-- Plateforme: ${context?.platform || 'E'nvlé Space'}
+- Plateforme: ${context?.platform || "E'nvlé Space"}
 
 Tes capacités:
 1. **Rédaction de contenu**: Posts professionnels, articles, descriptions

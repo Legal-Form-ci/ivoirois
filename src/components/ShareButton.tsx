@@ -68,7 +68,7 @@ const ShareButton = ({ postId, content }: ShareButtonProps) => {
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Publication E'nvlé Space', text: shareText, url: shareUrl });
+        await navigator.share({ title: "Publication E'nvlé Space", text: shareText, url: shareUrl });
         recordShare('native');
       } catch (e) {
         // User cancelled
