@@ -24,6 +24,7 @@ import {
   Printer
 } from "lucide-react";
 import { toast } from "sonner";
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface Resume {
   id: string;
@@ -88,7 +89,7 @@ const ResumeView = () => {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_PUBLIC_COLUMNS)
         .eq("id", resumeData.user_id)
         .single();
 

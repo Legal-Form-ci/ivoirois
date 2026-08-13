@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import QRCodeProfile from "@/components/QRCodeProfile";
 import { AdaptiveImage } from "@/components/ui/adaptive-media";
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface Profile {
   id: string;
@@ -67,12 +68,18 @@ const Profile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_PUBLIC_COLUMNS)
         .eq("id", id)
         .single();
 
       if (error) throw error;
-      setProfile(data);
+
+      let own: Record<string, string | null> = {};
+      if (user?.id && user.id === id) {
+        const { data: sensitive } = await supabase.rpc('get_own_sensitive_profile', { p_user_id: user.id });
+        own = (Array.isArray(sensitive) ? sensitive[0] : sensitive) || {};
+      }
+      setProfile({ ...data, ...own });
     } catch (error: any) {
       toast.error("Erreur lors du chargement du profil");
     } finally {

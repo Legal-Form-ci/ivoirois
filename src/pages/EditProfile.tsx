@@ -21,6 +21,7 @@ import {
   MARITAL_STATUS,
   RELIGIONS 
 } from "@/constants/regions";
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface Profile {
   id: string;
@@ -80,13 +81,16 @@ const EditProfile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_PUBLIC_COLUMNS)
         .eq("id", user.id)
         .single();
 
       if (error) throw error;
       
-      setProfile(data);
+      const { data: sensitive } = await supabase.rpc('get_own_sensitive_profile', { p_user_id: user.id });
+      const own = Array.isArray(sensitive) ? sensitive[0] : sensitive;
+
+      setProfile({ ...data, ...(own || {}) });
       setFormData({
         full_name: data.full_name || "",
         username: data.username || "",
@@ -94,7 +98,7 @@ const EditProfile = () => {
         location: data.location || "",
         avatar_url: data.avatar_url || "",
         cover_url: data.cover_url || "",
-        phone_number: data.phone_number || "",
+        phone_number: own?.phone_number || "",
         region: data.region || "",
         profession: data.profession || "",
         sector: data.sector || "",
@@ -102,8 +106,8 @@ const EditProfile = () => {
         experience_level: data.experience_level || "",
         years_of_experience: data.years_of_experience || 0,
         education_level: data.education_level || "",
-        marital_status: data.marital_status || "",
-        religion: data.religion || "",
+        marital_status: own?.marital_status || "",
+        religion: own?.religion || "",
         interests: data.interests || [],
       });
     } catch (error: any) {
