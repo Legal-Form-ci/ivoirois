@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { AdaptiveImage } from "@/components/ui/adaptive-media";
 import { 
-import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
   REGIONS_COTE_IVOIRE, 
   SECTORS, 
   EDUCATION_LEVELS, 
@@ -22,6 +21,7 @@ import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
   MARITAL_STATUS,
   RELIGIONS 
 } from "@/constants/regions";
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface Profile {
   id: string;
