@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface RecommendedContent {
   id: string;
@@ -131,7 +132,7 @@ export const useContentRecommendations = () => {
       // 4. Suggest users to follow
       const { data: suggestedUsers } = await supabase
         .from('profiles')
-        .select('*')
+        .select(PROFILE_PUBLIC_COLUMNS)
         .neq('id', user.id)
         .limit(20);
 

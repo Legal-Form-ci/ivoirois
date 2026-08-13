@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import QRCodeProfile from "@/components/QRCodeProfile";
 import { AdaptiveImage } from "@/components/ui/adaptive-media";
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface Profile {
   id: string;
@@ -67,7 +68,7 @@ const Profile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_PUBLIC_COLUMNS)
         .eq("id", id)
         .single();
 

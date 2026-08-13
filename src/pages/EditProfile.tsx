@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { AdaptiveImage } from "@/components/ui/adaptive-media";
 import { 
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
   REGIONS_COTE_IVOIRE, 
   SECTORS, 
   EDUCATION_LEVELS, 
@@ -80,7 +81,7 @@ const EditProfile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_PUBLIC_COLUMNS)
         .eq("id", user.id)
         .single();
 

@@ -29,6 +29,7 @@ import {
   Mail, Activity, TrendingUp, Clock, Edit, UserCog
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface DashboardStats {
   totalUsers: number;
@@ -149,7 +150,7 @@ const EnhancedAdmin = () => {
         { count: pendingReports },
         { count: totalGroups }
       ] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('companies').select('*', { count: 'exact', head: true }),
         supabase.from('companies').select('*', { count: 'exact', head: true }).eq('verified', true),
         supabase.from('posts').select('*', { count: 'exact', head: true }),
@@ -160,7 +161,7 @@ const EnhancedAdmin = () => {
 
       const { count: activeUsers } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('is_online', true);
 
       setStats({
@@ -181,7 +182,7 @@ const EnhancedAdmin = () => {
   const fetchUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PROFILE_PUBLIC_COLUMNS)
       .order('created_at', { ascending: false })
       .limit(100);
     setUsers(data || []);

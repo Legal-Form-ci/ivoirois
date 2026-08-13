@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AdaptiveImage } from '@/components/ui/adaptive-media';
+import { LIVE_STREAM_PUBLIC_COLUMNS } from '@/lib/profileFields';
 
 interface LiveStream {
   id: string;
@@ -156,7 +157,7 @@ const LiveStreams = () => {
       // Live streams
       const { data: live } = await supabase
         .from('live_streams')
-        .select('*, profiles:host_id(full_name, avatar_url, username)')
+        .select(`${LIVE_STREAM_PUBLIC_COLUMNS}, profiles:host_id(full_name, avatar_url, username)`)
         .eq('status', 'live')
         .order('started_at', { ascending: false });
       setLiveStreams(live || []);
@@ -164,7 +165,7 @@ const LiveStreams = () => {
       // Scheduled
       const { data: scheduled } = await supabase
         .from('live_streams')
-        .select('*, profiles:host_id(full_name, avatar_url, username)')
+        .select(`${LIVE_STREAM_PUBLIC_COLUMNS}, profiles:host_id(full_name, avatar_url, username)`)
         .eq('status', 'scheduled')
         .order('scheduled_at', { ascending: true });
       setScheduledStreams(scheduled || []);
@@ -172,7 +173,7 @@ const LiveStreams = () => {
       // Ended (Replays)
       const { data: ended } = await supabase
         .from('live_streams')
-        .select('*, profiles:host_id(full_name, avatar_url, username)')
+        .select(`${LIVE_STREAM_PUBLIC_COLUMNS}, profiles:host_id(full_name, avatar_url, username)`)
         .eq('status', 'ended')
         .order('ended_at', { ascending: false })
         .limit(20);
@@ -212,7 +213,7 @@ const LiveStreams = () => {
           privacy: 'public',
           started_at: new Date().toISOString(),
           stream_key: crypto.randomUUID(),
-        }).select().single()
+        }).select('id').single()
       );
 
       if (error) throw error;
