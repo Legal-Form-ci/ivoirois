@@ -2,7 +2,7 @@
   "app": {
     "name": "E'nvlé Space",
     "tagline": "Where we speak royally!",
-    "description": "E'nvlé Space — the Ivorian pride that connects, unites and makes every voice shine. Here, the royalty is the people."
+    "description": "E'nvlé Space, the all-in-one African super-app to connect, share, work and grow. Social network, jobs, marketplace and live in Côte d'Ivoire."
   },
   "common": {
     "loading": "Loading...",
@@ -242,7 +242,7 @@
   },
   "landing": {
     "slogan": "Here, we speak royally!",
-    "description": "E'nvlé Space — the Ivorian pride that connects, brings together and makes every voice shine. Here, royalty is the people.",
+    "description": "E'nvlé Space, the all-in-one African super-app to connect, share, work and grow. Social network, jobs, marketplace and live in Côte d'Ivoire.",
     "joinCommunity": "Join the community",
     "connectWithIvorians": "100% Ivorian Connection",
     "features": {
