@@ -18,12 +18,14 @@ const Index = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/95 via-secondary/80 to-primary/70" />
         <div className="container relative z-10 text-center text-white px-4">
-          <div className="flex justify-center mb-6">
-            <img src={appLogo} alt="E'nvlé Space" className="h-24 w-24 rounded-2xl shadow-2xl" />
+          <h1 className="sr-only">E'nvlé Space — Le réseau social africain tout-en-un</h1>
+          <div className="flex justify-center mb-6 md:mb-8">
+            <img
+              src={appLogo}
+              alt="E'nvlé Space"
+              className="w-[min(72vw,20rem)] sm:w-[min(55vw,24rem)] md:w-[min(45vw,28rem)] lg:w-[32rem] max-h-[40vh] object-contain drop-shadow-2xl"
+            />
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 drop-shadow-lg">
-            E'nvlé Space
-          </h1>
           <p className="text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 max-w-2xl mx-auto drop-shadow-md font-medium">
             Notre peuple. Notre espace.
           </p>

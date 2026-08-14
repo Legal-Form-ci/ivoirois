@@ -80,6 +80,90 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_definitions: {
+        Row: {
+          active: boolean
+          auto_assign: boolean
+          code: string
+          color: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_special: boolean
+          name: string
+          position: number
+          rules: Json
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          auto_assign?: boolean
+          code: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_special?: boolean
+          name: string
+          position?: number
+          rules?: Json
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          auto_assign?: boolean
+          code?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_special?: boolean
+          name?: string
+          position?: number
+          rules?: Json
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      badge_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          badge_code: string | null
+          badge_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          badge_code?: string | null
+          badge_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          badge_code?: string | null
+          badge_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       call_ratings: {
         Row: {
           conversation_id: string
@@ -2954,6 +3038,54 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          awarded_by: string | null
+          awarded_reason: string | null
+          badge_id: string
+          created_at: string
+          id: string
+          is_auto: boolean
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_by?: string | null
+          awarded_reason?: string | null
+          badge_id: string
+          created_at?: string
+          id?: string
+          is_auto?: boolean
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_by?: string | null
+          awarded_reason?: string | null
+          badge_id?: string
+          created_at?: string
+          id?: string
+          is_auto?: boolean
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_interactions: {
         Row: {
           content_id: string
@@ -3169,6 +3301,7 @@ export type Database = {
         Args: { _identifier: string }
         Returns: string
       }
+      run_badge_engine: { Args: { _user_id?: string }; Returns: number }
       search_content: {
         Args: { p_query: string; p_type?: string }
         Returns: {

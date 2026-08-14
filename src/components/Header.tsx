@@ -32,7 +32,7 @@ const Header = () => {
       </a>
       <div className="mx-auto flex h-14 md:h-16 max-w-screen-2xl items-center justify-between gap-3 px-3 sm:px-6">
         <Link to="/feed" aria-label="E'nvlé Space — Accueil" className="flex items-center shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <img src={appLogo} alt="E'nvlé Space" className="h-9 w-9 md:h-11 md:w-11 object-contain drop-shadow-sm" />
+          <img src={appLogo} alt="E'nvlé Space" className="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain drop-shadow-sm" />
         </Link>
 
         {user && (
