@@ -50,6 +50,7 @@ import CourseDetail from "./pages/CourseDetail";
 import MyLearning from "./pages/MyLearning";
 import CertificateView from "./pages/CertificateView";
 import GeoGateDashboard from "./pages/GeoGateDashboard";
+import AdminBadges from "./pages/AdminBadges";
 import NotFound from "./pages/NotFound";
 import { IncomingCallHandler } from "./hooks/useIncomingCallDetection";
 import GeoGate from "@/components/GeoGate";
@@ -200,6 +201,10 @@ const App = () => (
             {/* GeoGate admin dashboard */}
             <Route path="/admin/geogate" element={<ProtectedRoute><GeoGateDashboard /></ProtectedRoute>} />
             <Route path="/administration/geogate" element={<ProtectedRoute><GeoGateDashboard /></ProtectedRoute>} />
+
+            {/* Badges & récompenses */}
+            <Route path="/admin/badges" element={<ProtectedRoute><AdminBadges /></ProtectedRoute>} />
+            <Route path="/administration/badges" element={<ProtectedRoute><AdminBadges /></ProtectedRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
