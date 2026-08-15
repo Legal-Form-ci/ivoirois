@@ -8,6 +8,7 @@ import { Bot, X, Send, Loader2, Minimize2, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import aiAvatar from '@/assets/ai-assistant-avatar.png';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -34,6 +35,9 @@ const FloatingAIChat = () => {
     let assistantContent = '';
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error('Connectez-vous pour utiliser l\'assistant IA.');
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
         method: 'POST',
         headers: {

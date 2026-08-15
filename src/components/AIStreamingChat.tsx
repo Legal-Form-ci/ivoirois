@@ -9,6 +9,7 @@ import {
   Image as ImageIcon, Mic, FileText, Lightbulb
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -47,6 +48,9 @@ const AIStreamingChat = ({ onClose, isFullscreen, onToggleFullscreen }: AIStream
     let assistantContent = '';
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error('Connectez-vous pour utiliser l\'assistant IA.');
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
