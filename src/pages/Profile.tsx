@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import QRCodeProfile from "@/components/QRCodeProfile";
 import { AdaptiveImage } from "@/components/ui/adaptive-media";
 import { PROFILE_PUBLIC_COLUMNS } from '@/lib/profileFields';
+import { getStorageUrl, extractStoragePath } from '@/lib/storage';
 
 interface Profile {
   id: string;
@@ -79,7 +80,21 @@ const Profile = () => {
         const { data: sensitive } = await supabase.rpc('get_own_sensitive_profile', { p_user_id: user.id });
         own = (Array.isArray(sensitive) ? sensitive[0] : sensitive) || {};
       }
-      setProfile({ ...data, ...own });
+      const resolveMedia = async (value?: string | null) => {
+        if (!value) return value ?? undefined;
+        // Local/public assets stay untouched
+        if (value.startsWith("/")) return value;
+        const path = extractStoragePath("avatars", value);
+        if (!path) return value;
+        return (await getStorageUrl("avatars", path)) || undefined;
+      };
+
+      const [cover_url, avatar_url] = await Promise.all([
+        resolveMedia((data as any)?.cover_url),
+        resolveMedia((data as any)?.avatar_url),
+      ]);
+
+      setProfile({ ...data, ...own, cover_url, avatar_url } as Profile);
     } catch (error: any) {
       toast.error("Erreur lors du chargement du profil");
     } finally {
