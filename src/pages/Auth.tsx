@@ -50,22 +50,31 @@ const Auth = () => {
         setIsForgotPassword(false);
       } else if (isLogin) {
         const identifier = email.trim();
-        let loginEmail = identifier;
 
         if (!identifier.includes("@")) {
-          const { data: resolvedEmail, error: resolveError } = await supabase.rpc(
-            "resolve_login_identifier",
-            { _identifier: identifier }
-          );
-          if (resolveError || !resolvedEmail) {
-            toast.error("Identifiant introuvable");
+          // Username login is resolved server-side so member emails are never exposed.
+          const { data, error } = await supabase.functions.invoke("login-identifier", {
+            body: { identifier, password },
+          });
+
+          if (error || !data?.access_token) {
+            toast.error("Identifiant ou mot de passe incorrect");
             setLoading(false);
             return;
           }
-          loginEmail = resolvedEmail;
+
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+          });
+          if (sessionError) throw sessionError;
+
+          toast.success("Connexion réussie !");
+          navigate(redirectTo);
+          return;
         }
 
-        const validation = authSchema.safeParse({ email: loginEmail, password });
+        const validation = authSchema.safeParse({ email: identifier, password });
         if (!validation.success) {
           toast.error(validation.error.errors[0]?.message);
           setLoading(false);
@@ -73,7 +82,7 @@ const Auth = () => {
         }
 
         const { error } = await supabase.auth.signInWithPassword({
-          email: loginEmail,
+          email: identifier,
           password,
         });
 
