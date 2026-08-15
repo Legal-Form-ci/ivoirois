@@ -172,11 +172,11 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <img src={appLogo} alt="E'nvlé Space" className="h-16 w-16 rounded-xl" />
+            <img src={appLogo} alt="E'nvlé Space" className="h-28 sm:h-32 w-auto object-contain" />
           </div>
-          <CardTitle className="text-3xl text-primary">
-            {isForgotPassword ? "Mot de passe oublié" : "E'nvlé Space"}
-          </CardTitle>
+          {isForgotPassword && (
+            <CardTitle className="text-3xl text-primary">Mot de passe oublié</CardTitle>
+          )}
           <CardDescription>
             {isForgotPassword
               ? "Entrez votre email pour réinitialiser"

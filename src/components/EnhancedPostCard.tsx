@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import UserBadges from '@/components/UserBadges';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -209,7 +210,10 @@ const EnhancedPostCard = ({
               <AvatarFallback>{authorName?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate font-semibold hover:underline">{authorName}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate font-semibold hover:underline">{authorName}</p>
+                <UserBadges userId={authorId} limit={2} />
+              </div>
               <p className="text-sm text-muted-foreground">{getTimeAgo(createdAt)}</p>
             </div>
           </Link>

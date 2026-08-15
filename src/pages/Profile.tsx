@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
+import UserBadges from "@/components/UserBadges";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -328,6 +329,9 @@ const Profile = () => {
                   <div className="bg-background/90 md:bg-transparent rounded-lg p-2 md:p-0">
                     <h1 className="text-3xl font-bold">{profile.full_name}</h1>
                     <p className="text-muted-foreground">@{profile.username}</p>
+                    <div className="mt-2">
+                      <UserBadges userId={profile.id} size="md" limit={8} />
+                    </div>
                   </div>
 
                   {profile.bio && (
