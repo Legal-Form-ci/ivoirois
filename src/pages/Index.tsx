@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Users, Shield, Globe2, Home, MessageCircle, Briefcase, Film, Radio, ShoppingBag, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-abidjan.jpg";
-import appLogo from "@/assets/app-logo.png";
+import appLogo from "@/assets/logo-full-white.png";
 
 const Index = () => {
   return (
