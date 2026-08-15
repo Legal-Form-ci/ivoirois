@@ -2,7 +2,7 @@ import { Home, Users, Bell, MessageCircle, User, LogOut, UsersRound, Menu, Setti
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import appLogo from "@/assets/logo-symbol.png";
+import appLogo from "@/assets/logo-full-dark.png";
 import NotificationBell from "./NotificationBell";
 import GlobalSearch from "./GlobalSearch";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ const Header = () => {
       </a>
       <div className="mx-auto flex h-14 md:h-16 max-w-screen-2xl items-center justify-between gap-3 px-3 sm:px-6">
         <Link to="/feed" aria-label="E'nvlé Space — Accueil" className="flex items-center shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <img src={appLogo} alt="E'nvlé Space" className="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain drop-shadow-sm" />
+          <img src={appLogo} alt="E'nvlé Space" className="h-9 sm:h-10 md:h-12 w-auto object-contain drop-shadow-sm dark:brightness-0 dark:invert" />
         </Link>
 
         {user && (
