@@ -328,6 +328,9 @@ const Profile = () => {
                   <div className="bg-background/90 md:bg-transparent rounded-lg p-2 md:p-0">
                     <h1 className="text-3xl font-bold">{profile.full_name}</h1>
                     <p className="text-muted-foreground">@{profile.username}</p>
+                    <div className="mt-2">
+                      <UserBadges userId={profile.id} size="md" limit={8} />
+                    </div>
                   </div>
 
                   {profile.bio && (

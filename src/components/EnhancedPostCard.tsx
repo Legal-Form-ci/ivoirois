@@ -209,7 +209,10 @@ const EnhancedPostCard = ({
               <AvatarFallback>{authorName?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate font-semibold hover:underline">{authorName}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate font-semibold hover:underline">{authorName}</p>
+                <UserBadges userId={authorId} limit={2} />
+              </div>
               <p className="text-sm text-muted-foreground">{getTimeAgo(createdAt)}</p>
             </div>
           </Link>
