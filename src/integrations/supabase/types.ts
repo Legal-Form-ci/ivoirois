@@ -3297,10 +3297,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      resolve_login_identifier: {
-        Args: { _identifier: string }
-        Returns: string
-      }
       run_badge_engine: { Args: { _user_id?: string }; Returns: number }
       search_content: {
         Args: { p_query: string; p_type?: string }
