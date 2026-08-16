@@ -360,51 +360,6 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* Professional Information */}
-                  {(profile.profession || profile.sector || profile.position) && (
-                    <div className="border-t pt-4 space-y-2">
-                      <h3 className="font-semibold text-sm">Informations professionnelles</h3>
-                      <div className="space-y-1 text-sm">
-                        {profile.profession && (
-                          <p><span className="text-muted-foreground">Profession:</span> {profile.profession}</p>
-                        )}
-                        {profile.sector && (
-                          <p><span className="text-muted-foreground">Secteur:</span> {profile.sector}</p>
-                        )}
-                        {profile.position && (
-                          <p><span className="text-muted-foreground">Poste:</span> {profile.position}</p>
-                        )}
-                        {profile.experience_level && (
-                          <p><span className="text-muted-foreground">Expérience:</span> {profile.experience_level}</p>
-                        )}
-                        {profile.years_of_experience && (
-                          <p><span className="text-muted-foreground">Années d'expérience:</span> {profile.years_of_experience} ans</p>
-                        )}
-                        {profile.education_level && (
-                          <p><span className="text-muted-foreground">Niveau d'études:</span> {profile.education_level}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Personal Information (only visible to profile owner) */}
-                  {user?.id === id && (profile.marital_status || profile.religion || profile.phone_number) && (
-                    <div className="border-t pt-4 space-y-2">
-                      <h3 className="font-semibold text-sm">Informations personnelles</h3>
-                      <div className="space-y-1 text-sm">
-                        {profile.phone_number && (
-                          <p><span className="text-muted-foreground">Téléphone:</span> {profile.phone_number}</p>
-                        )}
-                        {profile.marital_status && (
-                          <p><span className="text-muted-foreground">Statut matrimonial:</span> {profile.marital_status}</p>
-                        )}
-                        {profile.religion && (
-                          <p><span className="text-muted-foreground">Religion:</span> {profile.religion}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
                   {user?.id === id ? (
                     <div className="flex flex-wrap gap-2">
                       <Button variant="default" className="gap-2" asChild>
@@ -499,30 +454,103 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Publications</h2>
-            {posts.length === 0 ? (
-              <Card className="p-8 text-center text-muted-foreground">
-                Aucune publication pour le moment
+          <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)] items-start">
+            {/* Colonne latérale : informations */}
+            <aside className="space-y-4 lg:sticky lg:top-24">
+              {(profile.profession || profile.sector || profile.position || profile.experience_level || profile.years_of_experience || profile.education_level) && (
+                <Card className="shadow-[var(--shadow-card)]">
+                  <CardContent className="p-5 space-y-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Informations professionnelles
+                    </h2>
+                    <dl className="space-y-2 text-sm">
+                      {profile.profession && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Profession</dt><dd className="text-right font-medium break-words min-w-0">{profile.profession}</dd></div>
+                      )}
+                      {profile.sector && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Secteur</dt><dd className="text-right font-medium break-words min-w-0">{profile.sector}</dd></div>
+                      )}
+                      {profile.position && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Poste</dt><dd className="text-right font-medium break-words min-w-0">{profile.position}</dd></div>
+                      )}
+                      {profile.experience_level && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Expérience</dt><dd className="text-right font-medium break-words min-w-0">{profile.experience_level}</dd></div>
+                      )}
+                      {profile.years_of_experience && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Années</dt><dd className="text-right font-medium">{profile.years_of_experience} ans</dd></div>
+                      )}
+                      {profile.education_level && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Études</dt><dd className="text-right font-medium break-words min-w-0">{profile.education_level}</dd></div>
+                      )}
+                    </dl>
+                  </CardContent>
+                </Card>
+              )}
+
+              {user?.id === id && (profile.marital_status || profile.religion || profile.phone_number) && (
+                <Card className="shadow-[var(--shadow-card)]">
+                  <CardContent className="p-5 space-y-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Informations personnelles
+                    </h2>
+                    <dl className="space-y-2 text-sm">
+                      {profile.phone_number && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Téléphone</dt><dd className="text-right font-medium break-words min-w-0">{profile.phone_number}</dd></div>
+                      )}
+                      {profile.marital_status && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Statut</dt><dd className="text-right font-medium break-words min-w-0">{profile.marital_status}</dd></div>
+                      )}
+                      {profile.religion && (
+                        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Religion</dt><dd className="text-right font-medium break-words min-w-0">{profile.religion}</dd></div>
+                      )}
+                    </dl>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="shadow-[var(--shadow-card)]">
+                <CardContent className="p-5 space-y-3">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Activité</h2>
+                  <div className="grid grid-cols-2 gap-3 text-center">
+                    <div className="rounded-lg border border-border/60 p-3">
+                      <p className="text-xl font-bold">{posts.length}</p>
+                      <p className="text-xs text-muted-foreground">Publications</p>
+                    </div>
+                    <div className="rounded-lg border border-border/60 p-3">
+                      <p className="text-xl font-bold">{new Date(profile.created_at).getFullYear()}</p>
+                      <p className="text-xs text-muted-foreground">Membre depuis</p>
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,42rem)]">
-                {posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    postId={post.id}
-                    userId={profile.id}
-                    author={profile.full_name}
-                    authorAvatar={profile.avatar_url}
-                    content={post.content}
-                    image={post.image_url}
-                    likes={post.likes[0]?.count || 0}
-                    comments={post.comments[0]?.count || 0}
-                    timeAgo={new Date(post.created_at).toLocaleDateString("fr-FR")}
-                  />
-                ))}
-              </div>
-            )}
+            </aside>
+
+            {/* Colonne principale : publications */}
+            <section className="space-y-4 min-w-0">
+              <h2 className="text-xl md:text-2xl font-bold">Publications</h2>
+              {posts.length === 0 ? (
+                <Card className="p-8 text-center text-muted-foreground">
+                  Aucune publication pour le moment
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      postId={post.id}
+                      userId={profile.id}
+                      author={profile.full_name}
+                      authorAvatar={profile.avatar_url}
+                      content={post.content}
+                      image={post.image_url}
+                      likes={post.likes[0]?.count || 0}
+                      comments={post.comments[0]?.count || 0}
+                      timeAgo={new Date(post.created_at).toLocaleDateString("fr-FR")}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
         </div>
       </main>
